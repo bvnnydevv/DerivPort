@@ -6,6 +6,7 @@ __pycache__/
 .streamlit/secrets.toml
 artifacts/*.png
 artifacts/*.jpg
+artifacts/*.zip
 data/market_cache/_provider/
 data/market_cache/*.tmp
 data/market_cache/*.csv

@@ -16,6 +16,8 @@ from derivport import (DEFAULT_FORMULA, FormulaError, analyze_cutoff, apply_rule
     reveal_outcomes, simulate_paths, simulation_summary, SCENARIOS)
 from derivport.market_data import (MarketDataError, get_search_status,
     load_symbol_prices, read_cached_symbols, search_symbols, symbol_info)
+from derivport.projections import project_scenarios
+from algorithms.derivport_signal import NAME as SIGNAL_NAME, FORMULA as SIGNAL_FORMULA, DEFAULT_K as SIGNAL_K
 
 ROOT = Path(__file__).parent
 DEFAULT_STOCKS = ['AAPL', 'AMZN', 'GOOGL', 'MSFT', 'NVDA']
@@ -71,10 +73,19 @@ def cached_simulation(stocks, scenario):
     return simulate_paths(stocks, scenario, n_paths=600, seed=2024)
 
 
+@st.cache_data(show_spinner=False)
+def cached_projection(prices, target, drift, multiplier, correlation, paths):
+    return project_scenarios(prices, target, annual_drift=drift / 100,
+        volatility_multiplier=multiplier, correlation=correlation, n_paths=paths, seed=2037)
+
+
 st.session_state.setdefault('valid_formula', DEFAULT_FORMULA)
 st.session_state.setdefault('valid_k', 2.0)
 st.session_state.setdefault('reveals', {})
 st.session_state.setdefault('seen_backtests', [])
+if 'history_mode' not in st.session_state:
+    st.session_state.history_mode = 'Full cached history'
+    st.session_state.pop('decision_date', None)
 if 'pending_stock' in st.session_state:
     pending = st.session_state.pop('pending_stock')
     current = list(st.session_state.get('universe_selection', DEFAULT_STOCKS))
@@ -82,13 +93,25 @@ if 'pending_stock' in st.session_state:
         current = (current + [pending])[-10:]
     st.session_state.universe_selection = current
     st.session_state.stock = pending
-    st.session_state.extended_history = True
+    st.session_state.history_mode = 'Full cached history'
 
-st.html('''<div class="masthead"><div class="brand">DerivPort<span>Equity research</span></div>
-<div class="mast-right">RESEARCH & EDUCATION <span class="connection">Local cache</span></div></div>''')
+st.html('''<div class="masthead"><div class="brand">DerivPort<span>Quantitative research</span></div>
+<div class="mast-right">SIGNALS · REPLAY · SCENARIOS <span class="connection">Local cache</span></div></div>''')
 def clear_search():
     st.session_state.pop('search_results', None)
     st.session_state.pop('search_status', None)
+
+
+def change_history_mode():
+    for key in ('decision_date', 'test_start', 'test_end'):
+        st.session_state.pop(key, None)
+
+
+stock_col, date_col, mode_col, status_col = st.columns([1.25, 1.05, 1.2, 1.1], gap='medium', vertical_alignment='bottom')
+with mode_col:
+    history_mode = st.selectbox('Price history', ['Full cached history', 'Frozen demo (2018–2024)'],
+        key='history_mode', on_change=change_history_mode)
+extended = history_mode == 'Full cached history'
 
 with st.expander('Stocks & comparison group', expanded=False):
     st.caption('Search US and international equities or enter a Yahoo Finance symbol directly. Provider coverage and historical availability vary. Cached stocks work offline.')
@@ -134,8 +157,7 @@ with st.expander('Stocks & comparison group', expanded=False):
                 st.error(str(exc))
     st.multiselect('Comparison group · 2–10 stocks', read_cached_symbols(), default=DEFAULT_STOCKS,
         max_selections=10, key='universe_selection')
-    extended = st.toggle('Use extended downloaded histories', value=False, key='extended_history',
-        help='Off keeps the original five stocks on their reproducible 2018–2024 demo cache. On uses full cached histories through the most recent completed download.')
+    st.caption('Full cached history includes the downloaded 2026 data. Frozen demo preserves the original five-stock 2018–2024 example. Choose the range in the visible Price history control.')
     st.caption('Rankings and backtests use this fixed group. International comparisons use shared observed dates and local-currency returns, without FX conversion or filling missing days.')
 
 universe = sorted(st.session_state.get('universe_selection', DEFAULT_STOCKS))
@@ -162,20 +184,23 @@ if len(prices) < 295:
     st.info('This group needs at least 295 shared observations for training, past forecast errors, and replay. Choose stocks with a longer shared history.')
     st.stop()
 earliest = max(prices.index[252], pd.Timestamp('2020-04-01'))
-latest = prices.index[-22]
+latest = prices.index[-1]
+latest_replay = prices.index[-22]
+st.session_state.latest_historical_date = latest.date().isoformat()
+st.session_state.latest_replay_date = latest_replay.date().isoformat()
 if earliest > latest:
     st.info('This group needs more historical data. Choose an earlier-listed stock.')
     st.stop()
 if st.session_state.get('stock') not in universe:
     st.session_state.stock = 'AAPL' if 'AAPL' in universe else universe[0]
-existing_date = pd.Timestamp(st.session_state.get('decision_date', date(2024, 5, 3)))
+initial_date = latest.date() if extended else date(2024, 5, 3)
+existing_date = pd.Timestamp(st.session_state.get('decision_date', initial_date))
 if not earliest <= existing_date <= latest:
     st.session_state.decision_date = min(max(existing_date, earliest), latest).date()
-stock_col, date_col, status_col = st.columns([1.2, 1.2, 1.6], gap='large', vertical_alignment='bottom')
 with stock_col:
     ticker = st.selectbox('Stock', universe, format_func=lambda s: f"{s} · {metadata[s].get('name', s)}", key='stock')
 with date_col:
-    default_date = min(max(pd.Timestamp('2024-05-03'), earliest), latest).date()
+    default_date = min(max(pd.Timestamp(initial_date), earliest), latest).date()
     chosen_date = st.date_input('Historical cutoff', value=default_date, min_value=earliest.date(),
         max_value=latest.date(), format='YYYY-MM-DD', key='decision_date')
 cutoff = prices.index[prices.index <= pd.Timestamp(chosen_date)][-1].date().isoformat()
@@ -183,10 +208,13 @@ st.session_state.cutoff = cutoff
 data_fingerprint = hashlib.sha256(pd.util.hash_pandas_object(prices, index=True).values.tobytes()).hexdigest()[:12]
 context = ','.join(universe) + '|' + cutoff + '|' + data_fingerprint
 st.session_state.active_replay_key = context
+subsequent_sessions = len(prices) - prices.index.get_loc(pd.Timestamp(cutoff)) - 1
+outcome_complete = subsequent_sessions >= 21
 with status_col:
     st.html(f'<div class="data-status">{len(prices):,} shared sessions · {len(universe)} stocks<br>Cache through {prices.index[-1]:%d %b %Y}</div>')
 if cutoff != chosen_date.isoformat():
     st.caption(f'{chosen_date} is not a shared trading date. Using the preceding observed session, {cutoff}.')
+st.caption(f"Historical data ends {latest:%Y-%m-%d}. Completed 21-session replays are available through {latest_replay:%Y-%m-%d}. Dates through 2037 are available under Future scenarios as simulations.")
 history = cached_history(prices)
 try:
     analysis = cached_analysis(prices, cutoff, history)
@@ -197,21 +225,38 @@ base, meta = analysis.stocks, metadata[ticker]
 notes = json.loads((ROOT / 'data/notes.json').read_text())
 available_notes = [n for n in notes if n['ticker'] == ticker and pd.Timestamp(n['published']) <= pd.Timestamp(cutoff)]
 note = max(available_notes, key=lambda n: n['published']) if available_notes else None
-research, builder = st.tabs(['Research', 'Algorithm builder'], key='workspace')
+research, builder, future = st.tabs(['Research', 'Algorithm builder', 'Future scenarios'], key='workspace')
 with research:
     st.html(f'''<div class="stock-header"><div><h1>{esc(meta.get('name', ticker))} <span>{esc(ticker)}</span></h1>
     <p>{esc(meta.get('exchange', ''))} · {esc(meta.get('currency', 'Unknown'))} · Historical adjusted prices</p></div>
     <div class="price">{prices.loc[pd.Timestamp(cutoff), ticker]:,.2f}<small>Adjusted close · {cutoff}</small></div></div>''')
     if ticker == 'AAPL' and cutoff == '2024-05-03' and not extended:
         st.caption('Curated example: Apple after its May 2 earnings release. Choose any available date or change the stock group.')
-    panels, ranks_area, replay_area, extras_area = [st.container() for _ in range(4)]
+    panels = st.container()
+    ranks_area = st.container(border=True, key='rankings_panel')
+    replay_area = st.container(border=True, key='replay_panel')
+    extras_area = st.container()
 with builder:
     st.html('<div class="page-title"><h1>Algorithm builder</h1><p>Write a ranking rule. Inspect the math. Test it on historical outcomes.</p></div>')
+    with st.container(border=True, key='signal_card'):
+        st.html(f'<div class="summary-signal"><div><span class="signal-kicker">YOUR ALGORITHM</span><h2>{esc(SIGNAL_NAME)}</h2><p>A balanced model and momentum score with explicit error and volatility penalties.</p></div><span class="signal-badge">BALANCED</span></div>')
+        signal_info, signal_actions = st.columns([2, 1], gap='large')
+        with signal_info:
+            st.code(SIGNAL_FORMULA, language=None)
+            st.caption('60% model estimate + 40% trailing momentum. k controls a penalty of 50% forecast error + 25% volatility. Fixed starting weights; no claim that they are optimal.')
+        with signal_actions:
+            def load_balanced_algorithm():
+                st.session_state.formula = SIGNAL_FORMULA
+                st.session_state.k = float(SIGNAL_K)
+            st.button('Use my balanced algorithm', key='load_balanced_algorithm',
+                on_click=load_balanced_algorithm, type='primary', width='stretch')
+            st.download_button('Download Python algorithm', (ROOT / 'algorithms/derivport_signal.py').read_bytes(),
+                file_name='derivport_signal.py', mime='text/x-python', key='download_algorithm', width='stretch')
     editor, sensitivity = st.columns(2, gap='large')
-    with editor:
+    with editor, st.container(border=True, key='algorithm_editor'):
         formula = st.text_input('Ranking formula', value=st.session_state.valid_formula, key='formula', max_chars=400)
         st.caption('Variables: predicted_return, uncertainty, momentum, volatility, k. Use numbers, + − * / and parentheses. Return inputs are percentage points.')
-        k = st.slider('Uncertainty weight · k', 0.0, 10.0, value=float(st.session_state.valid_k), step=.05, key='k')
+        k = st.slider('Risk penalty weight · k', 0.0, 10.0, value=float(st.session_state.valid_k), step=.05, key='k')
         old_formula, old_k = st.session_state.valid_formula, st.session_state.valid_k
         try:
             scores = apply_rule(base, formula, k)
@@ -234,6 +279,8 @@ with builder:
                 st.session_state.valid_formula = DEFAULT_FORMULA
         st.session_state.current_scores = scores.copy()
         active_formula, active_k = st.session_state.valid_formula, st.session_state.valid_k
+        st.session_state.active_algorithm_name = SIGNAL_NAME if active_formula.strip() == SIGNAL_FORMULA else 'Custom expression'
+        st.caption(f'Active algorithm: {st.session_state.active_algorithm_name}')
         row = scores.loc[ticker]
         values = {name: float(row[name]) for name in ('predicted_return', 'uncertainty', 'momentum', 'volatility')}
         values['k'] = active_k
@@ -257,7 +304,7 @@ with builder:
                 st.session_state.formula = DEFAULT_FORMULA
                 st.session_state.k = target
             st.button(f'Try default rule at k = {target:.2f}', key='try_crossover', on_click=try_crossover)
-    with sensitivity:
+    with sensitivity, st.container(border=True, key='algorithm_sensitivity'):
         st.html('<div class="small-title">Score sensitivity</div>')
         curve = formula_curve(active_formula, values, active_k)
         fig = go.Figure(go.Scatter(x=curve.uncertainty, y=curve.score, mode='lines', line=dict(color='#20252c', width=2), showlegend=False))
@@ -274,6 +321,13 @@ with builder:
             st.caption('The numerical local slope is undefined here; the current score remains valid.')
         if active_formula.strip() == DEFAULT_FORMULA and active_k == 2:
             st.caption('At k = 2, one extra percentage point of uncertainty lowers the score by two percentage points.')
+    feature_export = scores[['predicted_return', 'uncertainty', 'momentum', 'volatility']].rename_axis('ticker').reset_index()
+    feature_export.insert(1, 'cutoff', cutoff)
+    st.download_button('Download this cutoff’s algorithm inputs', feature_export.to_csv(index=False).encode(),
+        file_name=f'derivport_features_{cutoff}.csv', mime='text/csv', key='export_algorithm_inputs')
+    st.caption('The standalone file implements DerivPort Signal and matches that preset with the same k. Custom formula edits are not included in the download. It uses Python’s standard library and does not place trades.')
+    if active_formula.strip() == SIGNAL_FORMULA:
+        st.code(f'python3 derivport_signal.py --input derivport_features_{cutoff}.csv --output ranked.csv --k {active_k:g}', language='bash')
     heading('Historical backtest', 'Same group and periods for every algorithm')
     for field in ('test_start', 'test_end'):
         if field in st.session_state:
@@ -317,20 +371,90 @@ with builder:
             st.caption(result['metadata']['assumptions'])
         st.download_button('Export test results', result['per_date'].to_csv(index=False).encode(), file_name='derivport_backtest.csv', mime='text/csv')
 
+with future:
+    st.html('<div class="page-title"><h1>Future scenarios</h1><p>Explore hypothetical prices through 2037 under assumptions you control.</p></div>')
+    st.info(f'SIMULATED SCENARIOS · Actual historical prices stop at {latest:%Y-%m-%d}. Values after this anchor are hypothetical, not known prices or validated forecasts.')
+    target_col, drift_col, run_col = st.columns([1, 1, 1], vertical_alignment='bottom')
+    with target_col:
+        projection_target = st.date_input('Scenario end date', value=date(2037, 12, 31),
+            min_value=(latest + pd.Timedelta(days=1)).date(), max_value=date(2037, 12, 31),
+            format='YYYY-MM-DD', key='projection_target')
+    with drift_col:
+        projection_drift = st.slider('Annual log-price drift assumption (%)', -20.0, 20.0, 6.0, .5, key='projection_drift')
+    with st.expander('Scenario assumptions'):
+        v_col, c_col, p_col = st.columns(3)
+        with v_col:
+            projection_volatility = st.slider('Historical volatility multiplier', .25, 3.0, 1.0, .25, key='projection_volatility')
+        with c_col:
+            projection_correlation = st.slider('Correlation between stocks', 0.0, 1.0, .6, .05, key='projection_correlation')
+        with p_col:
+            projection_paths = st.number_input('Simulated paths', min_value=200, max_value=2000, value=600, step=200, key='projection_paths')
+        st.caption('Monthly correlated lognormal scenarios. Volatility uses the last three years of observed log returns, annualized with 252 sessions/year, then multiplied by your setting. Drift and correlation are assumptions, not model estimates. Seed 2037 keeps the same assumptions reproducible; editing your ranking rule does not change the paths.')
+    with run_col:
+        run_projection = st.button('Simulate through target date', type='primary', width='stretch', key='project_future')
+    projection_config = (tuple(universe), data_fingerprint, str(projection_target), projection_drift,
+        projection_volatility, projection_correlation, int(projection_paths))
+    if run_projection:
+        try:
+            with st.spinner('Generating hypothetical monthly paths…'):
+                projected = cached_projection(prices, projection_target, projection_drift,
+                    projection_volatility, projection_correlation, int(projection_paths))
+            st.session_state.projection_result = projected
+            st.session_state.projection_config = projection_config
+        except ValueError as exc:
+            st.error(str(exc))
+    projected = st.session_state.get('projection_result')
+    if projected is not None:
+        if projection_config != st.session_state.get('projection_config'):
+            st.info('Scenario settings or data changed. The results below belong to your previous simulation; run again to update them.')
+        symbols = list(projected.latest_prices.index)
+        plotted_symbol = ticker if ticker in symbols else symbols[0]
+        band = projected.quantiles.loc[projected.quantiles['ticker'] == plotted_symbol]
+        heading(f'{plotted_symbol} · hypothetical price paths', f'{projected.dates[0]:%Y-%m-%d} to {projected.dates[-1]:%Y-%m-%d}')
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=band['date'], y=band['p90'], mode='lines',
+            line=dict(width=0), showlegend=False, hoverinfo='skip'))
+        fig.add_trace(go.Scatter(x=band['date'], y=band['p10'], mode='lines',
+            line=dict(width=0), fill='tonexty', fillcolor='rgba(57,119,188,.12)',
+            name='Simulated 10th–90th percentiles', hoverinfo='skip'))
+        fig.add_trace(go.Scatter(x=band['date'], y=band['p50'], name='Simulated median',
+            line=dict(color='#3977bc', width=2, dash='dash')))
+        fig.add_trace(go.Scatter(x=[projected.dates[0]], y=[projected.latest_prices[plotted_symbol]],
+            mode='markers', marker=dict(color='#20252c', size=7), name='Last actual cached close'))
+        fig.update_yaxes(title='Hypothetical adjusted-price level · local currency')
+        st.plotly_chart(chart(fig, 310), width='stretch', config={'displayModeBar': False}, key='future_scenario_chart')
+        terminal = projected.terminal_returns
+        summary_projection = pd.DataFrame({
+            'Last actual close': projected.latest_prices,
+            'Assumed annual volatility (%)': projected.annual_volatility * 100,
+            'Simulated return · 10th (%)': terminal.quantile(.10),
+            'Simulated return · median (%)': terminal.quantile(.50),
+            'Simulated return · 90th (%)': terminal.quantile(.90),
+        })
+        st.dataframe(summary_projection.round(2), width='stretch')
+        st.caption('SIMULATED, NOT REALIZED · Bands are empirical percentiles of hypothetical paths, not confidence intervals or guaranteed probabilities. The 21-session regression is not extrapolated to 2037. No future company statements, actual returns, or prediction-accuracy scores are invented.')
+        with st.expander('Simulation provenance and assumptions'):
+            st.json(projected.assumptions)
+        st.download_button('Export simulated monthly percentiles', projected.quantiles.to_csv(index=False).encode(),
+            file_name='derivport_hypothetical_scenarios.csv', mime='text/csv')
+
 snapshot = st.session_state.reveals.get(context)
 edited = bool(snapshot and (formula != snapshot['formula'] or k != snapshot['k']))
 with panels:
     left, right = st.columns(2, gap='large')
-    with left:
+    with left, st.container(border=True, key='analyst_company'):
         st.html('<div class="analyst-label">COMPANY & BUSINESS</div><h3>Stock analyst</h3>')
         if note:
+            source_age = (pd.Timestamp(cutoff) - pd.Timestamp(note['published'])).days
+            if source_age > 180:
+                st.caption(f"Historical context only: this source is {source_age} days before the cutoff. More recent company evidence is not cached.")
             st.markdown(f"**Reported fact.** {note['fact']}")
             st.markdown(f"**Interpretation.** {note['interpretation']}")
             st.markdown(f"**Open question.** {note['limitation']}")
             st.caption(f"Published {note['published']} · [{note['source_title']}]({note['url']})")
         else:
             st.info('No suitable dated company source is cached for this stock and cutoff. There is insufficient evidence for a company interpretation.')
-    with right:
+    with right, st.container(border=True, key='analyst_quant'):
         st.html('<div class="analyst-label">MODEL & RANKING</div><h3>Quant analyst — model and ranking</h3>')
         a, b, c = st.columns(3)
         a.metric('Estimated next 21 sessions', pct(row.predicted_return))
@@ -356,12 +480,16 @@ with replay_area:
     copy_col, action = st.columns([2, 1], vertical_alignment='center')
     with copy_col:
         st.html('<h3>Historical replay</h3>')
-        st.caption('Future returns and realized ranks stay hidden until reveal. International experiments use 21 shared trading sessions.')
+        if outcome_complete:
+            st.caption('Future returns and realized ranks stay hidden until reveal. International experiments use 21 shared trading sessions.')
+        else:
+            st.caption(f'Outcome pending: only {subsequent_sessions} of 21 subsequent shared sessions are cached. Research is available, but actual future returns and realized ranks do not exist in this cache yet.')
     with action:
-        if st.button('Reveal next 21 trading days' if not snapshot else 'Outcome revealed', key='reveal', type='primary', disabled=bool(snapshot), width='stretch'):
+        reveal_label = '21-session outcome pending' if not outcome_complete else ('Outcome revealed' if snapshot else 'Reveal next 21 trading days')
+        if st.button(reveal_label, key='reveal', type='primary', disabled=bool(snapshot) or not outcome_complete, width='stretch'):
             st.session_state.reveals[context] = {'scores': scores.copy(), 'formula': active_formula, 'k': active_k}
             st.rerun()
-    if snapshot:
+    if snapshot and outcome_complete:
         outcomes = reveal_outcomes(prices, cutoff)
         original = snapshot['scores']
         display = outcomes.join(original[['momentum_rank', 'model_rank', 'student_rank']]).sort_values('realized_rank').rename(columns={'actual_return': 'Actual 21d return', 'realized_rank': 'Realized rank', 'momentum_rank': 'Momentum rank', 'model_rank': 'AI rank', 'student_rank': 'Algorithm rank at reveal'})

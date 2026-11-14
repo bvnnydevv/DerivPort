@@ -1,6 +1,6 @@
 # DerivPort
 
-An educational stock-research and algorithm lab for the Veritas AI finance challenge. Compare dated company evidence with a **quant analyst — model and ranking**, edit a mathematical rule, and reveal what happened next. The interface has two focused tabs, **Research** and **Algorithm builder**. No brokerage connections, balances, position sizing, trades, or buy/sell recommendations.
+An educational stock-research and algorithm lab for the Veritas AI finance challenge. Compare dated company evidence with a **quant analyst — model and ranking**, edit a mathematical rule, and reveal what happened next. Use **Research**, **Algorithm builder**, and **Future scenarios** for historical evidence, retrospective testing, and hypothetical projections respectively. No brokerage connections, balances, position sizing, trades, or buy/sell recommendations.
 
 ## Run locally
 
@@ -16,13 +16,15 @@ Open **http://127.0.0.1:8501**. Installation requires internet. Once installed, 
 
 ## Explore stocks and dates
 
-The curated starting example is **Apple on May 3, 2024**, after its May 2 earnings release. It was chosen for clear, mixed business evidence, not to demonstrate a successful forecast. The initial five-stock comparison uses AAPL, MSFT, NVDA, AMZN, and GOOGL with the frozen 2018–2024 demo cache.
+**Full cached history** is the default data range, making the supplied 2026 observations available directly. For the reproducible presentation, choose **Frozen demo (2018–2024)**, the original AAPL/MSFT/NVDA/AMZN/GOOGL group, and **Apple on May 3, 2024**. That example follows Apple's May 2 earnings release and was curated for clear, mixed business evidence, not to demonstrate a successful forecast.
 
 Select **2–10 stocks** for a comparison. The offline starter catalog contains **109 symbols**; an explicit online search queries Yahoo Finance equity listings worldwide. Enter a Yahoo-format symbol directly for listings outside the catalog, such as `0700.HK`, `SAP.DE`, `7203.T`, `ASML.AS`, or `RELIANCE.NS`. Provider coverage varies: this is not a guarantee that every current, historical, or delisted security is available.
 
-**25 full histories are supplied**, containing **212,969 adjusted daily observations** through November 13, 2026. They include the original five, ten additional US stocks, and ten international listings. Enable **Use extended downloaded histories** to use these longer histories for the original stocks; adding another stock enables extended history automatically. The frozen demo file remains unchanged. Further downloads stay in the local cache and are ignored by Git.
+**25 full histories are supplied**, containing **212,969 adjusted daily observations** through November 13, 2026. They include the original five, ten additional US stocks, and ten international listings. The visible data-range selector switches between full cached history and the unchanged frozen demo. Further downloads stay in the local cache and are ignored by Git.
 
-Choose a daily historical cutoff. Weekends and other missing dates normalize to the previous shared trading session. Available cutoffs begin after at least 252 shared observations and no earlier than April 1, 2020; the latest cutoff must have 21 subsequent shared observations available. Different exchange holidays mean a global comparison uses **shared sessions**, without forward filling. Returns are measured in each listing's local currency; there is no FX conversion.
+Choose a daily historical cutoff through the latest observed date in the selected group. Weekends and missing dates normalize to the preceding shared session. Cutoffs begin after at least 252 shared observations and no earlier than April 1, 2020. Research can use the latest close even when its next 21 sessions have not happened; outcome reveal remains disabled until all 21 subsequent observations are cached. The old 2024 limit came from the default frozen cache, and the earlier replay-date cap reserved those 21 future observations.
+
+The supplied cache covers **part of 2026, through November 13**, not the rest of that year. Different exchange holidays mean a global comparison uses **shared sessions**, without forward filling. Returns are local-currency returns with no FX conversion.
 
 ## Research and algorithm experiments
 
@@ -34,15 +36,37 @@ Three algorithms rank the same comparison group:
 - **AI model:** regression estimate of the next 21-session return.
 - **Student algorithm:** an editable expression, initially `predicted_return - k * uncertainty`, with `k = 2`.
 
-In **Algorithm builder**, use `predicted_return`, `uncertainty`, `momentum`, `volatility`, `k`, numeric constants, basic arithmetic, and parentheses. A restricted AST parser rejects calls, attributes, powers, division by zero, and non-finite results. Invalid edits preserve the last valid formula, k, scores, and ranks.
+The rounded quant dashboard includes your named balanced rule, **DerivPort Signal**. In **Algorithm builder**, click **Use my balanced algorithm** to load:
+
+```text
+0.6 * predicted_return + 0.4 * momentum - k * (0.5 * uncertainty + 0.25 * volatility)
+```
+
+The starting `k = 1` balances a 60/40 model–momentum blend against explicit error and volatility penalties. These are transparent starting weights, not optimized parameters or evidence of profitability. Download the standalone [Python algorithm](algorithms/derivport_signal.py) and the cutoff's input CSV from the app. It uses only Python's standard library:
+
+```sh
+python3 derivport_signal.py --input features.csv --output ranked.csv --k 1
+```
+
+The file reproduces the app's scores and average tied ranks. [Algorithm documentation](algorithms/README.md) explains the inputs, coefficients, and measured frozen-cache research results.
+
+You can also edit `predicted_return`, `uncertainty`, `momentum`, `volatility`, `k`, numeric constants, arithmetic, and parentheses. A restricted AST parser rejects calls, attributes, powers, division by zero, and non-finite results. Invalid edits preserve the last valid formula, k, scores, and ranks.
 
 The score-versus-uncertainty chart holds other inputs fixed, marks the current score, and shows the local slope. The default slope is −k: at k = 2, one extra percentage point of uncertainty lowers the score by two percentage points. Custom slopes are numerical. Crossover examples distinguish a changing score from a changing relative rank.
 
-**Research** hides subsequent returns, realized ranks, and single-date ranking accuracy until **Reveal next 21 trading days**. Reveal freezes that experiment's predictions; later rule edits are labeled **edited after seeing the outcome**. Another unrevealed cutoff provides a fresh experiment. Reveal context includes the universe, cutoff, and price-data fingerprint, so changing the experiment does not expose another experiment's result.
+**Research** hides subsequent returns, realized ranks, and single-date ranking accuracy until **Reveal next 21 trading days**. Recent cutoffs show a pending-outcome message instead of invented results. Reveal freezes that experiment's predictions; later rule edits are labeled **edited after seeing the outcome**. Another unrevealed cutoff provides a fresh experiment. Reveal context includes the universe, cutoff, and price-data fingerprint, so changing the experiment does not expose another experiment's result.
 
 Run a separate date-range backtest in **Algorithm builder**. All methods use the same nonoverlapping forecast origins and completed outcomes; labels extending past the requested end date are excluded. Results include per-period Spearman correlations, top-ranked-stock returns, forecast RMSE, aggregate comparisons, and a linked research-return curve. These exploratory retrospective results stay separate from a single historical reveal; a revised rule is not untouched validation.
 
 The expandable stress tests use **600 reproducible correlated paths per scenario** for rally, sudden reversal, and sideways/volatile assumptions. Each method freezes its initial ranking and top-stock selection, then receives the same paths. Formula edits preserve the paths. Return distributions and first-place frequencies are simulated projections, not historical evidence or model validation.
+
+## Hypothetical scenarios through 2037
+
+**Future scenarios** accepts a target through **December 31, 2037**. Actual prices and company evidence for future dates do not exist yet, so this mode is explicitly labeled **SIMULATED**. It does not extend historical data or backtest accuracy into the future.
+
+The simulation anchors to the last genuine adjusted close in the selected cache and generates reproducible correlated monthly paths. Controls set an assumed annual **log-price drift**, a volatility multiplier, and cross-stock correlation. Each stock's volatility is estimated from up to three preceding years of daily returns and annualized with √252. The default uses 600 paths; at least 200 are required. Charts show simulated 10th, median, and 90th price percentiles, not calibrated confidence intervals. Returns remain in local currency.
+
+These are assumption-driven possibilities, not validated long-range forecasts. The 21-session regression is not extrapolated through 2037, and no future company statement or realized result is fabricated.
 
 ## Model, units, and evaluation
 
@@ -80,4 +104,4 @@ The repository's existing MIT license covers application code. Market data and i
 .venv/bin/python -m pytest -q
 ```
 
-Tests exercise the normal Streamlit entry point with outbound connections blocked: hidden outcomes, formula preservation, real k-driven rank crossings, frozen reveal predictions, post-reveal edit labels, and fresh experiment contexts. Additional checks cover dated sources, completed training labels, future-price mutation invariance, tied/constant Spearman handling, measured uncertainty, identical simulations for identical rankings, global data/cache behavior, dynamic universes, and common-date backtests.
+Tests exercise the normal Streamlit entry point with outbound connections blocked: recent-date research with pending outcomes, hidden completed outcomes, formula preservation, real k-driven rank crossings, frozen reveal predictions, post-reveal edit labels, and fresh experiment contexts. Additional checks cover dated sources, completed training labels, future-price mutation invariance, tied/constant Spearman handling, measured uncertainty, identical simulations for identical rankings, global caches, dynamic universes, common-date backtests, and reproducible hypothetical projections through 2037.
