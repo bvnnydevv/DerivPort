@@ -16,6 +16,10 @@ python3 -m venv .venv
 
 Open **http://127.0.0.1:8501**. Installation requires internet. Once installed, all bundled and previously downloaded stock histories work offline. Explicit provider search, adding an uncached stock, refreshing history, and opening external source links require internet. No API key is required. Dependencies include Streamlit, pandas, NumPy, scikit-learn, Plotly, and `yfinance==1.8.0`.
 
+## Host a demo
+
+Deploy this repository on [Streamlit Community Cloud](https://share.streamlit.io/) with repository **`bvnnydevv/DerivPort`**, branch **`main`**, entrypoint **`app.py`**, and Python **3.13** in Advanced settings. The bundled demo needs no secrets or API keys. See the [hosting guide](docs/HOSTING.md) for the complete steps and demo checks.
+
 ## Explore stocks and dates
 
 **Full cached history** is the default data range, making the supplied 2026 observations available directly. For the reproducible presentation, choose **Frozen demo (2018–2024)**, the original AAPL/MSFT/NVDA/AMZN/GOOGL group, and **Apple on May 3, 2024**. That example follows Apple's May 2 earnings release and was curated for clear, mixed business evidence, not to demonstrate a successful forecast.
