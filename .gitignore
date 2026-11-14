@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+.DS_Store
+.streamlit/secrets.toml
+artifacts/*.png
+artifacts/*.jpg
+data/market_cache/_provider/
+data/market_cache/*.tmp
+data/market_cache/*.csv
+data/market_cache/*.json

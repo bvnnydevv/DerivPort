@@ -1,0 +1,20 @@
+{
+  "symbol": "BHP.AX",
+  "name": "BHP Group Limited",
+  "exchange": "ASX",
+  "currency": "AUD",
+  "region": "Australia",
+  "source": "Yahoo Finance via yfinance",
+  "source_url": "https://finance.yahoo.com/quote/BHP.AX/history/",
+  "cache_status": "downloaded",
+  "fetched_at": "2026-11-14T16:42:43+00:00",
+  "start": "1988-01-29",
+  "end": "2026-11-13",
+  "rows": 9948,
+  "adjusted": true,
+  "price_field": "Adj Close",
+  "point_in_time_archive": false,
+  "observations_excluded": 0,
+  "note": "Retrospectively adjusted snapshot; current UTC date excluded; no interpolation or currency conversion.",
+  "cache_sha256": "26573661b92525df8727d318b878d71b9ed00296325b80b12d95f420004ec532"
+}

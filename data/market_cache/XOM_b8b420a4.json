@@ -1,0 +1,20 @@
+{
+  "symbol": "XOM",
+  "name": "ExxonMobil Holdings Corporation",
+  "exchange": "NYSE",
+  "currency": "USD",
+  "region": "United States",
+  "source": "Yahoo Finance via yfinance",
+  "source_url": "https://finance.yahoo.com/quote/XOM/history/",
+  "cache_status": "downloaded",
+  "fetched_at": "2026-11-14T16:42:47+00:00",
+  "start": "1962-01-02",
+  "end": "2026-11-13",
+  "rows": 16327,
+  "adjusted": true,
+  "price_field": "Adj Close",
+  "point_in_time_archive": false,
+  "observations_excluded": 0,
+  "note": "Retrospectively adjusted snapshot; current UTC date excluded; no interpolation or currency conversion.",
+  "cache_sha256": "9fd831410be42bc5fd6e743e30f0ea16287b62cbff8d833f7a5a27154540107f"
+}

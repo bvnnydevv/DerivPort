@@ -1,0 +1,20 @@
+{
+  "symbol": "AMZN",
+  "name": "Amazon.com, Inc.",
+  "exchange": "NasdaqGS",
+  "currency": "USD",
+  "region": "United States",
+  "source": "Yahoo Finance via yfinance",
+  "source_url": "https://finance.yahoo.com/quote/AMZN/history/",
+  "cache_status": "downloaded",
+  "fetched_at": "2026-11-14T16:43:36+00:00",
+  "start": "1997-05-15",
+  "end": "2026-11-13",
+  "rows": 7422,
+  "adjusted": true,
+  "price_field": "Adj Close",
+  "point_in_time_archive": false,
+  "observations_excluded": 0,
+  "note": "Retrospectively adjusted snapshot; current UTC date excluded; no interpolation or currency conversion.",
+  "cache_sha256": "4ab00023abcb8110e5a867030a1dca83c1ba6e5400f7ab73dfd1d80cceb14262"
+}

@@ -1,0 +1,84 @@
+{
+  "dataset": "DerivPort fixed five-stock educational historical cache",
+  "retrieved": "2026-11-14",
+  "vendor": "Yahoo Finance",
+  "mirror_author": "Akmal Yaasir Fauzaan (Akma86)",
+  "mirror_repository": "https://github.com/Akma86/us-tech-giants-market-analytics",
+  "mirror_commit": "363151b27e8bf71b377483b37fa49ee5ebb3f5e2",
+  "mirror_fetch_script": "https://github.com/Akma86/us-tech-giants-market-analytics/blob/363151b27e8bf71b377483b37fa49ee5ebb3f5e2/scripts/fetch_data.py",
+  "upstream_method": "Mirror uses yfinance Ticker.history(period=\"max\", auto_adjust=False). The cache selects Adj Close, not Close.",
+  "price_field": "Adj Close (USD, adjusted for stock splits and cash dividends by Yahoo Finance)",
+  "schema": [
+    "date",
+    "ticker",
+    "adjusted_close"
+  ],
+  "start": "2018-01-02",
+  "end": "2024-12-31",
+  "rows": 8805,
+  "trading_dates_per_ticker": 1761,
+  "tickers": [
+    "AAPL",
+    "MSFT",
+    "NVDA",
+    "AMZN",
+    "GOOGL"
+  ],
+  "cache_sha256": "812922aec7ee2a760d2e8cb91a447e8ef36099c796477c15d1ddd272a20132a1",
+  "files": [
+    {
+      "ticker": "AAPL",
+      "source_sha256": "99044a83dc9cb1799c4fb7019e6bb07a7b100c6b5ab8ffaad4b007571a893059",
+      "rows_cached": 1761,
+      "url": "https://raw.githubusercontent.com/Akma86/us-tech-giants-market-analytics/363151b27e8bf71b377483b37fa49ee5ebb3f5e2/data/raw/AAPL.csv"
+    },
+    {
+      "ticker": "MSFT",
+      "source_sha256": "c9e2e892c76bfd2a5c8dcf794b861ad074e711505aebaf1b388f5c69a87cc115",
+      "rows_cached": 1761,
+      "url": "https://raw.githubusercontent.com/Akma86/us-tech-giants-market-analytics/363151b27e8bf71b377483b37fa49ee5ebb3f5e2/data/raw/MSFT.csv"
+    },
+    {
+      "ticker": "NVDA",
+      "source_sha256": "a168c7f15b74ade3b5b7ec3518d0f97c486a7a2914a7c8be837694998854e507",
+      "rows_cached": 1761,
+      "url": "https://raw.githubusercontent.com/Akma86/us-tech-giants-market-analytics/363151b27e8bf71b377483b37fa49ee5ebb3f5e2/data/raw/NVDA.csv"
+    },
+    {
+      "ticker": "AMZN",
+      "source_sha256": "6b03b9539aa4c2923c9ae53f5b6a49e4e8c829f14aafb124e171a1aeccc34a3f",
+      "rows_cached": 1761,
+      "url": "https://raw.githubusercontent.com/Akma86/us-tech-giants-market-analytics/363151b27e8bf71b377483b37fa49ee5ebb3f5e2/data/raw/AMZN.csv"
+    },
+    {
+      "ticker": "GOOGL",
+      "source_sha256": "75b48cddaca5a6c4fcd72894a7c4777d1d1569165da968aa37ee4c21b3ec4b1d",
+      "rows_cached": 1761,
+      "url": "https://raw.githubusercontent.com/Akma86/us-tech-giants-market-analytics/363151b27e8bf71b377483b37fa49ee5ebb3f5e2/data/raw/GOOGL.csv"
+    }
+  ],
+  "source_notes": "20 paraphrased factual summaries checked against dated official earnings releases or issuer exhibits at SEC.gov; interpretation and limitations are DerivPort editorial analysis, not company statements. No quotations are used.",
+  "source_note_policy": "For a cutoff, select only notes with published <= cutoff. When none exists, show insufficient evidence. This is a small curated set, not complete news coverage.",
+  "curated_cutoffs": [
+    "2023-08-04",
+    "2023-11-03",
+    "2024-05-03",
+    "2024-08-02"
+  ],
+  "default_example": {
+    "ticker": "AAPL",
+    "cutoff": "2024-05-03",
+    "reason": "The May 2 earnings release presents both a services record and lower overall revenue, providing a clear example of mixed qualitative evidence."
+  },
+  "limitations": [
+    "Fixed survivor universe of five large US technology-related stocks creates selection and survivorship bias; results do not generalize to the market.",
+    "Downloaded in 2026: this is a retrospectively adjusted vendor snapshot, not a point-in-time archived price database. Later split/dividend adjustments can rescale earlier levels. The app uses scale-invariant returns and volatility; vendor revisions cannot be ruled out.",
+    "Yahoo Finance data is obtained through a credited pinned public mirror because the direct Yahoo endpoint rate-limited downloads. It has not been independently reconciled to exchange records.",
+    "Adjusted close is an approximation of total-return history, not an executable price. It omits transaction costs, slippage, taxes and other trading frictions.",
+    "Data ends in 2024 and is deliberately frozen. There are no live quotes or internet requests in the main app.",
+    "Publication dates are interpreted in US time; all curated decision cutoffs are at the market close on a later trading day, avoiding same-day after-close release ambiguity.",
+    "Source notes are a deliberately limited editorial sample. Older NVIDIA notes are marked as such; missing news and future events remain unknown at each cutoff.",
+    "The mirror repository uses MIT for code; underlying market data and company releases retain their original owners' terms. This limited cache is for personal educational use, not commercial redistribution."
+  ],
+  "rebuild_command": "python scripts/fetch_data.py"
+}

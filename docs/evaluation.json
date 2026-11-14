@@ -1,0 +1,920 @@
+{
+  "description": "Reproducible research metrics. Includes future outcomes and full-cache evaluation; do not show these before historical reveal.",
+  "price_cache_sha256": "812922aec7ee2a760d2e8cb91a447e8ef36099c796477c15d1ddd272a20132a1",
+  "units": "Returns, forecast errors, momentum, volatility, uncertainty and default score are numeric percentage points. k is dimensionless.",
+  "formula": "predicted_return - k * uncertainty",
+  "k": 2,
+  "model": {
+    "type": "StandardScaler fitted on train rows, followed by Ridge(alpha=25)",
+    "features": [
+      "trailing 21-session total return, %",
+      "trailing 21-session sample daily return standard deviation \u00d7 sqrt(21), %"
+    ],
+    "target": "next 21-session adjusted-price total return, %",
+    "training": "expanding daily pooled five-stock rows; label_end <= cutoff; no random split",
+    "oos_origins": "Every 21 cached sessions from first 2020 session; 2020-2021 are error-estimation warm-up, evaluation origins >=2022",
+    "uncertainty": "Stock RMSE of latest 24 completed OOS forecasts; pooled latest120 fallback if fewer than6 stock-specific errors. Each estimate only sees label_end <= forecast cutoff.",
+    "tie_policy": "Average tied ranks. Alphabetical first representative among tied top stocks for simulation; tied realized simulation winners split one unit of credit."
+  },
+  "overall": {
+    "model_rmse": 12.11136483187906,
+    "baseline_rmse": 18.418949042537964,
+    "n_forecasts": 170,
+    "n_dates": 34,
+    "model_spearman": 0.08529411764705884,
+    "baseline_spearman": -0.04411764705882354,
+    "student_spearman": -0.09705882352941174
+  },
+  "heldout_per_date": [
+    {
+      "cutoff": "2022-02-01",
+      "label_end": "2022-03-03",
+      "model_rmse": 7.26712763298802,
+      "baseline_rmse": 6.914694899743412,
+      "model_spearman": 0.19999999999999998,
+      "baseline_spearman": -0.49999999999999994,
+      "student_spearman": 0.19999999999999998
+    },
+    {
+      "cutoff": "2022-03-03",
+      "label_end": "2022-04-01",
+      "model_rmse": 4.305663597626497,
+      "baseline_rmse": 11.396788793210845,
+      "model_spearman": 0.7,
+      "baseline_spearman": 0.3,
+      "student_spearman": -0.39999999999999997
+    },
+    {
+      "cutoff": "2022-04-01",
+      "label_end": "2022-05-03",
+      "model_rmse": 21.806773469583884,
+      "baseline_rmse": 26.606803877470448,
+      "model_spearman": -0.9999999999999999,
+      "baseline_spearman": -0.7,
+      "student_spearman": 0.3
+    },
+    {
+      "cutoff": "2022-05-03",
+      "label_end": "2022-06-02",
+      "model_rmse": 5.689706142625801,
+      "baseline_rmse": 18.230020815150812,
+      "model_spearman": 0.7,
+      "baseline_spearman": -0.7,
+      "student_spearman": 0.09999999999999999
+    },
+    {
+      "cutoff": "2022-06-02",
+      "label_end": "2022-07-05",
+      "model_rmse": 14.977428177630234,
+      "baseline_rmse": 11.73011801865975,
+      "model_spearman": -0.8999999999999998,
+      "baseline_spearman": -0.09999999999999999,
+      "student_spearman": 0.8999999999999998
+    },
+    {
+      "cutoff": "2022-07-05",
+      "label_end": "2022-08-03",
+      "model_rmse": 15.338079338343944,
+      "baseline_rmse": 29.348744667795735,
+      "model_spearman": 0.7,
+      "baseline_spearman": -0.9999999999999999,
+      "student_spearman": -0.7999999999999999
+    },
+    {
+      "cutoff": "2022-08-03",
+      "label_end": "2022-09-01",
+      "model_rmse": 15.136626917727709,
+      "baseline_rmse": 30.269452274431963,
+      "model_spearman": -0.09999999999999999,
+      "baseline_spearman": -0.7,
+      "student_spearman": 0.6
+    },
+    {
+      "cutoff": "2022-09-01",
+      "label_end": "2022-10-03",
+      "model_rmse": 12.27950605658481,
+      "baseline_rmse": 7.650526667905624,
+      "model_spearman": -0.49999999999999994,
+      "baseline_spearman": 0.19999999999999998,
+      "student_spearman": 0.3
+    },
+    {
+      "cutoff": "2022-10-03",
+      "label_end": "2022-11-01",
+      "model_rmse": 10.866810932872541,
+      "baseline_rmse": 11.333183687156064,
+      "model_spearman": 0.6,
+      "baseline_spearman": -0.49999999999999994,
+      "student_spearman": -0.39999999999999997
+    },
+    {
+      "cutoff": "2022-11-01",
+      "label_end": "2022-12-01",
+      "model_rmse": 12.633859908905944,
+      "baseline_rmse": 16.165635733792712,
+      "model_spearman": 0.0,
+      "baseline_spearman": 0.39999999999999997,
+      "student_spearman": -0.09999999999999999
+    },
+    {
+      "cutoff": "2022-12-01",
+      "label_end": "2023-01-03",
+      "model_rmse": 14.650530042317484,
+      "baseline_rmse": 24.48497335450649,
+      "model_spearman": -0.3,
+      "baseline_spearman": -0.09999999999999999,
+      "student_spearman": 0.7
+    },
+    {
+      "cutoff": "2023-01-03",
+      "label_end": "2023-02-02",
+      "model_rmse": 28.364570847922415,
+      "baseline_rmse": 42.489170717642715,
+      "model_spearman": 0.7,
+      "baseline_spearman": -0.6,
+      "student_spearman": -0.8999999999999998
+    },
+    {
+      "cutoff": "2023-02-02",
+      "label_end": "2023-03-06",
+      "model_rmse": 10.678119121980963,
+      "baseline_rmse": 34.03693096086373,
+      "model_spearman": -0.3,
+      "baseline_spearman": 0.09999999999999999,
+      "student_spearman": -0.3
+    },
+    {
+      "cutoff": "2023-03-06",
+      "label_end": "2023-04-04",
+      "model_rmse": 9.406313673566586,
+      "baseline_rmse": 17.637683521693038,
+      "model_spearman": 0.19999999999999998,
+      "baseline_spearman": 0.3,
+      "student_spearman": -0.3
+    },
+    {
+      "cutoff": "2023-04-04",
+      "label_end": "2023-05-04",
+      "model_rmse": 2.5363960871450684,
+      "baseline_rmse": 10.661075384296769,
+      "model_spearman": -0.8999999999999998,
+      "baseline_spearman": 0.6,
+      "student_spearman": 0.3
+    },
+    {
+      "cutoff": "2023-05-04",
+      "label_end": "2023-06-05",
+      "model_rmse": 21.7277224298326,
+      "baseline_rmse": 23.062355863661427,
+      "model_spearman": 0.8999999999999998,
+      "baseline_spearman": -0.09999999999999999,
+      "student_spearman": -0.8999999999999998
+    },
+    {
+      "cutoff": "2023-06-05",
+      "label_end": "2023-07-06",
+      "model_rmse": 4.367467764512877,
+      "baseline_rmse": 21.114440976767163,
+      "model_spearman": 0.7,
+      "baseline_spearman": 0.3,
+      "student_spearman": -0.49999999999999994
+    },
+    {
+      "cutoff": "2023-07-06",
+      "label_end": "2023-08-04",
+      "model_rmse": 5.661349679448207,
+      "baseline_rmse": 8.284174960569613,
+      "model_spearman": 0.7,
+      "baseline_spearman": -0.3,
+      "student_spearman": -0.6
+    },
+    {
+      "cutoff": "2023-08-04",
+      "label_end": "2023-09-05",
+      "model_rmse": 3.8242279656130487,
+      "baseline_rmse": 6.928292113791838,
+      "model_spearman": -0.6,
+      "baseline_spearman": -0.19999999999999998,
+      "student_spearman": -0.39999999999999997
+    },
+    {
+      "cutoff": "2023-09-05",
+      "label_end": "2023-10-04",
+      "model_rmse": 8.899660704867532,
+      "baseline_rmse": 10.965445467740027,
+      "model_spearman": -0.7999999999999999,
+      "baseline_spearman": -0.3,
+      "student_spearman": 0.49999999999999994
+    },
+    {
+      "cutoff": "2023-10-04",
+      "label_end": "2023-11-02",
+      "model_rmse": 5.6901607252047635,
+      "baseline_rmse": 11.444785859064888,
+      "model_spearman": 0.3,
+      "baseline_spearman": 0.0,
+      "student_spearman": 0.49999999999999994
+    },
+    {
+      "cutoff": "2023-11-02",
+      "label_end": "2023-12-04",
+      "model_rmse": 3.278044321383866,
+      "baseline_rmse": 5.082493110756778,
+      "model_spearman": -0.8999999999999998,
+      "baseline_spearman": 0.7,
+      "student_spearman": 0.6
+    },
+    {
+      "cutoff": "2023-12-04",
+      "label_end": "2024-01-04",
+      "model_rmse": 3.61205139163028,
+      "baseline_rmse": 6.363256647498367,
+      "model_spearman": 0.8999999999999998,
+      "baseline_spearman": -0.9999999999999999,
+      "student_spearman": -0.6
+    },
+    {
+      "cutoff": "2024-01-04",
+      "label_end": "2024-02-05",
+      "model_rmse": 20.535314413758616,
+      "baseline_rmse": 20.026414890927146,
+      "model_spearman": -0.09999999999999999,
+      "baseline_spearman": 0.39999999999999997,
+      "student_spearman": -0.7
+    },
+    {
+      "cutoff": "2024-02-05",
+      "label_end": "2024-03-06",
+      "model_rmse": 14.028576734173326,
+      "baseline_rmse": 14.187498377610689,
+      "model_spearman": -0.7999999999999999,
+      "baseline_spearman": 0.9999999999999999,
+      "student_spearman": -0.7
+    },
+    {
+      "cutoff": "2024-03-06",
+      "label_end": "2024-04-05",
+      "model_rmse": 6.812838511760653,
+      "baseline_rmse": 17.869717524404734,
+      "model_spearman": -0.09999999999999999,
+      "baseline_spearman": -0.3,
+      "student_spearman": 0.19999999999999998
+    },
+    {
+      "cutoff": "2024-04-05",
+      "label_end": "2024-05-06",
+      "model_rmse": 4.773138220480203,
+      "baseline_rmse": 6.4511465013578055,
+      "model_spearman": 0.7,
+      "baseline_spearman": 0.19999999999999998,
+      "student_spearman": -0.19999999999999998
+    },
+    {
+      "cutoff": "2024-05-06",
+      "label_end": "2024-06-05",
+      "model_rmse": 13.731330449373255,
+      "baseline_rmse": 13.38059276416092,
+      "model_spearman": 0.7999999999999999,
+      "baseline_spearman": 0.49999999999999994,
+      "student_spearman": -0.3
+    },
+    {
+      "cutoff": "2024-06-05",
+      "label_end": "2024-07-08",
+      "model_rmse": 8.512003741222282,
+      "baseline_rmse": 14.973603327851045,
+      "model_spearman": -0.6,
+      "baseline_spearman": -0.3,
+      "student_spearman": 0.7999999999999999
+    },
+    {
+      "cutoff": "2024-07-08",
+      "label_end": "2024-08-06",
+      "model_rmse": 18.355081793173753,
+      "baseline_rmse": 25.234387562222796,
+      "model_spearman": -0.19999999999999998,
+      "baseline_spearman": 0.7,
+      "student_spearman": 0.7999999999999999
+    },
+    {
+      "cutoff": "2024-08-06",
+      "label_end": "2024-09-05",
+      "model_rmse": 4.075190608711691,
+      "baseline_rmse": 20.366154860479636,
+      "model_spearman": 0.3,
+      "baseline_spearman": -0.3,
+      "student_spearman": -0.3
+    },
+    {
+      "cutoff": "2024-09-05",
+      "label_end": "2024-10-04",
+      "model_rmse": 6.075963797480949,
+      "baseline_rmse": 7.6437308104022135,
+      "model_spearman": 0.8999999999999998,
+      "baseline_spearman": -0.09999999999999999,
+      "student_spearman": -0.8999999999999998
+    },
+    {
+      "cutoff": "2024-10-04",
+      "label_end": "2024-11-04",
+      "model_rmse": 3.97151991235072,
+      "baseline_rmse": 4.783718727308845,
+      "model_spearman": 0.7,
+      "baseline_spearman": 0.7999999999999999,
+      "student_spearman": -0.8999999999999998
+    },
+    {
+      "cutoff": "2024-11-04",
+      "label_end": "2024-12-04",
+      "model_rmse": 5.882504771435263,
+      "baseline_rmse": 7.345152477187999,
+      "model_spearman": 0.3,
+      "baseline_spearman": -0.19999999999999998,
+      "student_spearman": 0.09999999999999999
+    }
+  ],
+  "baseline_better_dates": [
+    {
+      "cutoff": "2022-02-01",
+      "label_end": "2022-03-03",
+      "model_rmse": 7.26712763298802,
+      "baseline_rmse": 6.914694899743412
+    },
+    {
+      "cutoff": "2022-06-02",
+      "label_end": "2022-07-05",
+      "model_rmse": 14.977428177630234,
+      "baseline_rmse": 11.73011801865975
+    },
+    {
+      "cutoff": "2022-09-01",
+      "label_end": "2022-10-03",
+      "model_rmse": 12.27950605658481,
+      "baseline_rmse": 7.650526667905624
+    },
+    {
+      "cutoff": "2024-01-04",
+      "label_end": "2024-02-05",
+      "model_rmse": 20.535314413758616,
+      "baseline_rmse": 20.026414890927146
+    },
+    {
+      "cutoff": "2024-05-06",
+      "label_end": "2024-06-05",
+      "model_rmse": 13.731330449373255,
+      "baseline_rmse": 13.38059276416092
+    }
+  ],
+  "curated_cutoffs": {
+    "2023-08-04": {
+      "known_heldout_metrics": {
+        "model_rmse": 13.839927217755141,
+        "baseline_rmse": 21.878275807002808,
+        "n_forecasts": 90,
+        "n_dates": 18,
+        "model_spearman": 0.1166666666666667,
+        "baseline_spearman": -0.1722222222222222,
+        "student_spearman": -0.09999999999999999
+      },
+      "training": {
+        "n_rows": 6825,
+        "first_feature_date": "2018-02-01",
+        "last_feature_date": "2023-07-06",
+        "last_label_end": "2023-08-04",
+        "feature_columns": [
+          "momentum",
+          "volatility"
+        ],
+        "ridge_alpha": 25.0
+      },
+      "stocks": [
+        {
+          "ticker": "AAPL",
+          "momentum": -5.119636836697805,
+          "volatility": 6.0963287405662685,
+          "predicted_return": 2.365696321721773,
+          "uncertainty": 8.665634666730671,
+          "uncertainty_n": 24,
+          "uncertainty_source": "stock: last 24 completed OOS forecasts (or all available)",
+          "model_rank": 4.0,
+          "momentum_rank": 5.0,
+          "score": -14.96557301173957,
+          "student_rank": 2.0
+        },
+        {
+          "ticker": "AMZN",
+          "momentum": 8.733255422633391,
+          "volatility": 11.392567330862308,
+          "predicted_return": 2.4778819367280653,
+          "uncertainty": 12.997464552955561,
+          "uncertainty_n": 24,
+          "uncertainty_source": "stock: last 24 completed OOS forecasts (or all available)",
+          "model_rank": 2.0,
+          "momentum_rank": 1.0,
+          "score": -23.51704716918306,
+          "student_rank": 4.0
+        },
+        {
+          "ticker": "GOOGL",
+          "momentum": 6.660566716882066,
+          "volatility": 9.533778684466546,
+          "predicted_return": 2.3644547353681444,
+          "uncertainty": 9.63957411341359,
+          "uncertainty_n": 24,
+          "uncertainty_source": "stock: last 24 completed OOS forecasts (or all available)",
+          "model_rank": 5.0,
+          "momentum_rank": 2.0,
+          "score": -16.914693491459033,
+          "student_rank": 3.0
+        },
+        {
+          "ticker": "MSFT",
+          "momentum": -3.9528784887631785,
+          "volatility": 8.363790549179432,
+          "predicted_return": 2.5402136512771762,
+          "uncertainty": 7.451174079579494,
+          "uncertainty_n": 24,
+          "uncertainty_source": "stock: last 24 completed OOS forecasts (or all available)",
+          "model_rank": 1.0,
+          "momentum_rank": 4.0,
+          "score": -12.362134507881812,
+          "student_rank": 1.0
+        },
+        {
+          "ticker": "NVDA",
+          "momentum": 6.120693658774634,
+          "volatility": 10.193858869054004,
+          "predicted_return": 2.438610349266606,
+          "uncertainty": 20.814431290385482,
+          "uncertainty_n": 24,
+          "uncertainty_source": "stock: last 24 completed OOS forecasts (or all available)",
+          "model_rank": 3.0,
+          "momentum_rank": 3.0,
+          "score": -39.19025223150436,
+          "student_rank": 5.0
+        }
+      ],
+      "revealed_outcomes": [
+        {
+          "ticker": "AAPL",
+          "actual_return": 4.377232457474589,
+          "realized_rank": 3.0
+        },
+        {
+          "ticker": "AMZN",
+          "actual_return": -1.6479207071741775,
+          "realized_rank": 5.0
+        },
+        {
+          "ticker": "GOOGL",
+          "actual_return": 5.979231973461618,
+          "realized_rank": 2.0
+        },
+        {
+          "ticker": "MSFT",
+          "actual_return": 1.975791566526608,
+          "realized_rank": 4.0
+        },
+        {
+          "ticker": "NVDA",
+          "actual_return": 8.657121892411123,
+          "realized_rank": 1.0
+        }
+      ],
+      "revealed_end_date": "2023-09-05",
+      "single_date_spearman": {
+        "model": -0.6,
+        "momentum": -0.19999999999999998,
+        "student": -0.39999999999999997
+      }
+    },
+    "2023-11-03": {
+      "known_heldout_metrics": {
+        "model_rmse": 13.04569103527159,
+        "baseline_rmse": 20.60407552201053,
+        "n_forecasts": 105,
+        "n_dates": 21,
+        "model_spearman": 0.04761904761904764,
+        "baseline_spearman": -0.1714285714285714,
+        "student_spearman": -0.05714285714285713
+      },
+      "training": {
+        "n_rows": 7145,
+        "first_feature_date": "2018-02-01",
+        "last_feature_date": "2023-10-05",
+        "last_label_end": "2023-11-03",
+        "feature_columns": [
+          "momentum",
+          "volatility"
+        ],
+        "ridge_alpha": 25.0
+      },
+      "stocks": [
+        {
+          "ticker": "AAPL",
+          "momentum": 0.9948018581495521,
+          "volatility": 5.289842801740914,
+          "predicted_return": 1.96494910359179,
+          "uncertainty": 8.749594371015183,
+          "uncertainty_n": 24,
+          "uncertainty_source": "stock: last 24 completed OOS forecasts (or all available)",
+          "model_rank": 4.0,
+          "momentum_rank": 3.0,
+          "score": -15.534239638438576,
+          "student_rank": 2.0
+        },
+        {
+          "ticker": "AMZN",
+          "momentum": 10.034937369696607,
+          "volatility": 11.772830100181835,
+          "predicted_return": 2.376299067191448,
+          "uncertainty": 13.139772303228618,
+          "uncertainty_n": 24,
+          "uncertainty_source": "stock: last 24 completed OOS forecasts (or all available)",
+          "model_rank": 3.0,
+          "momentum_rank": 2.0,
+          "score": -23.90324553926579,
+          "student_rank": 4.0
+        },
+        {
+          "ticker": "GOOGL",
+          "momentum": -4.419941358316482,
+          "volatility": 11.465026219461997,
+          "predicted_return": 2.717392307927958,
+          "uncertainty": 9.625876143062593,
+          "uncertainty_n": 24,
+          "uncertainty_source": "stock: last 24 completed OOS forecasts (or all available)",
+          "model_rank": 1.0,
+          "momentum_rank": 5.0,
+          "score": -16.534359978197227,
+          "student_rank": 3.0
+        },
+        {
+          "ticker": "MSFT",
+          "momentum": 10.470935068380061,
+          "volatility": 7.014672751275311,
+          "predicted_return": 1.8925843333308587,
+          "uncertainty": 7.184073268368741,
+          "uncertainty_n": 24,
+          "uncertainty_source": "stock: last 24 completed OOS forecasts (or all available)",
+          "model_rank": 5.0,
+          "momentum_rank": 1.0,
+          "score": -12.475562203406623,
+          "student_rank": 1.0
+        },
+        {
+          "ticker": "NVDA",
+          "momentum": 0.7093781602228733,
+          "volatility": 12.603742845125424,
+          "predicted_return": 2.6985880319328177,
+          "uncertainty": 20.331229412910158,
+          "uncertainty_n": 24,
+          "uncertainty_source": "stock: last 24 completed OOS forecasts (or all available)",
+          "model_rank": 2.0,
+          "momentum_rank": 4.0,
+          "score": -37.9638707938875,
+          "student_rank": 5.0
+        }
+      ],
+      "revealed_outcomes": [
+        {
+          "ticker": "AAPL",
+          "actual_return": 9.637602713634074,
+          "realized_rank": 1.0
+        },
+        {
+          "ticker": "AMZN",
+          "actual_return": 5.9740248302131205,
+          "realized_rank": 2.0
+        },
+        {
+          "ticker": "GOOGL",
+          "actual_return": 1.463987303572889,
+          "realized_rank": 5.0
+        },
+        {
+          "ticker": "MSFT",
+          "actual_return": 5.803897121267898,
+          "realized_rank": 3.0
+        },
+        {
+          "ticker": "NVDA",
+          "actual_return": 3.4775974586402914,
+          "realized_rank": 4.0
+        }
+      ],
+      "revealed_end_date": "2023-12-05",
+      "single_date_spearman": {
+        "model": -0.7,
+        "momentum": 0.6,
+        "student": 0.3
+      }
+    },
+    "2024-05-03": {
+      "known_heldout_metrics": {
+        "model_rmse": 12.80429391321769,
+        "baseline_rmse": 19.516342727446574,
+        "n_forecasts": 130,
+        "n_dates": 26,
+        "model_spearman": 1.6546593155471083e-17,
+        "baseline_spearman": -0.10769230769230766,
+        "student_spearman": -0.09230769230769229
+      },
+      "training": {
+        "n_rows": 7765,
+        "first_feature_date": "2018-02-01",
+        "last_feature_date": "2024-04-04",
+        "last_label_end": "2024-05-03",
+        "feature_columns": [
+          "momentum",
+          "volatility"
+        ],
+        "ridge_alpha": 25.0
+      },
+      "stocks": [
+        {
+          "ticker": "AAPL",
+          "momentum": 8.624557397489063,
+          "volatility": 9.300263864283863,
+          "predicted_return": 2.512193965191896,
+          "uncertainty": 8.773297535565034,
+          "uncertainty_n": 24,
+          "uncertainty_source": "stock: last 24 completed OOS forecasts (or all available)",
+          "model_rank": 3.0,
+          "momentum_rank": 2.0,
+          "score": -15.034401105938171,
+          "student_rank": 2.0
+        },
+        {
+          "ticker": "AMZN",
+          "momentum": 3.4500037299444397,
+          "volatility": 8.696852075606255,
+          "predicted_return": 2.496704767459322,
+          "uncertainty": 13.168445081127684,
+          "uncertainty_n": 24,
+          "uncertainty_source": "stock: last 24 completed OOS forecasts (or all available)",
+          "model_rank": 4.0,
+          "momentum_rank": 3.0,
+          "score": -23.840185394796045,
+          "student_rank": 4.0
+        },
+        {
+          "ticker": "GOOGL",
+          "momentum": 11.100765379416444,
+          "volatility": 12.197490880287749,
+          "predicted_return": 2.774761236477608,
+          "uncertainty": 10.07930198922545,
+          "uncertainty_n": 24,
+          "uncertainty_source": "stock: last 24 completed OOS forecasts (or all available)",
+          "model_rank": 2.0,
+          "momentum_rank": 1.0,
+          "score": -17.38384274197329,
+          "student_rank": 3.0
+        },
+        {
+          "ticker": "MSFT",
+          "momentum": -2.6849980720932587,
+          "volatility": 7.064142874774959,
+          "predicted_return": 2.38861250945346,
+          "uncertainty": 6.972601036575118,
+          "uncertainty_n": 24,
+          "uncertainty_source": "stock: last 24 completed OOS forecasts (or all available)",
+          "model_rank": 5.0,
+          "momentum_rank": 5.0,
+          "score": -11.556589563696775,
+          "student_rank": 1.0
+        },
+        {
+          "ticker": "NVDA",
+          "momentum": 3.357198363840652,
+          "volatility": 17.702690199123218,
+          "predicted_return": 3.378417007020889,
+          "uncertainty": 21.739582353258328,
+          "uncertainty_n": 24,
+          "uncertainty_source": "stock: last 24 completed OOS forecasts (or all available)",
+          "model_rank": 1.0,
+          "momentum_rank": 4.0,
+          "score": -40.10074769949577,
+          "student_rank": 5.0
+        }
+      ],
+      "revealed_outcomes": [
+        {
+          "ticker": "AAPL",
+          "actual_return": 6.125858768667225,
+          "realized_rank": 2.0
+        },
+        {
+          "ticker": "AMZN",
+          "actual_return": -3.689388393909099,
+          "realized_rank": 5.0
+        },
+        {
+          "ticker": "GOOGL",
+          "actual_return": 3.9165218820646164,
+          "realized_rank": 3.0
+        },
+        {
+          "ticker": "MSFT",
+          "actual_return": 2.498525938322138,
+          "realized_rank": 4.0
+        },
+        {
+          "ticker": "NVDA",
+          "actual_return": 31.13899396643529,
+          "realized_rank": 1.0
+        }
+      ],
+      "revealed_end_date": "2024-06-04",
+      "single_date_spearman": {
+        "model": 0.7999999999999999,
+        "momentum": 0.09999999999999999,
+        "student": -0.3
+      }
+    },
+    "2024-08-02": {
+      "known_heldout_metrics": {
+        "model_rmse": 12.520996159678639,
+        "baseline_rmse": 18.8898301596536,
+        "n_forecasts": 145,
+        "n_dates": 29,
+        "model_spearman": 0.031034482758620707,
+        "baseline_spearman": -0.08275862068965513,
+        "student_spearman": -0.07241379310344827
+      },
+      "training": {
+        "n_rows": 8075,
+        "first_feature_date": "2018-02-01",
+        "last_feature_date": "2024-07-03",
+        "last_label_end": "2024-08-02",
+        "feature_columns": [
+          "momentum",
+          "volatility"
+        ],
+        "ridge_alpha": 25.0
+      },
+      "stocks": [
+        {
+          "ticker": "AAPL",
+          "momentum": -0.7628161964714164,
+          "volatility": 6.774849718705885,
+          "predicted_return": 2.446836855983885,
+          "uncertainty": 8.703865271401249,
+          "uncertainty_n": 24,
+          "uncertainty_source": "stock: last 24 completed OOS forecasts (or all available)",
+          "model_rank": 5.0,
+          "momentum_rank": 1.0,
+          "score": -14.960893686818611,
+          "student_rank": 2.0
+        },
+        {
+          "ticker": "AMZN",
+          "momentum": -15.026065586147851,
+          "volatility": 10.912768506451767,
+          "predicted_return": 3.029322320027747,
+          "uncertainty": 11.791399011136267,
+          "uncertainty_n": 24,
+          "uncertainty_source": "stock: last 24 completed OOS forecasts (or all available)",
+          "model_rank": 2.0,
+          "momentum_rank": 4.0,
+          "score": -20.55347570224479,
+          "student_rank": 4.0
+        },
+        {
+          "ticker": "GOOGL",
+          "momentum": -10.311050234866482,
+          "volatility": 8.552452685590135,
+          "predicted_return": 2.7232893029272125,
+          "uncertainty": 9.378938795772038,
+          "uncertainty_n": 24,
+          "uncertainty_source": "stock: last 24 completed OOS forecasts (or all available)",
+          "model_rank": 3.0,
+          "momentum_rank": 2.0,
+          "score": -16.034588288616863,
+          "student_rank": 3.0
+        },
+        {
+          "ticker": "MSFT",
+          "momentum": -11.346240013460285,
+          "volatility": 6.461180836644193,
+          "predicted_return": 2.492098838113926,
+          "uncertainty": 6.55232943042051,
+          "uncertainty_n": 24,
+          "uncertainty_source": "stock: last 24 completed OOS forecasts (or all available)",
+          "model_rank": 4.0,
+          "momentum_rank": 3.0,
+          "score": -10.612560022727095,
+          "student_rank": 1.0
+        },
+        {
+          "ticker": "NVDA",
+          "momentum": -16.37824938356591,
+          "volatility": 21.46195301380916,
+          "predicted_return": 4.245930809317613,
+          "uncertainty": 20.834579809929885,
+          "uncertainty_n": 24,
+          "uncertainty_source": "stock: last 24 completed OOS forecasts (or all available)",
+          "model_rank": 1.0,
+          "momentum_rank": 5.0,
+          "score": -37.423228810542156,
+          "student_rank": 5.0
+        }
+      ],
+      "revealed_outcomes": [
+        {
+          "ticker": "AAPL",
+          "actual_return": 1.4408574480573089,
+          "realized_rank": 2.0
+        },
+        {
+          "ticker": "AMZN",
+          "actual_return": 4.973202148326017,
+          "realized_rank": 1.0
+        },
+        {
+          "ticker": "GOOGL",
+          "actual_return": -5.580234672412088,
+          "realized_rank": 5.0
+        },
+        {
+          "ticker": "MSFT",
+          "actual_return": 0.41322747581675756,
+          "realized_rank": 4.0
+        },
+        {
+          "ticker": "NVDA",
+          "actual_return": 0.6805376433077104,
+          "realized_rank": 3.0
+        }
+      ],
+      "revealed_end_date": "2024-09-03",
+      "single_date_spearman": {
+        "model": 0.09999999999999999,
+        "momentum": -0.19999999999999998,
+        "student": -0.3
+      }
+    }
+  },
+  "default_crossovers": [
+    {
+      "first": "AMZN",
+      "second": "MSFT",
+      "k": 0.017445929437313327,
+      "score": 2.266969003774833
+    },
+    {
+      "first": "GOOGL",
+      "second": "NVDA",
+      "k": 0.05177026209466698,
+      "score": 2.252953130764108
+    },
+    {
+      "first": "AAPL",
+      "second": "NVDA",
+      "k": 0.06680580089116801,
+      "score": 1.9260867968719633
+    },
+    {
+      "first": "MSFT",
+      "second": "NVDA",
+      "k": 0.06702822170223667,
+      "score": 1.9212514613326577
+    },
+    {
+      "first": "AAPL",
+      "second": "MSFT",
+      "k": 0.068629808414554,
+      "score": 1.910084236162189
+    },
+    {
+      "first": "AMZN",
+      "second": "NVDA",
+      "k": 0.10286992397478983,
+      "score": 1.142067823097522
+    },
+    {
+      "first": "GOOGL",
+      "second": "MSFT",
+      "k": 0.12429542878748079,
+      "score": 1.5219500738483227
+    },
+    {
+      "first": "AAPL",
+      "second": "GOOGL",
+      "k": 0.20104622962793053,
+      "score": 0.7483555742625312
+    }
+  ],
+  "simulation": {
+    "seed": 2024,
+    "paths_per_scenario": 600,
+    "sessions": 21,
+    "all_algorithms_share_paths": true,
+    "ranking_frozen_before_each_path": true,
+    "scenario_assumptions": {
+      "rally": "21 sessions; market log drift +0.14% per session; stock momentum tilt capped at \u00b10.10% per session; correlation 0.65; trailing daily volatility \u00d7 1.0.",
+      "reversal": "First 5 sessions: market log drift +0.15% per session. Next 16: \u22120.35% per session; momentum tilt reverses and is capped at \u00b10.10% per session; correlation 0.80; trailing daily volatility \u00d7 1.3.",
+      "sideways": "21 sessions; zero log drift; no momentum tilt; correlation 0.45; trailing daily volatility \u00d7 1.6. Zero log drift does not imply zero expected simple return."
+    }
+  }
+}

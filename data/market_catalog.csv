@@ -1,0 +1,110 @@
+symbol,name,exchange,currency,region
+AAPL,Apple,NASDAQ,USD,United States
+MSFT,Microsoft,NASDAQ,USD,United States
+NVDA,NVIDIA,NASDAQ,USD,United States
+AMZN,Amazon,NASDAQ,USD,United States
+GOOGL,Alphabet Class A,NASDAQ,USD,United States
+GOOG,Alphabet Class C,NASDAQ,USD,United States
+META,Meta Platforms,NASDAQ,USD,United States
+TSLA,Tesla,NASDAQ,USD,United States
+AMD,Advanced Micro Devices,NASDAQ,USD,United States
+AVGO,Broadcom,NASDAQ,USD,United States
+ORCL,Oracle,NYSE,USD,United States
+NFLX,Netflix,NASDAQ,USD,United States
+ADBE,Adobe,NASDAQ,USD,United States
+CRM,Salesforce,NYSE,USD,United States
+INTC,Intel,NASDAQ,USD,United States
+QCOM,Qualcomm,NASDAQ,USD,United States
+IBM,IBM,NYSE,USD,United States
+CSCO,Cisco Systems,NASDAQ,USD,United States
+JPM,JPMorgan Chase,NYSE,USD,United States
+BAC,Bank of America,NYSE,USD,United States
+GS,Goldman Sachs,NYSE,USD,United States
+V,Visa,NYSE,USD,United States
+MA,Mastercard,NYSE,USD,United States
+BRK-B,Berkshire Hathaway Class B,NYSE,USD,United States
+WMT,Walmart,NASDAQ,USD,United States
+COST,Costco Wholesale,NASDAQ,USD,United States
+TGT,Target,NYSE,USD,United States
+HD,Home Depot,NYSE,USD,United States
+NKE,Nike,NYSE,USD,United States
+KO,Coca-Cola,NYSE,USD,United States
+PEP,PepsiCo,NASDAQ,USD,United States
+MCD,McDonald's,NYSE,USD,United States
+SBUX,Starbucks,NASDAQ,USD,United States
+DIS,Walt Disney,NYSE,USD,United States
+JNJ,Johnson & Johnson,NYSE,USD,United States
+PFE,Pfizer,NYSE,USD,United States
+MRK,Merck,NYSE,USD,United States
+LLY,Eli Lilly,NYSE,USD,United States
+UNH,UnitedHealth Group,NYSE,USD,United States
+ABBV,AbbVie,NYSE,USD,United States
+XOM,Exxon Mobil,NYSE,USD,United States
+CVX,Chevron,NYSE,USD,United States
+COP,ConocoPhillips,NYSE,USD,United States
+CAT,Caterpillar,NYSE,USD,United States
+DE,Deere & Company,NYSE,USD,United States
+BA,Boeing,NYSE,USD,United States
+GE,GE Aerospace,NYSE,USD,United States
+UBER,Uber Technologies,NYSE,USD,United States
+ABNB,Airbnb,NASDAQ,USD,United States
+PLTR,Palantir Technologies,NASDAQ,USD,United States
+SHOP,Shopify,NASDAQ,USD,Canada ADR
+TSM,Taiwan Semiconductor Manufacturing,NYSE,USD,Taiwan ADR
+ASML,ASML Holding,NASDAQ,USD,Netherlands ADR
+BABA,Alibaba Group,NYSE,USD,China ADR
+NVO,Novo Nordisk,NYSE,USD,Denmark ADR
+TM,Toyota Motor,NYSE,USD,Japan ADR
+SONY,Sony Group,NYSE,USD,Japan ADR
+0700.HK,Tencent Holdings,Hong Kong,HKD,Hong Kong
+9988.HK,Alibaba Group,Hong Kong,HKD,Hong Kong
+1211.HK,BYD Company,Hong Kong,HKD,Hong Kong
+1299.HK,AIA Group,Hong Kong,HKD,Hong Kong
+0939.HK,China Construction Bank,Hong Kong,HKD,Hong Kong
+7203.T,Toyota Motor,Tokyo,JPY,Japan
+6758.T,Sony Group,Tokyo,JPY,Japan
+9984.T,SoftBank Group,Tokyo,JPY,Japan
+7974.T,Nintendo,Tokyo,JPY,Japan
+6861.T,Keyence,Tokyo,JPY,Japan
+SAP.DE,SAP,XETRA,EUR,Germany
+SIE.DE,Siemens,XETRA,EUR,Germany
+ALV.DE,Allianz,XETRA,EUR,Germany
+BMW.DE,BMW,XETRA,EUR,Germany
+ASML.AS,ASML Holding,Amsterdam,EUR,Netherlands
+UNA.AS,Unilever,Amsterdam,EUR,Netherlands
+MC.PA,LVMH,Paris,EUR,France
+OR.PA,L'Oreal,Paris,EUR,France
+TTE.PA,TotalEnergies,Paris,EUR,France
+AIR.PA,Airbus,Paris,EUR,France
+SHEL.L,Shell,London,GBp,United Kingdom
+AZN.L,AstraZeneca,London,GBp,United Kingdom
+BP.L,BP,London,GBp,United Kingdom
+VOD.L,Vodafone Group,London,GBp,United Kingdom
+HSBA.L,HSBC Holdings,London,GBp,United Kingdom
+NESN.SW,Nestle,Swiss,CHF,Switzerland
+NOVN.SW,Novartis,Swiss,CHF,Switzerland
+ROG.SW,Roche Holding,Swiss,CHF,Switzerland
+NOVO-B.CO,Novo Nordisk Class B,Copenhagen,DKK,Denmark
+RELIANCE.NS,Reliance Industries,NSE,INR,India
+TCS.NS,Tata Consultancy Services,NSE,INR,India
+INFY.NS,Infosys,NSE,INR,India
+HDFCBANK.NS,HDFC Bank,NSE,INR,India
+005930.KS,Samsung Electronics,Korea,KRW,South Korea
+000660.KS,SK Hynix,Korea,KRW,South Korea
+2330.TW,Taiwan Semiconductor Manufacturing,Taiwan,TWD,Taiwan
+2317.TW,Hon Hai Precision Industry,Taiwan,TWD,Taiwan
+BHP.AX,BHP Group,ASX,AUD,Australia
+CBA.AX,Commonwealth Bank of Australia,ASX,AUD,Australia
+CSL.AX,CSL,ASX,AUD,Australia
+RY.TO,Royal Bank of Canada,Toronto,CAD,Canada
+TD.TO,Toronto-Dominion Bank,Toronto,CAD,Canada
+SHOP.TO,Shopify,Toronto,CAD,Canada
+ENB.TO,Enbridge,Toronto,CAD,Canada
+PETR4.SA,Petrobras preferred,Sao Paulo,BRL,Brazil
+VALE3.SA,Vale,Sao Paulo,BRL,Brazil
+WALMEX.MX,Walmart de Mexico,Mexico,MXN,Mexico
+D05.SI,DBS Group,Singapore,SGD,Singapore
+2222.SR,Saudi Arabian Oil,Saudi,SAR,Saudi Arabia
+NPN.JO,Naspers,Johannesburg,ZAc,South Africa
+600519.SS,Kweichow Moutai,Shanghai,CNY,China
+000001.SZ,Ping An Bank,Shenzhen,CNY,China

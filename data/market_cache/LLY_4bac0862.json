@@ -1,0 +1,20 @@
+{
+  "symbol": "LLY",
+  "name": "Eli Lilly and Company",
+  "exchange": "NYSE",
+  "currency": "USD",
+  "region": "United States",
+  "source": "Yahoo Finance via yfinance",
+  "source_url": "https://finance.yahoo.com/quote/LLY/history/",
+  "cache_status": "downloaded",
+  "fetched_at": "2026-11-14T16:42:48+00:00",
+  "start": "1972-06-01",
+  "end": "2026-11-13",
+  "rows": 13728,
+  "adjusted": true,
+  "price_field": "Adj Close",
+  "point_in_time_archive": false,
+  "observations_excluded": 0,
+  "note": "Retrospectively adjusted snapshot; current UTC date excluded; no interpolation or currency conversion.",
+  "cache_sha256": "24a69e972070117e2c7b0605645209238d95f528dd7f6cc882af5717ad077a15"
+}

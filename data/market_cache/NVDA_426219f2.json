@@ -1,0 +1,20 @@
+{
+  "symbol": "NVDA",
+  "name": "NVIDIA Corporation",
+  "exchange": "NasdaqGS",
+  "currency": "USD",
+  "region": "United States",
+  "source": "Yahoo Finance via yfinance",
+  "source_url": "https://finance.yahoo.com/quote/NVDA/history/",
+  "cache_status": "downloaded",
+  "fetched_at": "2026-11-14T16:43:35+00:00",
+  "start": "1999-01-22",
+  "end": "2026-11-13",
+  "rows": 6997,
+  "adjusted": true,
+  "price_field": "Adj Close",
+  "point_in_time_archive": false,
+  "observations_excluded": 0,
+  "note": "Retrospectively adjusted snapshot; current UTC date excluded; no interpolation or currency conversion.",
+  "cache_sha256": "5effbb3adde34ba0843f2bdd36280070292bf82aebd082379d33e8073ad4875e"
+}

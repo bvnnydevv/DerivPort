@@ -1,0 +1,182 @@
+[
+  {
+    "ticker": "AAPL",
+    "published": "2023-08-03",
+    "source_title": "Apple reports third quarter results",
+    "url": "https://www.apple.com/newsroom/2023/08/apple-reports-third-quarter-results/",
+    "fact": "Services reached a revenue record, supported by more than one billion paid subscriptions. Total quarterly revenue was $81.8 billion, 1% below a year earlier.",
+    "interpretation": "Recurring services demand offers a source of resilience even as overall sales soften.",
+    "limitation": "A services record did not prevent total revenue from declining; the release does not establish when company-wide growth will resume."
+  },
+  {
+    "ticker": "AAPL",
+    "published": "2023-11-02",
+    "source_title": "Apple reports fourth quarter results",
+    "url": "https://www.apple.com/newsroom/2023/11/apple-reports-fourth-quarter-results/",
+    "fact": "Apple reported record September-quarter iPhone revenue and record Services revenue. Total revenue was $89.5 billion, down 1% year over year.",
+    "interpretation": "The iPhone ecosystem and services business remain strengths within a mixed overall quarter.",
+    "limitation": "Product records coexist with falling total revenue. The release alone cannot establish future demand or a 21-day share-price return."
+  },
+  {
+    "ticker": "AAPL",
+    "published": "2024-05-02",
+    "source_title": "Apple reports second quarter results",
+    "url": "https://www.apple.com/newsroom/2024/05/apple-reports-second-quarter-results/",
+    "fact": "Services revenue reached a record, while total quarterly revenue fell 4% year over year to $90.8 billion. Apple also announced a $110 billion share-repurchase authorization.",
+    "interpretation": "Services show resilience, but the broader business picture is mixed. A repurchase authorization signals planned capital returns, not a guaranteed stock-price gain.",
+    "limitation": "The release does not show whether Services growth can offset weaker total sales in coming quarters. An authorization is not the same as completed repurchases."
+  },
+  {
+    "ticker": "AAPL",
+    "published": "2024-08-01",
+    "source_title": "Apple reports third quarter results",
+    "url": "https://www.apple.com/newsroom/2024/08/apple-reports-third-quarter-results/",
+    "fact": "June-quarter revenue rose 5% year over year to $85.8 billion, and Services reached another revenue record.",
+    "interpretation": "Renewed total-sales growth alongside services strength suggests a broader improvement from the March quarter.",
+    "limitation": "One quarter does not establish lasting growth, and the announced Apple Intelligence features had not yet demonstrated sustained financial returns."
+  },
+  {
+    "ticker": "AMZN",
+    "published": "2023-08-03",
+    "source_title": "Amazon.com announces second quarter results",
+    "url": "https://ir.aboutamazon.com/news-release/news-release-details/2023/Amazon.com-Announces-Second-Quarter-Results/default.aspx",
+    "fact": "Operating income increased to $7.7 billion from $3.3 billion a year earlier. AWS sales grew 12% to $22.1 billion.",
+    "interpretation": "Higher operating profit suggests improving efficiency while the cloud business continues to expand.",
+    "limitation": "The international segment still lost $0.9 billion in operating income; stronger group profit does not establish that every business is healthy."
+  },
+  {
+    "ticker": "AMZN",
+    "published": "2023-10-26",
+    "source_title": "Amazon.com announces third quarter results",
+    "url": "https://ir.aboutamazon.com/news-release/news-release-details/2023/Amazon-com-Announces-Third-Quarter-Results/default.aspx",
+    "fact": "Operating income rose to $11.2 billion from $2.5 billion a year earlier. AWS sales rose 12% to $23.1 billion.",
+    "interpretation": "The widening operating profit points to improved business economics alongside continued cloud growth.",
+    "limitation": "AWS growth alone does not establish future AI-related profitability, and quarterly operating improvement cannot predict the next 21-day stock return."
+  },
+  {
+    "ticker": "AMZN",
+    "published": "2024-04-30",
+    "source_title": "Amazon.com announces first quarter results",
+    "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872424000081/amzn-20240331xex991.htm",
+    "fact": "AWS sales increased 17% year over year to $25.0 billion. Group operating income rose to $15.3 billion from $4.8 billion.",
+    "interpretation": "Cloud growth and improved operating profit suggest strengthening business momentum.",
+    "limitation": "The release does not isolate the eventual return on AI-related spending; strong operating results can already be reflected in a stock price."
+  },
+  {
+    "ticker": "AMZN",
+    "published": "2024-08-01",
+    "source_title": "Amazon.com announces second quarter results",
+    "url": "https://ir.aboutamazon.com/news-release/news-release-details/2024/Amazon-com-Announces-Second-Quarter-Results/default.aspx",
+    "fact": "AWS sales grew 19% year over year to $26.3 billion. Group operating income increased to $14.7 billion from $7.7 billion.",
+    "interpretation": "The cloud business and operating profitability are contributing positive evidence about company performance.",
+    "limitation": "Revenue growth differs across segments, and the quarter does not establish how future infrastructure spending will affect profitability."
+  },
+  {
+    "ticker": "GOOGL",
+    "published": "2023-07-25",
+    "source_title": "Alphabet announces second quarter 2023 results",
+    "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204423000067/googexhibit991q22023.htm",
+    "fact": "Alphabet reported $74.6 billion of revenue, 7% above a year earlier. Google Cloud revenue was $8.0 billion, with $395 million of operating income.",
+    "interpretation": "Cloud profitability offers evidence that a growth business is contributing alongside the larger advertising operation.",
+    "limitation": "A profitable cloud quarter does not establish durable margins or how AI will change the economics of Search and Cloud."
+  },
+  {
+    "ticker": "GOOGL",
+    "published": "2023-10-24",
+    "source_title": "Alphabet announces third quarter 2023 results",
+    "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204423000088/googexhibit991q32023.htm",
+    "fact": "Revenue increased 11% year over year to $76.7 billion, and the operating margin rose from 25% to 28%.",
+    "interpretation": "Sales growth and a higher operating margin together indicate improving operating performance.",
+    "limitation": "Group results do not establish the future profitability of every product, and historical margin expansion is not a 21-day share-price forecast."
+  },
+  {
+    "ticker": "GOOGL",
+    "published": "2024-04-25",
+    "source_title": "Alphabet announces first quarter 2024 results",
+    "url": "https://www.sec.gov/Archives/edgar/data/1652044/000165204424000047/googexhibit991q12024.htm",
+    "fact": "Revenue grew 15% year over year to $80.5 billion, while the operating margin increased from 25% to 32%.",
+    "interpretation": "Growth accompanied by margin expansion provides constructive evidence about business execution.",
+    "limitation": "The release does not establish whether these margins will persist as AI investment grows or how much of the improvement is already priced in."
+  },
+  {
+    "ticker": "GOOGL",
+    "published": "2024-07-23",
+    "source_title": "Alphabet announces second quarter 2024 results",
+    "url": "https://abc.xyz/assets/19/e4/3dc1d4d6439c81206370167db1bd/2024q2-alphabet-earnings-release.pdf",
+    "fact": "Google Cloud exceeded $10 billion of quarterly revenue and $1 billion of operating profit for the first time. Group revenue grew 14% to $84.7 billion.",
+    "interpretation": "Cloud scale and profitability add a second source of business strength alongside Search.",
+    "limitation": "A milestone quarter does not guarantee future cloud margins or that AI-related infrastructure investment will earn an attractive return."
+  },
+  {
+    "ticker": "MSFT",
+    "published": "2023-07-25",
+    "source_title": "Microsoft earnings release FY2023 Q4",
+    "url": "https://www.microsoft.com/en-us/investor/earnings/fy-2023-q4/press-release-webcast",
+    "fact": "Microsoft Cloud revenue reached $30.3 billion, up 21% year over year. Azure and other cloud-services revenue grew 26%; total revenue was $56.2 billion, up 8%.",
+    "interpretation": "Cloud demand is supporting company-wide growth, making the business evidence constructive for this part of Microsoft.",
+    "limitation": "Devices revenue declined 20% year over year. Cloud growth does not by itself establish the return earned on AI investment or the next 21-day share-price move."
+  },
+  {
+    "ticker": "MSFT",
+    "published": "2023-10-24",
+    "source_title": "Microsoft earnings release FY2024 Q1",
+    "url": "https://www.microsoft.com/en-us/investor/earnings/fy-2024-q1/press-release-webcast",
+    "fact": "Microsoft Cloud revenue reached $31.8 billion, up 24% year over year. Azure and other cloud-services revenue grew 29%; total revenue was $56.5 billion, up 13%.",
+    "interpretation": "Cloud demand is supporting company-wide growth, making the business evidence constructive for this part of Microsoft.",
+    "limitation": "Devices revenue declined 22% year over year. Cloud growth does not by itself establish the return earned on AI investment or the next 21-day share-price move."
+  },
+  {
+    "ticker": "MSFT",
+    "published": "2024-04-25",
+    "source_title": "Microsoft earnings release FY2024 Q3",
+    "url": "https://www.microsoft.com/en-us/investor/earnings/fy-2024-q3/press-release-webcast",
+    "fact": "Microsoft Cloud revenue reached $35.1 billion, up 23% year over year. Azure and other cloud-services revenue grew 31%; total revenue was $61.9 billion, up 17%.",
+    "interpretation": "Cloud demand is supporting company-wide growth, making the business evidence constructive for this part of Microsoft.",
+    "limitation": "Devices revenue declined 17% year over year. Cloud growth does not by itself establish the return earned on AI investment or the next 21-day share-price move."
+  },
+  {
+    "ticker": "MSFT",
+    "published": "2024-07-30",
+    "source_title": "Microsoft earnings release FY2024 Q4",
+    "url": "https://www.microsoft.com/en-us/investor/earnings/fy-2024-q4/press-release-webcast",
+    "fact": "Microsoft Cloud revenue reached $36.8 billion, up 21% year over year. Azure and other cloud-services revenue grew 29%; total revenue was $64.7 billion, up 15%.",
+    "interpretation": "Cloud demand is supporting company-wide growth, making the business evidence constructive for this part of Microsoft.",
+    "limitation": "Devices revenue declined 11% year over year. Cloud growth does not by itself establish the return earned on AI investment or the next 21-day share-price move."
+  },
+  {
+    "ticker": "NVDA",
+    "published": "2023-05-24",
+    "source_title": "NVIDIA announces financial results for first quarter fiscal 2024",
+    "url": "https://investor.nvidia.com/news/press-release-details/2023/NVIDIA-Announces-Financial-Results-for-First-Quarter-Fiscal-2024/default.aspx",
+    "fact": "Data Center revenue reached $4.28 billion. Total revenue was $7.19 billion, down 13% year over year but 19% above the previous quarter.",
+    "interpretation": "Data Center demand is a promising business development within a company whose total sales still trail the prior year.",
+    "limitation": "The mixed revenue comparison leaves the durability of the recovery open. This curated note is from May and is older than the August decision date."
+  },
+  {
+    "ticker": "NVDA",
+    "published": "2023-08-23",
+    "source_title": "NVIDIA announces financial results for second quarter fiscal 2024",
+    "url": "https://investor.nvidia.com/news/press-release-details/2023/NVIDIA-Announces-Financial-Results-for-Second-Quarter-Fiscal-2024/default.aspx",
+    "fact": "Data Center revenue rose 171% year over year to $10.32 billion. Total quarterly revenue reached $13.51 billion, up 101%.",
+    "interpretation": "Rapid data-center growth provides strong evidence of expanding demand for accelerated computing.",
+    "limitation": "Exceptional growth does not establish how long demand and supply conditions will persist, nor whether the stock already reflects those expectations."
+  },
+  {
+    "ticker": "NVDA",
+    "published": "2024-02-21",
+    "source_title": "NVIDIA announces financial results for fourth quarter and fiscal 2024",
+    "url": "https://nvidianews.nvidia.com/news/nvidia-announces-financial-results-for-fourth-quarter-and-fiscal-2024",
+    "fact": "Quarterly revenue grew 265% year over year to $22.1 billion; Data Center revenue reached $18.4 billion, up 409%.",
+    "interpretation": "The scale of Data Center growth indicates a major business expansion tied to accelerated computing demand.",
+    "limitation": "This February release is the latest curated source available before the May cutoff. It does not establish whether growth, customer spending, or margins will persist."
+  },
+  {
+    "ticker": "NVDA",
+    "published": "2024-05-22",
+    "source_title": "NVIDIA announces financial results for first quarter fiscal 2025",
+    "url": "https://investor.nvidia.com/news/press-release-details/2024/NVIDIA-Announces-Financial-Results-for-First-Quarter-Fiscal-2025/",
+    "fact": "Quarterly revenue rose 262% year over year to $26.0 billion. Data Center revenue grew 427% to $22.6 billion.",
+    "interpretation": "Data-center expansion remains the clearest business development in the reported quarter.",
+    "limitation": "Very rapid historical growth is not proof of sustained future demand or of a positive next-month stock return; this note predates the August cutoff by more than two months."
+  }
+]

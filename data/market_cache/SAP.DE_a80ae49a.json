@@ -1,0 +1,20 @@
+{
+  "symbol": "SAP.DE",
+  "name": "SAP SE",
+  "exchange": "XETRA",
+  "currency": "EUR",
+  "region": "Germany",
+  "source": "Yahoo Finance via yfinance",
+  "source_url": "https://finance.yahoo.com/quote/SAP.DE/history/",
+  "cache_status": "downloaded",
+  "fetched_at": "2026-11-14T16:42:41+00:00",
+  "start": "1998-04-09",
+  "end": "2026-11-13",
+  "rows": 7319,
+  "adjusted": true,
+  "price_field": "Adj Close",
+  "point_in_time_archive": false,
+  "observations_excluded": 0,
+  "note": "Retrospectively adjusted snapshot; current UTC date excluded; no interpolation or currency conversion.",
+  "cache_sha256": "b171baaa0211bb43fd080dcc329bfa4e21be9f673053c63c3fd8b5ff94f33df8"
+}

@@ -1,0 +1,20 @@
+{
+  "symbol": "005930.KS",
+  "name": "Samsung Electronics Co., Ltd.",
+  "exchange": "KSE",
+  "currency": "KRW",
+  "region": "South Korea",
+  "source": "Yahoo Finance via yfinance",
+  "source_url": "https://finance.yahoo.com/quote/005930.KS/history/",
+  "cache_status": "downloaded",
+  "fetched_at": "2026-11-14T16:42:43+00:00",
+  "start": "2000-01-04",
+  "end": "2026-11-13",
+  "rows": 6714,
+  "adjusted": true,
+  "price_field": "Adj Close",
+  "point_in_time_archive": false,
+  "observations_excluded": 0,
+  "note": "Retrospectively adjusted snapshot; current UTC date excluded; no interpolation or currency conversion.",
+  "cache_sha256": "41b43cdaf04c667f09d847b04953fc07f897b4874b438ffcd6868ab8328ecde0"
+}
