@@ -1,0 +1,160 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="2040" viewBox="0 0 1440 2040"><title>DerivPort — Research</title><desc>Editable equity research design. Historical AAPL adjusted prices: 126 observed sessions from 2026-05-18 through 2026-11-13. Balanced algorithm selected at k=1. All numbers derive from the bundled local data.</desc>
+<g id="Canvas">
+<rect x="0" y="0" width="1440" height="2040" rx="0" fill="#F3F1EB"/>
+</g>
+<g id="Masthead">
+<text id="Text_1" x="60" y="65" font-family="Arial" font-size="34" font-weight="700" fill="#101820" text-anchor="start">DerivPort</text>
+<line x1="60" y1="100" x2="1380" y2="100" stroke="#101820" stroke-width="2"/>
+</g>
+<g id="Research_filters">
+<text id="Text_2" x="60" y="132" font-family="Arial" font-size="14" font-weight="600" fill="#62696D" text-anchor="start">Stock</text>
+<rect x="60" y="147" width="330" height="50" rx="10" fill="#FFFFFF" stroke="#D8D9D2" stroke-width="1"/>
+<text id="Text_3" x="77" y="179" font-family="Arial" font-size="18" font-weight="400" fill="#101820" text-anchor="start">AAPL · Apple Inc.</text>
+<path d="M358 169 l5 5 l5 -5" fill="none" stroke="#62696D" stroke-width="1.8"/>
+<text id="Text_4" x="410" y="132" font-family="Arial" font-size="14" font-weight="600" fill="#62696D" text-anchor="start">Historical cutoff</text>
+<rect x="410" y="147" width="260" height="50" rx="10" fill="#FFFFFF" stroke="#D8D9D2" stroke-width="1"/>
+<text id="Text_5" x="427" y="179" font-family="Arial" font-size="18" font-weight="400" fill="#101820" text-anchor="start">2026-11-13</text>
+<path d="M638 169 l5 5 l5 -5" fill="none" stroke="#62696D" stroke-width="1.8"/>
+<text id="Text_6" x="690" y="132" font-family="Arial" font-size="14" font-weight="600" fill="#62696D" text-anchor="start">Price history</text>
+<rect x="690" y="147" width="360" height="50" rx="10" fill="#FFFFFF" stroke="#D8D9D2" stroke-width="1"/>
+<text id="Text_7" x="707" y="179" font-family="Arial" font-size="18" font-weight="400" fill="#101820" text-anchor="start">Full cached history</text>
+<path d="M1018 169 l5 5 l5 -5" fill="none" stroke="#62696D" stroke-width="1.8"/>
+<text id="Text_8" x="1380" y="168" font-family="Menlo" font-size="14" font-weight="400" fill="#62696D" text-anchor="end">5,596 shared sessions · 5 stocks</text>
+<text id="Text_9" x="1380" y="191" font-family="Menlo" font-size="14" font-weight="400" fill="#62696D" text-anchor="end">Cache through 13 Nov 2026</text>
+</g>
+<g id="Workspace_navigation">
+<rect x="60" y="230" width="152" height="46" rx="23" fill="#101820" stroke="#101820" stroke-width="1"/>
+<text id="Text_10" x="136.0" y="259" font-family="Arial" font-size="16" font-weight="600" fill="#FFFFFF" text-anchor="middle">Research</text>
+<text id="Text_11" x="247" y="260" font-family="Arial" font-size="17" font-weight="600" fill="#62696D" text-anchor="start">Algorithm builder</text>
+<text id="Text_12" x="474" y="260" font-family="Arial" font-size="17" font-weight="600" fill="#62696D" text-anchor="start">Future scenarios</text>
+</g>
+<g id="Historical_price_hero">
+<rect x="60" y="310" width="1320" height="424" rx="16" fill="#101820"/>
+<text id="Text_13" x="92" y="375" font-family="Arial" font-size="42" font-weight="700" fill="#FFFFFF" text-anchor="start">Apple Inc.</text>
+<text id="Text_14" x="92" y="408" font-family="Arial" font-size="16" font-weight="400" fill="#BFC8CB" text-anchor="start">NasdaqGS · USD · Historical adjusted prices</text>
+<text id="Text_15" x="1348" y="378" font-family="Menlo" font-size="56" font-weight="400" fill="#FFFFFF" text-anchor="end">356.27</text>
+<text id="Text_16" x="1348" y="410" font-family="Arial" font-size="14" font-weight="400" fill="#BFC8CB" text-anchor="end">Adjusted close · 2026-11-13</text>
+<g id="Observed_price_chart">
+<line x1="92" y1="605.33" x2="1296" y2="605.33" stroke="#34413B" stroke-width="1"/>
+<text id="Text_17" x="1320" y="610.33" font-family="Menlo" font-size="14" font-weight="400" fill="#BFC8CB" text-anchor="start">300</text>
+<line x1="92" y1="500.89" x2="1296" y2="500.89" stroke="#34413B" stroke-width="1"/>
+<text id="Text_18" x="1320" y="505.89" font-family="Menlo" font-size="14" font-weight="400" fill="#BFC8CB" text-anchor="start">350</text>
+<path id="AAPL_126_observed_closes" d="M 92.00 610.85 L 101.63 608.50 L 111.26 601.66 L 120.90 595.94 L 130.53 587.95 L 140.16 588.98 L 149.79 583.72 L 159.42 580.26 L 169.06 581.20 L 178.69 593.19 L 188.32 574.65 L 197.95 584.95 L 207.58 582.93 L 217.22 591.04 L 226.85 603.14 L 236.48 626.06 L 246.11 623.91 L 255.74 615.46 L 265.38 624.85 L 275.01 613.81 L 284.64 607.93 L 294.27 614.79 L 303.90 610.50 L 313.54 612.58 L 323.17 618.24 L 332.80 620.78 L 342.43 658.17 L 352.06 640.18 L 361.70 644.43 L 371.33 628.54 L 380.96 618.07 L 390.59 588.35 L 400.22 579.95 L 409.86 584.12 L 419.49 578.42 L 429.12 572.52 L 438.75 574.40 L 448.38 570.25 L 458.02 575.36 L 467.65 549.00 L 477.28 536.98 L 486.91 535.98 L 496.54 550.90 L 506.18 548.50 L 515.81 552.35 L 525.44 561.18 L 535.07 537.49 L 544.70 529.37 L 554.34 522.76 L 563.97 526.70 L 573.60 536.63 L 583.23 587.77 L 592.86 599.22 L 602.50 586.79 L 612.13 583.41 L 621.76 580.47 L 631.39 578.55 L 641.02 588.57 L 650.66 595.56 L 660.29 601.11 L 669.92 594.83 L 679.55 593.43 L 689.18 594.14 L 698.82 584.87 L 708.45 570.68 L 718.08 582.22 L 727.71 586.29 L 737.34 584.23 L 746.98 585.14 L 756.61 577.73 L 766.24 575.38 L 775.87 564.69 L 785.50 570.64 L 795.14 553.36 L 804.77 553.71 L 814.40 546.93 L 824.03 564.13 L 833.66 571.95 L 843.30 573.79 L 852.93 550.35 L 862.56 538.45 L 872.19 536.76 L 881.82 540.39 L 891.46 538.16 L 901.09 528.58 L 910.72 530.39 L 920.35 524.45 L 929.98 522.84 L 939.62 528.54 L 949.25 530.83 L 958.88 520.08 L 968.51 525.66 L 978.14 544.44 L 987.78 536.89 L 997.41 542.52 L 1007.04 535.49 L 1016.67 537.16 L 1026.30 535.61 L 1035.94 529.27 L 1045.57 521.44 L 1055.20 529.33 L 1064.83 520.29 L 1074.46 519.67 L 1084.10 516.14 L 1093.73 518.14 L 1103.36 515.09 L 1112.99 516.18 L 1122.62 523.36 L 1132.26 513.99 L 1141.89 505.16 L 1151.52 506.18 L 1161.15 514.16 L 1170.78 507.50 L 1180.42 514.32 L 1190.05 503.72 L 1199.68 512.65 L 1209.31 525.82 L 1218.94 539.22 L 1228.58 502.47 L 1238.21 513.61 L 1247.84 517.37 L 1257.47 500.00 L 1267.10 504.55 L 1276.74 489.69 L 1286.37 490.70 L 1296.00 487.79" fill="none" stroke="#D6F23C" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="1296.00" cy="487.79" r="5" fill="#D6F23C"/>
+<text id="Text_19" x="92" y="698" font-family="Arial" font-size="14" font-weight="400" fill="#BFC8CB" text-anchor="start">18 May 2026</text>
+<text id="Text_20" x="694.0" y="698" font-family="Arial" font-size="14" font-weight="400" fill="#BFC8CB" text-anchor="middle">18 Aug 2026</text>
+<text id="Text_21" x="1296" y="698" font-family="Arial" font-size="14" font-weight="400" fill="#BFC8CB" text-anchor="end">13 Nov 2026</text>
+<text id="Text_22" x="92" y="722" font-family="Arial" font-size="14" font-weight="400" fill="#BFC8CB" text-anchor="start">Adjusted close · 126 observed sessions · prices available at the cutoff only</text>
+</g>
+</g>
+<g id="Stock_analyst_evidence">
+<text id="Text_23" x="60" y="806" font-family="Arial" font-size="28" font-weight="700" fill="#101820" text-anchor="start">Stock analyst</text>
+<text id="Text_24" x="60" y="838" font-family="Arial" font-size="14" font-weight="400" fill="#62696D" text-anchor="start">Latest bundled company note: 2024-08-01.</text>
+<text id="Text_25" x="60" y="860" font-family="Arial" font-size="14" font-weight="400" fill="#62696D" text-anchor="start">Historical context; more recent company evidence is not cached.</text>
+<text id="Text_26" x="60" y="896" font-family="Arial" font-size="16" font-weight="700" fill="#101820" text-anchor="start">Reported fact</text>
+<text id="Text_27" x="60" y="922" font-family="Arial" font-size="18" font-weight="400" fill="#101820" text-anchor="start">June-quarter revenue rose 5% to $85.8 billion year over year.</text>
+<text id="Text_28" x="60" y="947" font-family="Arial" font-size="18" font-weight="400" fill="#101820" text-anchor="start">Services reached another revenue record.</text>
+<text id="Text_29" x="60" y="987" font-family="Arial" font-size="16" font-weight="700" fill="#101820" text-anchor="start">Interpretation</text>
+<text id="Text_30" x="60" y="1013" font-family="Arial" font-size="18" font-weight="400" fill="#101820" text-anchor="start">Renewed sales growth and Services strength suggest</text>
+<text id="Text_31" x="60" y="1038" font-family="Arial" font-size="18" font-weight="400" fill="#101820" text-anchor="start">a broader improvement from the March quarter.</text>
+<text id="Text_32" x="60" y="1078" font-family="Arial" font-size="16" font-weight="700" fill="#101820" text-anchor="start">Open question</text>
+<text id="Text_33" x="60" y="1104" font-family="Arial" font-size="18" font-weight="400" fill="#101820" text-anchor="start">Can growth persist? Apple Intelligence had not yet</text>
+<text id="Text_34" x="60" y="1129" font-family="Arial" font-size="18" font-weight="400" fill="#101820" text-anchor="start">demonstrated sustained financial returns.</text>
+<text id="Text_35" x="60" y="1161" font-family="Arial" font-size="14" font-weight="400" fill="#62696D" text-anchor="start">Source: Apple reports third quarter results · 01 Aug 2024</text>
+</g>
+<g id="Quant_analyst_model">
+<rect x="720" y="774" width="660" height="350" rx="12" fill="#FFFFFF"/>
+<rect x="720" y="774" width="660" height="4" rx="0" fill="#2454FF"/>
+<text id="Text_36" x="748" y="815" font-family="Arial" font-size="28" font-weight="700" fill="#101820" text-anchor="start">Quant analyst</text>
+<line x1="748" y1="845" x2="748" y2="902" stroke="#BDCAFF" stroke-width="2"/>
+<text id="Text_37" x="760" y="863" font-family="Arial" font-size="14" font-weight="400" fill="#62696D" text-anchor="start">Estimated next 21 sessions</text>
+<text id="Text_38" x="760" y="900" font-family="Menlo" font-size="28" font-weight="500" fill="#101820" text-anchor="start">+2.52%</text>
+<line x1="957" y1="845" x2="957" y2="902" stroke="#BDCAFF" stroke-width="2"/>
+<text id="Text_39" x="969" y="863" font-family="Arial" font-size="14" font-weight="400" fill="#62696D" text-anchor="start">Typical forecast error</text>
+<text id="Text_40" x="969" y="900" font-family="Menlo" font-size="28" font-weight="500" fill="#101820" text-anchor="start">7.90 pp</text>
+<line x1="1174" y1="845" x2="1174" y2="902" stroke="#BDCAFF" stroke-width="2"/>
+<text id="Text_41" x="1186" y="863" font-family="Arial" font-size="14" font-weight="400" fill="#62696D" text-anchor="start">AI model rank</text>
+<text id="Text_42" x="1186" y="900" font-family="Menlo" font-size="28" font-weight="500" fill="#101820" text-anchor="start">2 / 5</text>
+<text id="Text_43" x="748" y="947" font-family="Arial" font-size="16" font-weight="400" fill="#62696D" text-anchor="start">Error is RMSE from 24 completed past out-of-sample</text>
+<text id="Text_44" x="748" y="971" font-family="Arial" font-size="16" font-weight="400" fill="#62696D" text-anchor="start">forecasts. It is not a confidence interval or guarantee.</text>
+<text id="Text_45" x="748" y="1014" font-family="Times New Roman" font-size="23" font-weight="400" fill="#101820" text-anchor="start" font-style="italic">S = 0.6r̂₂₁ + 0.4M₂₁ − k(0.5ε + 0.25σ₂₁)</text>
+<text id="Text_46" x="748" y="1070" font-family="Arial" font-size="16" font-weight="400" fill="#62696D" text-anchor="start">Balanced algorithm · k = 1</text>
+<text id="Text_47" x="1348" y="1074" font-family="Menlo" font-size="28" font-weight="500" fill="#2454FF" text-anchor="end">−2.6944</text>
+<text id="Text_48" x="748" y="1103" font-family="Arial" font-size="14" font-weight="400" fill="#62696D" text-anchor="start">Algorithm rank 1 / 5 · a ranking score, not a return forecast</text>
+</g>
+<g id="Five_stock_rankings">
+<text id="Text_49" x="60" y="1221" font-family="Arial" font-size="28" font-weight="700" fill="#101820" text-anchor="start">Rankings</text>
+<text id="Text_50" x="1380" y="1221" font-family="Menlo" font-size="14" font-weight="400" fill="#62696D" text-anchor="end">Balanced rule · k = 1</text>
+<text id="Text_51" x="60" y="1249" font-family="Arial" font-size="16" font-weight="400" fill="#62696D" text-anchor="start">Same comparison group and cutoff. Highest score ranks first.</text>
+<line x1="60" y1="1272" x2="1380" y2="1272" stroke="#101820" stroke-width="1"/>
+<text id="Text_52" x="84" y="1300" font-family="Arial" font-size="14" font-weight="600" fill="#62696D" text-anchor="start">Stock</text>
+<text id="Text_53" x="430" y="1300" font-family="Arial" font-size="14" font-weight="600" fill="#62696D" text-anchor="start">Model estimate</text>
+<text id="Text_54" x="692" y="1300" font-family="Arial" font-size="14" font-weight="600" fill="#62696D" text-anchor="start">Momentum</text>
+<text id="Text_55" x="938" y="1300" font-family="Arial" font-size="14" font-weight="600" fill="#62696D" text-anchor="start">Past error</text>
+<text id="Text_56" x="1354" y="1300" font-family="Arial" font-size="14" font-weight="600" fill="#62696D" text-anchor="end">Algorithm score</text>
+<line x1="60" y1="1316" x2="1380" y2="1316" stroke="#D8D9D2" stroke-width="1"/>
+<rect x="60" y="1318" width="1320" height="40" rx="0" fill="#E8EBDD"/>
+<rect x="60" y="1318" width="3" height="40" rx="0" fill="#D6F23C"/>
+<text id="Text_57" x="84" y="1344" font-family="Arial" font-size="17" font-weight="700" fill="#101820" text-anchor="start">AAPL</text>
+<text id="Text_58" x="173" y="1344" font-family="Arial" font-size="16" font-weight="400" fill="#62696D" text-anchor="start">Apple Inc.</text>
+<text id="Text_59" x="430" y="1344" font-family="Menlo" font-size="17" font-weight="400" fill="#2454FF" text-anchor="start">+2.5230%</text>
+<text id="Text_60" x="692" y="1344" font-family="Menlo" font-size="17" font-weight="400" fill="#101820" text-anchor="start">+4.2517%</text>
+<text id="Text_61" x="938" y="1344" font-family="Menlo" font-size="17" font-weight="400" fill="#101820" text-anchor="start">7.8977 pp</text>
+<text id="Text_62" x="1354" y="1344" font-family="Menlo" font-size="17" font-weight="500" fill="#101820" text-anchor="end">−2.6944</text>
+<line x1="60" y1="1358" x2="1380" y2="1358" stroke="#D8D9D2" stroke-width="1"/>
+<text id="Text_63" x="84" y="1384" font-family="Arial" font-size="17" font-weight="700" fill="#101820" text-anchor="start">AMZN</text>
+<text id="Text_64" x="173" y="1384" font-family="Arial" font-size="16" font-weight="400" fill="#62696D" text-anchor="start">Amazon.com Inc.</text>
+<text id="Text_65" x="430" y="1384" font-family="Menlo" font-size="17" font-weight="400" fill="#2454FF" text-anchor="start">+2.7593%</text>
+<text id="Text_66" x="692" y="1384" font-family="Menlo" font-size="17" font-weight="400" fill="#101820" text-anchor="start">+4.6711%</text>
+<text id="Text_67" x="938" y="1384" font-family="Menlo" font-size="17" font-weight="400" fill="#101820" text-anchor="start">9.3352 pp</text>
+<text id="Text_68" x="1354" y="1384" font-family="Menlo" font-size="17" font-weight="500" fill="#101820" text-anchor="end">−4.1477</text>
+<line x1="60" y1="1398" x2="1380" y2="1398" stroke="#D8D9D2" stroke-width="1"/>
+<text id="Text_69" x="84" y="1424" font-family="Arial" font-size="17" font-weight="700" fill="#101820" text-anchor="start">MSFT</text>
+<text id="Text_70" x="173" y="1424" font-family="Arial" font-size="16" font-weight="400" fill="#62696D" text-anchor="start">Microsoft Corp.</text>
+<text id="Text_71" x="430" y="1424" font-family="Menlo" font-size="17" font-weight="400" fill="#2454FF" text-anchor="start">+2.4166%</text>
+<text id="Text_72" x="692" y="1424" font-family="Menlo" font-size="17" font-weight="400" fill="#101820" text-anchor="start">−2.8845%</text>
+<text id="Text_73" x="938" y="1424" font-family="Menlo" font-size="17" font-weight="400" fill="#101820" text-anchor="start">9.5972 pp</text>
+<text id="Text_74" x="1354" y="1424" font-family="Menlo" font-size="17" font-weight="500" fill="#101820" text-anchor="end">−7.1415</text>
+<line x1="60" y1="1438" x2="1380" y2="1438" stroke="#D8D9D2" stroke-width="1"/>
+<text id="Text_75" x="84" y="1464" font-family="Arial" font-size="17" font-weight="700" fill="#101820" text-anchor="start">GOOGL</text>
+<text id="Text_76" x="173" y="1464" font-family="Arial" font-size="16" font-weight="400" fill="#62696D" text-anchor="start">Alphabet Inc.</text>
+<text id="Text_77" x="430" y="1464" font-family="Menlo" font-size="17" font-weight="400" fill="#2454FF" text-anchor="start">+2.1955%</text>
+<text id="Text_78" x="692" y="1464" font-family="Menlo" font-size="17" font-weight="400" fill="#101820" text-anchor="start">−15.3055%</text>
+<text id="Text_79" x="938" y="1464" font-family="Menlo" font-size="17" font-weight="400" fill="#101820" text-anchor="start">10.1983 pp</text>
+<text id="Text_80" x="1354" y="1464" font-family="Menlo" font-size="17" font-weight="500" fill="#101820" text-anchor="end">−13.5558</text>
+<line x1="60" y1="1478" x2="1380" y2="1478" stroke="#D8D9D2" stroke-width="1"/>
+<text id="Text_81" x="84" y="1504" font-family="Arial" font-size="17" font-weight="700" fill="#101820" text-anchor="start">NVDA</text>
+<text id="Text_82" x="173" y="1504" font-family="Arial" font-size="16" font-weight="400" fill="#62696D" text-anchor="start">NVIDIA Corp.</text>
+<text id="Text_83" x="430" y="1504" font-family="Menlo" font-size="17" font-weight="400" fill="#2454FF" text-anchor="start">+1.8670%</text>
+<text id="Text_84" x="692" y="1504" font-family="Menlo" font-size="17" font-weight="400" fill="#101820" text-anchor="start">−25.0334%</text>
+<text id="Text_85" x="938" y="1504" font-family="Menlo" font-size="17" font-weight="400" fill="#101820" text-anchor="start">11.0096 pp</text>
+<text id="Text_86" x="1354" y="1504" font-family="Menlo" font-size="17" font-weight="500" fill="#101820" text-anchor="end">−18.1106</text>
+<line x1="60" y1="1518" x2="1380" y2="1518" stroke="#D8D9D2" stroke-width="1"/>
+</g>
+<g id="Historical_replay">
+<line x1="60" y1="1558" x2="1380" y2="1558" stroke="#101820" stroke-width="1"/>
+<text id="Text_87" x="60" y="1601" font-family="Arial" font-size="28" font-weight="700" fill="#101820" text-anchor="start">Historical replay</text>
+<text id="Text_88" x="60" y="1644" font-family="Arial" font-size="29" font-weight="600" fill="#101820" text-anchor="start">21-session outcome pending</text>
+<text id="Text_89" x="60" y="1677" font-family="Arial" font-size="17" font-weight="400" fill="#62696D" text-anchor="start">Zero subsequent sessions are cached for this cutoff.</text>
+<text id="Text_90" x="60" y="1702" font-family="Arial" font-size="17" font-weight="400" fill="#62696D" text-anchor="start">Choose an earlier observed date to reveal a completed outcome.</text>
+<rect x="1110" y="1610" width="270" height="46" rx="23" fill="#FFFFFF" stroke="#101820" stroke-width="1"/>
+<text id="Text_91" x="1245.0" y="1639" font-family="Arial" font-size="16" font-weight="600" fill="#101820" text-anchor="middle">Select earlier cutoff</text>
+</g>
+<g id="Source_and_methodology_rows">
+<line x1="60" y1="1752" x2="1380" y2="1752" stroke="#D8D9D2" stroke-width="1"/>
+<text id="Text_92" x="60" y="1787" font-family="Arial" font-size="18" font-weight="500" fill="#101820" text-anchor="start">Full price history available at the cutoff</text>
+<path d="M1348 1776 l7 7 l7 -7" fill="none" stroke="#101820" stroke-width="1.8"/>
+<line x1="60" y1="1810" x2="1380" y2="1810" stroke="#D8D9D2" stroke-width="1"/>
+<text id="Text_93" x="60" y="1845" font-family="Arial" font-size="18" font-weight="500" fill="#101820" text-anchor="start">Simulated stress test</text>
+<path d="M1348 1834 l7 7 l7 -7" fill="none" stroke="#101820" stroke-width="1.8"/>
+<line x1="60" y1="1868" x2="1380" y2="1868" stroke="#D8D9D2" stroke-width="1"/>
+<text id="Text_94" x="60" y="1903" font-family="Arial" font-size="18" font-weight="500" fill="#101820" text-anchor="start">Methodology, data &amp; past evaluation</text>
+<path d="M1348 1892 l7 7 l7 -7" fill="none" stroke="#101820" stroke-width="1.8"/>
+<line x1="60" y1="1926" x2="1380" y2="1926" stroke="#D8D9D2" stroke-width="1"/>
+</g>
+<g id="Footer">
+<line x1="60" y1="1965" x2="1380" y2="1965" stroke="#101820" stroke-width="1"/>
+<text id="Text_95" x="60" y="2000" font-family="Arial" font-size="19" font-weight="700" fill="#101820" text-anchor="start">DerivPort</text>
+<text id="Text_96" x="1380" y="1998" font-family="Arial" font-size="12" font-weight="400" fill="#62696D" text-anchor="end">Educational research · historical results do not guarantee future performance</text>
+</g>
+</svg>

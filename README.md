@@ -2,6 +2,8 @@
 
 An educational stock-research and algorithm lab for the Veritas AI finance challenge. Compare dated company evidence with a **quant analyst — model and ranking**, edit a mathematical rule, and reveal what happened next. Use **Research**, **Algorithm builder**, and **Future scenarios** for historical evidence, retrospective testing, and hypothetical projections respectively. No brokerage connections, balances, position sizing, trades, or buy/sell recommendations.
 
+[Figma design](https://www.figma.com/design/ZxLybASxv0lxyUkdnQ33A2/Hackathon-DerivPort?node-id=1-7) · [Interface direction](docs/DESIGN.md)
+
 ## Run locally
 
 Tested with Python **3.13**:
@@ -36,7 +38,7 @@ Three algorithms rank the same comparison group:
 - **AI model:** regression estimate of the next 21-session return.
 - **Student algorithm:** an editable expression, initially `predicted_return - k * uncertainty`, with `k = 2`.
 
-The rounded quant dashboard includes your named balanced rule, **DerivPort Signal**. In **Algorithm builder**, click **Use my balanced algorithm** to load:
+The quant dashboard includes your named balanced rule, **DerivPort Signal**. In **Algorithm builder**, click **Use my balanced algorithm** to load:
 
 ```text
 0.6 * predicted_return + 0.4 * momentum - k * (0.5 * uncertainty + 0.25 * volatility)

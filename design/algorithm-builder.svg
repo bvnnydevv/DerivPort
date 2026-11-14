@@ -1,0 +1,186 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="2280" viewBox="0 0 1440 2280">
+<title>DerivPort — Algorithm builder</title><desc>Editable quantitative research interface with verified historical AAPL inputs, a balanced ranking rule, exact sensitivity, calculus explanations and an unrun historical backtest.</desc>
+<rect x="0" y="0" width="1440" height="2280" rx="0" fill="#F3F1EB"/>
+<g id="Shared_header">
+<text x="60" y="64" font-family="Arial" font-size="32" font-weight="700" fill="#101820" text-anchor="start">DerivPort</text>
+<text x="1380" y="61" font-family="Arial" font-size="14" font-weight="400" fill="#62696D" text-anchor="end">Historical research · transparent assumptions</text>
+<line x1="60.00" y1="100.00" x2="1380.00" y2="100.00" stroke="#101820" stroke-width="1.5"/>
+</g>
+<g id="Stock_and_date_controls">
+<text x="60" y="135" font-family="Arial" font-size="14" font-weight="600" fill="#62696D" text-anchor="start">Stock</text>
+<rect x="60" y="148" width="350" height="46" rx="10" fill="#FFFFFF" stroke="#D8D9D2" stroke-width="1"/>
+<text x="76" y="177" font-family="Arial" font-size="16" font-weight="400" fill="#101820" text-anchor="start">AAPL · Apple Inc.</text>
+<text x="434" y="135" font-family="Arial" font-size="14" font-weight="600" fill="#62696D" text-anchor="start">Historical cutoff</text>
+<rect x="434" y="148" width="260" height="46" rx="10" fill="#FFFFFF" stroke="#D8D9D2" stroke-width="1"/>
+<text x="450" y="177" font-family="Menlo" font-size="16" font-weight="400" fill="#101820" text-anchor="start">2026-11-13</text>
+<text x="718" y="135" font-family="Arial" font-size="14" font-weight="600" fill="#62696D" text-anchor="start">Price history</text>
+<rect x="718" y="148" width="320" height="46" rx="10" fill="#FFFFFF" stroke="#D8D9D2" stroke-width="1"/>
+<text x="734" y="177" font-family="Arial" font-size="16" font-weight="400" fill="#101820" text-anchor="start">Full cached history</text>
+<text x="1380" y="166" font-family="Menlo" font-size="14" font-weight="400" fill="#62696D" text-anchor="end">5,596 shared sessions · 5 stocks</text>
+<text x="1380" y="190" font-family="Menlo" font-size="14" font-weight="400" fill="#62696D" text-anchor="end">Cache through 13 Nov 2026</text>
+</g>
+<g id="Workspace_navigation">
+<rect x="60" y="230" width="579" height="52" rx="26" fill="#E8E9E1" stroke="#D8D9D2" stroke-width="1"/>
+<text x="144" y="262" font-family="Arial" font-size="16" font-weight="600" fill="#101820" text-anchor="middle">Research</text>
+<rect x="224" y="234" width="218" height="44" rx="22.0" fill="#101820" stroke="#101820" stroke-width="1"/>
+<text x="333.0" y="262.0" font-family="Arial" font-size="16" font-weight="600" fill="#FFFFFF" text-anchor="middle">Algorithm builder</text>
+<text x="539" y="262" font-family="Arial" font-size="16" font-weight="600" fill="#101820" text-anchor="middle">Future scenarios</text>
+</g>
+<g id="Builder_title">
+<text x="60" y="342" font-family="Arial" font-size="42" font-weight="700" fill="#101820" text-anchor="start">Algorithm builder</text>
+<text x="60" y="378" font-family="Arial" font-size="18" font-weight="400" fill="#62696D" text-anchor="start">Write a ranking rule. Inspect the math. Test it on historical outcomes.</text>
+</g>
+<g id="Balanced_signal_preset">
+<rect x="60" y="405" width="1320" height="170" rx="12" fill="#E9EDFF"/>
+<rect x="60" y="405" width="4" height="170" rx="0" fill="#2454FF"/>
+<text x="88" y="446" font-family="Arial" font-size="26" font-weight="700" fill="#101820" text-anchor="start">DerivPort Signal</text>
+<text x="88" y="490" font-family="Times New Roman" font-size="28" font-weight="400" fill="#101820" text-anchor="start">S = 0.6 r̂₂₁ + 0.4 M₂₁ − k (0.5 ε + 0.25 σ₂₁)</text>
+<text x="88" y="538" font-family="Arial" font-size="16" font-weight="400" fill="#4C577A" text-anchor="start">Fixed starting weights; no claim that they are optimal.</text>
+<rect x="1050" y="430" width="302" height="44" rx="22.0" fill="#2454FF" stroke="#2454FF" stroke-width="1"/>
+<text x="1201.0" y="458.0" font-family="Arial" font-size="16" font-weight="600" fill="#FFFFFF" text-anchor="middle">Use balanced algorithm</text>
+<rect x="1050" y="491" width="302" height="44" rx="22.0" fill="#FFFFFF" stroke="#A7B7FF" stroke-width="1"/>
+<text x="1201.0" y="519.0" font-family="Arial" font-size="16" font-weight="600" fill="#101820" text-anchor="middle">Download Python</text>
+</g>
+<g id="Ranking_rule_editor">
+<rect x="60" y="620" width="550" height="430" rx="12" fill="#FFFFFF" stroke="#D8D9D2" stroke-width="1"/>
+<text x="86" y="661" font-family="Arial" font-size="24" font-weight="700" fill="#101820" text-anchor="start">Ranking formula</text>
+<rect x="86" y="683" width="498" height="107" rx="9" fill="#F6F6F2" stroke="#D8D9D2" stroke-width="1"/>
+<text x="102" y="715" font-family="Menlo" font-size="16" font-weight="400" fill="#101820" text-anchor="start">0.6 * predicted_return + 0.4 * momentum</text>
+<text x="102" y="741" font-family="Menlo" font-size="16" font-weight="400" fill="#101820" text-anchor="start">  - k * (0.5 * uncertainty</text>
+<text x="102" y="767" font-family="Menlo" font-size="16" font-weight="400" fill="#101820" text-anchor="start">         + 0.25 * volatility)</text>
+<text x="86" y="823" font-family="Arial" font-size="16" font-weight="600" fill="#101820" text-anchor="start">Risk penalty · k</text>
+<text x="584" y="823" font-family="Menlo" font-size="18" font-weight="600" fill="#2454FF" text-anchor="end">1.00</text>
+<line x1="94.00" y1="850.00" x2="576.00" y2="850.00" stroke="#D9DFE4" stroke-width="5"/>
+<line x1="94.00" y1="850.00" x2="142.20" y2="850.00" stroke="#2454FF" stroke-width="5"/>
+<circle cx="142.2" cy="850" r="7" fill="#2454FF"/>
+<text x="86" y="878" font-family="Menlo" font-size="14" font-weight="400" fill="#62696D" text-anchor="start">0</text>
+<text x="584" y="878" font-family="Menlo" font-size="14" font-weight="400" fill="#62696D" text-anchor="end">10</text>
+<line x1="86.00" y1="900.00" x2="584.00" y2="900.00" stroke="#D8D9D2" stroke-width="1"/>
+<text x="86" y="928" font-family="Arial" font-size="16" font-weight="400" fill="#62696D" text-anchor="start">AAPL score</text>
+<text x="584" y="941" font-family="Menlo" font-size="30" font-weight="500" fill="#101820" text-anchor="end">−2.6944</text>
+<text x="86" y="974" font-family="Menlo" font-size="14" font-weight="400" fill="#62696D" text-anchor="start">Model +2.5230%   Momentum +4.2517%</text>
+<text x="86" y="1002" font-family="Menlo" font-size="14" font-weight="400" fill="#62696D" text-anchor="start">Past error 7.8977 pp   Volatility 7.8401 pp</text>
+<text x="86" y="1030" font-family="Arial" font-size="14" font-weight="400" fill="#62696D" text-anchor="start">Scores rank stocks; they are not return forecasts.</text>
+</g>
+<g id="Risk_sensitivity_plot">
+<rect x="650" y="620" width="730" height="430" rx="12" fill="#FFFFFF" stroke="#D8D9D2" stroke-width="1"/>
+<text x="676" y="661" font-family="Arial" font-size="24" font-weight="700" fill="#101820" text-anchor="start">Score sensitivity</text>
+<text x="676" y="689" font-family="Arial" font-size="16" font-weight="400" fill="#62696D" text-anchor="start">Vary k while all four AAPL inputs stay fixed.</text>
+<line x1="720.00" y1="723.00" x2="1324.00" y2="723.00" stroke="#E6E4DD" stroke-width="1"/>
+<text x="704" y="728.0" font-family="Menlo" font-size="14" font-weight="400" fill="#62696D" text-anchor="end">4</text>
+<line x1="720.00" y1="790.38" x2="1324.00" y2="790.38" stroke="#E6E4DD" stroke-width="1"/>
+<text x="704" y="795.3846153846154" font-family="Menlo" font-size="14" font-weight="400" fill="#62696D" text-anchor="end">0</text>
+<line x1="720.00" y1="857.77" x2="1324.00" y2="857.77" stroke="#E6E4DD" stroke-width="1"/>
+<text x="704" y="862.7692307692307" font-family="Menlo" font-size="14" font-weight="400" fill="#62696D" text-anchor="end">-4</text>
+<line x1="720.00" y1="925.15" x2="1324.00" y2="925.15" stroke="#E6E4DD" stroke-width="1"/>
+<text x="704" y="930.1538461538462" font-family="Menlo" font-size="14" font-weight="400" fill="#62696D" text-anchor="end">-8</text>
+<line x1="720.00" y1="942.00" x2="1324.00" y2="942.00" stroke="#AEB6B1" stroke-width="1"/>
+<text x="720.0" y="967" font-family="Menlo" font-size="14" font-weight="400" fill="#62696D" text-anchor="middle">0</text>
+<text x="871.0" y="967" font-family="Menlo" font-size="14" font-weight="400" fill="#62696D" text-anchor="middle">0.5</text>
+<text x="1022.0" y="967" font-family="Menlo" font-size="14" font-weight="400" fill="#62696D" text-anchor="middle">1</text>
+<text x="1173.0" y="967" font-family="Menlo" font-size="14" font-weight="400" fill="#62696D" text-anchor="middle">1.5</text>
+<text x="1324.0" y="967" font-family="Menlo" font-size="14" font-weight="400" fill="#62696D" text-anchor="middle">2</text>
+<line x1="720.00" y1="736.23" x2="1324.00" y2="935.32" stroke="#2454FF" stroke-width="3"/>
+<line x1="720.00" y1="736.23" x2="1324.00" y2="935.32" stroke="#101820" stroke-width="1.2" stroke-dasharray="6 7"/>
+<line x1="1022.00" y1="835.77" x2="1022.00" y2="942.00" stroke="#B8BDB7" stroke-width="1" stroke-dasharray="3 5"/>
+<circle cx="1022.00" cy="835.77" r="6" fill="#2454FF" stroke="white" stroke-width="2"/>
+<rect x="1035.0" y="795.7743508723077" width="194" height="32" rx="8" fill="#E9EDFF"/>
+<text x="1048.0" y="817.7743508723077" font-family="Menlo" font-size="14" font-weight="500" fill="#2454FF" text-anchor="start">k = 1 · S = −2.69</text>
+<text x="1324" y="992" font-family="Arial" font-size="14" font-weight="400" fill="#62696D" text-anchor="end">Risk penalty · k</text>
+<line x1="680.00" y1="1018.00" x2="708.00" y2="1018.00" stroke="#2454FF" stroke-width="3"/>
+<text x="718" y="1023" font-family="Arial" font-size="14" font-weight="400" fill="#62696D" text-anchor="start">Actual score</text>
+<line x1="871.00" y1="1018.00" x2="899.00" y2="1018.00" stroke="#101820" stroke-width="1.2" stroke-dasharray="5 5"/>
+<text x="909" y="1023" font-family="Arial" font-size="14" font-weight="400" fill="#62696D" text-anchor="start">Tangent · coincides for a linear rule</text>
+</g>
+<g id="Calculus_lab_heading_and_controls">
+<text x="60" y="1139" font-family="Arial" font-size="34" font-weight="700" fill="#101820" text-anchor="start">Calculus lab</text>
+<text x="60" y="1174" font-family="Arial" font-size="18" font-weight="400" fill="#62696D" text-anchor="start">Explore slope, curvature, and the accumulated change in your ranking score.</text>
+<text x="60" y="1210" font-family="Arial" font-size="14" font-weight="600" fill="#62696D" text-anchor="start">Input to vary</text>
+<rect x="60" y="1223" width="340" height="46" rx="10" fill="#FFFFFF" stroke="#D8D9D2" stroke-width="1"/>
+<text x="76" y="1252" font-family="Arial" font-size="16" font-weight="400" fill="#101820" text-anchor="start">Risk penalty · k</text>
+<text x="424" y="1210" font-family="Arial" font-size="14" font-weight="600" fill="#62696D" text-anchor="start">Change in input · Δk</text>
+<rect x="424" y="1223" width="240" height="46" rx="10" fill="#FFFFFF" stroke="#D8D9D2" stroke-width="1"/>
+<text x="440" y="1252" font-family="Menlo" font-size="16" font-weight="400" fill="#101820" text-anchor="start">+0.50</text>
+<text x="745" y="1227" font-family="Times New Roman" font-size="26" font-weight="400" fill="#101820" text-anchor="start">g′(1) = −5.9089</text>
+<text x="1100" y="1227" font-family="Times New Roman" font-size="26" font-weight="400" fill="#101820" text-anchor="start">g″(1) = 0</text>
+<text x="745" y="1261" font-family="Arial" font-size="14" font-weight="400" fill="#62696D" text-anchor="start">Exact local slope</text>
+<text x="1100" y="1261" font-family="Arial" font-size="14" font-weight="400" fill="#62696D" text-anchor="start">Zero curvature</text>
+</g>
+<g id="Score_and_tangent_plot">
+<rect x="60" y="1300" width="640" height="278" rx="12" fill="#FFFFFF" stroke="#D8D9D2" stroke-width="1"/>
+<text x="86" y="1338" font-family="Arial" font-size="22" font-weight="700" fill="#101820" text-anchor="start">Score and its tangent</text>
+<line x1="126.00" y1="1393.43" x2="658.00" y2="1393.43" stroke="#E6E4DD" stroke-width="1"/>
+<text x="112" y="1398.4285714285713" font-family="Menlo" font-size="14" font-weight="400" fill="#62696D" text-anchor="end">-2</text>
+<line x1="126.00" y1="1434.29" x2="658.00" y2="1434.29" stroke="#E6E4DD" stroke-width="1"/>
+<text x="112" y="1439.2857142857142" font-family="Menlo" font-size="14" font-weight="400" fill="#62696D" text-anchor="end">-4</text>
+<line x1="126.00" y1="1475.14" x2="658.00" y2="1475.14" stroke="#E6E4DD" stroke-width="1"/>
+<text x="112" y="1480.142857142857" font-family="Menlo" font-size="14" font-weight="400" fill="#62696D" text-anchor="end">-6</text>
+<line x1="126.00" y1="1516.00" x2="658.00" y2="1516.00" stroke="#E6E4DD" stroke-width="1"/>
+<text x="112" y="1521.0" font-family="Menlo" font-size="14" font-weight="400" fill="#62696D" text-anchor="end">-8</text>
+<text x="244.22222222222217" y="1543" font-family="Menlo" font-size="14" font-weight="400" fill="#62696D" text-anchor="middle">1</text>
+<text x="391.99999999999994" y="1543" font-family="Menlo" font-size="14" font-weight="400" fill="#62696D" text-anchor="middle">1.25</text>
+<text x="539.7777777777777" y="1543" font-family="Menlo" font-size="14" font-weight="400" fill="#62696D" text-anchor="middle">1.5</text>
+<line x1="126.00" y1="1383.47" x2="658.00" y2="1492.11" stroke="#2454FF" stroke-width="3"/>
+<line x1="126.00" y1="1383.47" x2="658.00" y2="1492.11" stroke="#101820" stroke-width="1.2" stroke-dasharray="6 7"/>
+<circle cx="244.22" cy="1407.61" r="5" fill="#2454FF" stroke="white" stroke-width="2"/>
+<circle cx="539.78" cy="1467.97" r="5" fill="#2454FF" stroke="white" stroke-width="2"/>
+<text x="658" y="1543" font-family="Times New Roman" font-size="16" font-weight="400" fill="#62696D" text-anchor="end">k</text>
+<text x="86" y="1564" font-family="Arial" font-size="14" font-weight="400" fill="#62696D" text-anchor="start">The linear and quadratic approximations match this linear rule.</text>
+</g>
+<g id="Derivative_area_plot">
+<rect x="730" y="1300" width="650" height="278" rx="12" fill="#FFFFFF" stroke="#D8D9D2" stroke-width="1"/>
+<text x="756" y="1338" font-family="Arial" font-size="22" font-weight="700" fill="#101820" text-anchor="start">Derivative and signed area</text>
+<line x1="800.00" y1="1373.00" x2="1336.00" y2="1373.00" stroke="#E6E4DD" stroke-width="1"/>
+<text x="786" y="1378.0" font-family="Menlo" font-size="14" font-weight="400" fill="#62696D" text-anchor="end">0</text>
+<line x1="800.00" y1="1413.86" x2="1336.00" y2="1413.86" stroke="#E6E4DD" stroke-width="1"/>
+<text x="786" y="1418.857142857143" font-family="Menlo" font-size="14" font-weight="400" fill="#62696D" text-anchor="end">-2</text>
+<line x1="800.00" y1="1454.71" x2="1336.00" y2="1454.71" stroke="#E6E4DD" stroke-width="1"/>
+<text x="786" y="1459.7142857142858" font-family="Menlo" font-size="14" font-weight="400" fill="#62696D" text-anchor="end">-4</text>
+<line x1="800.00" y1="1495.57" x2="1336.00" y2="1495.57" stroke="#E6E4DD" stroke-width="1"/>
+<text x="786" y="1500.5714285714287" font-family="Menlo" font-size="14" font-weight="400" fill="#62696D" text-anchor="end">-6</text>
+<rect x="919.1111111111111" y="1373.0" width="297.7777777777778" height="120.7095610128572" rx="0" fill="#2454FF" opacity="0.12"/>
+<line x1="800.00" y1="1493.71" x2="1336.00" y2="1493.71" stroke="#2454FF" stroke-width="3"/>
+<line x1="919.11" y1="1373.00" x2="919.11" y2="1493.71" stroke="#A9B9FC" stroke-width="1" stroke-dasharray="3 4"/>
+<line x1="1216.89" y1="1373.00" x2="1216.89" y2="1493.71" stroke="#A9B9FC" stroke-width="1" stroke-dasharray="3 4"/>
+<text x="919.1111111111111" y="1543" font-family="Menlo" font-size="14" font-weight="400" fill="#62696D" text-anchor="middle">1</text>
+<text x="1068.0" y="1543" font-family="Menlo" font-size="14" font-weight="400" fill="#62696D" text-anchor="middle">1.25</text>
+<text x="1216.888888888889" y="1543" font-family="Menlo" font-size="14" font-weight="400" fill="#62696D" text-anchor="middle">1.5</text>
+<text x="1336" y="1543" font-family="Times New Roman" font-size="16" font-weight="400" fill="#62696D" text-anchor="end">k</text>
+<text x="756" y="1564" font-family="Arial" font-size="14" font-weight="400" fill="#62696D" text-anchor="start">Shaded area from 1 to 1.5: score change −2.9544.</text>
+</g>
+<g id="Taylor_and_fundamental_theorem_equations">
+<text x="60" y="1623" font-family="Times New Roman" font-size="28" font-weight="400" fill="#101820" text-anchor="start">T₂(Δk) = g(k₀) + g′(k₀) Δk + ½ g″(k₀) Δk²</text>
+<text x="60" y="1661" font-family="Arial" font-size="16" font-weight="400" fill="#62696D" text-anchor="start">A second-order Taylor approximation adds curvature to the local tangent.</text>
+<text x="756" y="1623" font-family="Times New Roman" font-size="34" font-weight="400" fill="#101820">∫</text>
+<text x="775" y="1603" font-family="Times New Roman" font-size="13" fill="#101820">1.5</text>
+<text x="775" y="1635" font-family="Times New Roman" font-size="13" fill="#101820">1</text>
+<text x="808" y="1623" font-family="Times New Roman" font-size="27" font-weight="400" fill="#101820">g′(k) dk = g(1.5) − g(1) = −2.9544</text>
+<text x="756" y="1661" font-family="Arial" font-size="16" font-weight="400" fill="#62696D" text-anchor="start">The fundamental theorem links derivative area to score change.</text>
+<text x="60" y="1705" font-family="Arial" font-size="16" font-weight="400" fill="#62696D" text-anchor="start">These derivatives describe your rule. They do not measure the regression model’s feature influence.</text>
+</g>
+<g id="Historical_backtest">
+<line x1="60.00" y1="1743.00" x2="1380.00" y2="1743.00" stroke="#101820" stroke-width="1"/>
+<text x="60" y="1790" font-family="Arial" font-size="34" font-weight="700" fill="#101820" text-anchor="start">Historical backtest</text>
+<text x="1380" y="1786" font-family="Arial" font-size="16" font-weight="400" fill="#62696D" text-anchor="end">Same group and periods for every algorithm</text>
+<text x="60" y="1838" font-family="Arial" font-size="14" font-weight="600" fill="#62696D" text-anchor="start">Test from</text>
+<rect x="60" y="1851" width="385" height="46" rx="10" fill="#FFFFFF" stroke="#D8D9D2" stroke-width="1"/>
+<text x="76" y="1880" font-family="Menlo" font-size="16" font-weight="400" fill="#101820" text-anchor="start">2022-01-01</text>
+<text x="469" y="1838" font-family="Arial" font-size="14" font-weight="600" fill="#62696D" text-anchor="start">Test through</text>
+<rect x="469" y="1851" width="385" height="46" rx="10" fill="#FFFFFF" stroke="#D8D9D2" stroke-width="1"/>
+<text x="485" y="1880" font-family="Menlo" font-size="16" font-weight="400" fill="#101820" text-anchor="start">2026-11-13</text>
+<rect x="1048" y="1851" width="332" height="46" rx="23.0" fill="#2454FF" stroke="#2454FF" stroke-width="1"/>
+<text x="1214.0" y="1880.0" font-family="Arial" font-size="16" font-weight="600" fill="#FFFFFF" text-anchor="middle">Run backtest</text>
+<rect x="60" y="1930" width="1320" height="161" rx="12" fill="#FFFFFF" stroke="#D8D9D2" stroke-width="1"/>
+<text x="720" y="1993" font-family="Arial" font-size="24" font-weight="600" fill="#101820" text-anchor="middle">Run a historical test to see results.</text>
+<text x="720" y="2030" font-family="Arial" font-size="16" font-weight="400" fill="#62696D" text-anchor="middle">Only complete 21-session periods count. No test has been run in this design state.</text>
+<text x="60" y="2121" font-family="Arial" font-size="16" font-weight="400" fill="#62696D" text-anchor="start">Rules selected or tuned after seeing outcomes are retrospective experiments.</text>
+<rect x="1064" y="2111" width="316" height="44" rx="22.0" fill="#FFFFFF" stroke="#A9B0AA" stroke-width="1"/>
+<text x="1222.0" y="2139.0" font-family="Arial" font-size="16" font-weight="600" fill="#101820" text-anchor="middle">Export current inputs</text>
+</g>
+<g id="Footer">
+<line x1="60.00" y1="2190.00" x2="1380.00" y2="2190.00" stroke="#101820" stroke-width="1"/>
+<text x="60" y="2230" font-family="Arial" font-size="20" font-weight="700" fill="#101820" text-anchor="start">DerivPort</text>
+<text x="220" y="2230" font-family="Arial" font-size="14" font-weight="400" fill="#62696D" text-anchor="start">Educational research · transparent assumptions</text>
+<text x="1380" y="2230" font-family="Arial" font-size="14" font-weight="400" fill="#62696D" text-anchor="end">Historical results do not guarantee future performance.</text>
+</g>
+</svg>

@@ -22,7 +22,7 @@ from algorithms.derivport_signal import NAME as SIGNAL_NAME, FORMULA as SIGNAL_F
 
 ROOT = Path(__file__).parent
 DEFAULT_STOCKS = ['AAPL', 'AMZN', 'GOOGL', 'MSFT', 'NVDA']
-COLORS = {'Momentum': '#a1a7b0', 'AI model': '#3977bc', 'Your algorithm': '#20252c'}
+COLORS = {'Momentum': '#66706f', 'AI model': '#2454ff', 'Your algorithm': '#101820'}
 st.set_page_config(page_title='DerivPort | Equity research', layout='wide', page_icon='D')
 st.html(f"<style>{(ROOT / 'assets/style.css').read_text()}</style>")
 
@@ -42,10 +42,10 @@ def heading(title, description=''):
 def chart(fig, height=230):
     fig.update_layout(height=height, margin=dict(l=5, r=10, t=15, b=5),
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(family='Arial, sans-serif', size=11, color='#717782'),
+        font=dict(family='Arial, sans-serif', size=12, color='#66706f'),
         legend=dict(orientation='h', y=1.15, x=0), hoverlabel=dict(bgcolor='white'))
-    fig.update_xaxes(showgrid=False, zeroline=False, linecolor='#e5e7eb')
-    fig.update_yaxes(gridcolor='#eff0f2', zerolinecolor='#d4d7dd')
+    fig.update_xaxes(showgrid=False, zeroline=False, linecolor='#e6e4dd')
+    fig.update_yaxes(gridcolor='#e6e4dd', zerolinecolor='#b9bdb5')
     return fig
 
 
@@ -227,9 +227,26 @@ available_notes = [n for n in notes if n['ticker'] == ticker and pd.Timestamp(n[
 note = max(available_notes, key=lambda n: n['published']) if available_notes else None
 research, builder, future = st.tabs(['Research', 'Algorithm builder', 'Future scenarios'], key='workspace')
 with research:
-    st.html(f'''<div class="stock-header"><div><h1>{esc(meta.get('name', ticker))}</h1>
-    <p>{esc(meta.get('exchange', ''))} · {esc(meta.get('currency', 'Unknown'))} · Historical adjusted prices</p></div>
-    <div class="price">{prices.loc[pd.Timestamp(cutoff), ticker]:,.2f}<small>Adjusted close · {cutoff}</small></div></div>''')
+    with st.container(key='market_hero'):
+        st.html(f'''<div class="stock-header"><div><h1>{esc(meta.get('name', ticker))}</h1>
+        <p>{esc(meta.get('exchange', ''))} · {esc(meta.get('currency', 'Unknown'))} · Historical adjusted prices</p></div>
+        <div class="price">{prices.loc[pd.Timestamp(cutoff), ticker]:,.2f}<small>Adjusted close · {cutoff}</small></div></div>''')
+        known_recent = prices.loc[:cutoff, ticker].tail(126)
+        price_fig = go.Figure(go.Scatter(x=known_recent.index, y=known_recent,
+            mode='lines', line=dict(color='#d6f23c', width=2.5),
+            name='Adjusted close', hovertemplate='%{x|%d %b %Y}<br>%{y:,.2f}<extra></extra>'))
+        price_fig.add_trace(go.Scatter(x=[known_recent.index[-1]], y=[known_recent.iloc[-1]],
+            mode='markers', marker=dict(color='#d6f23c', size=7),
+            showlegend=False, hoverinfo='skip'))
+        chart(price_fig, 270)
+        price_fig.update_layout(paper_bgcolor='#101820', plot_bgcolor='#101820',
+            font_color='#c5cfc8', showlegend=False,
+            margin=dict(l=5, r=12, t=10, b=5), hoverlabel=dict(bgcolor='#f3f1eb', font_color='#101820'))
+        price_fig.update_xaxes(linecolor='#39443f', tickformat='%b %Y', nticks=6)
+        price_fig.update_yaxes(gridcolor='#2b3732', zeroline=False, side='right', nticks=4,
+            title=None)
+        st.plotly_chart(price_fig, width='stretch', config={'displayModeBar': False}, key='known_price_hero')
+        st.caption(f'Adjusted close · {len(known_recent)} observed sessions · {known_recent.index[0]:%d %b %Y}–{known_recent.index[-1]:%d %b %Y}')
     if ticker == 'AAPL' and cutoff == '2024-05-03' and not extended:
         st.caption('Curated example: Apple after its May 2 earnings release. Choose any available date or change the stock group.')
     panels = st.container()
@@ -310,8 +327,8 @@ with builder:
     with sensitivity, st.container(border=True, key='algorithm_sensitivity'):
         st.html('<div class="small-title">Score sensitivity</div>')
         curve = formula_curve(active_formula, values, active_k)
-        fig = go.Figure(go.Scatter(x=curve.uncertainty, y=curve.score, mode='lines', line=dict(color='#20252c', width=2), showlegend=False))
-        fig.add_trace(go.Scatter(x=[row.uncertainty], y=[row.score], mode='markers', marker=dict(color='#3977bc', size=8), showlegend=False))
+        fig = go.Figure(go.Scatter(x=curve.uncertainty, y=curve.score, mode='lines', line=dict(color='#2454ff', width=2.5), showlegend=False))
+        fig.add_trace(go.Scatter(x=[row.uncertainty], y=[row.score], mode='markers', marker=dict(color='#101820', size=9), showlegend=False))
         fig.add_vline(x=row.uncertainty, line_dash='dot', line_color='#bbc3ce')
         fig.update_xaxes(title='Uncertainty (percentage points)')
         fig.update_yaxes(title='Rule score')
@@ -438,9 +455,9 @@ with future:
             line=dict(width=0), fill='tonexty', fillcolor='rgba(57,119,188,.12)',
             name='Simulated 10th–90th percentiles', hoverinfo='skip'))
         fig.add_trace(go.Scatter(x=band['date'], y=band['p50'], name='Simulated median',
-            line=dict(color='#3977bc', width=2, dash='dash')))
+            line=dict(color='#2454ff', width=2, dash='dash')))
         fig.add_trace(go.Scatter(x=[projected.dates[0]], y=[projected.latest_prices[plotted_symbol]],
-            mode='markers', marker=dict(color='#20252c', size=7), name='Last actual cached close'))
+            mode='markers', marker=dict(color='#101820', size=7), name='Last actual cached close'))
         fig.update_yaxes(title='Hypothetical adjusted-price level · local currency')
         st.plotly_chart(chart(fig, 310), width='stretch', config={'displayModeBar': False}, key='future_scenario_chart')
         terminal = projected.terminal_returns
@@ -533,9 +550,9 @@ with replay_area:
         fig.update_yaxes(title='Return from cutoff (%)')
         st.plotly_chart(chart(fig, 260), width='stretch', config={'displayModeBar': False}, key='historical_outcomes')
 with extras_area:
-    with st.expander('Price history available at the cutoff'):
-        known = prices.loc[:cutoff, ticker].tail(252)
-        fig = go.Figure(go.Scatter(x=known.index, y=known, line=dict(color='#20252c', width=1.7)))
+    with st.expander('Full price history available at the cutoff'):
+        known = prices.loc[:cutoff, ticker]
+        fig = go.Figure(go.Scatter(x=known.index, y=known, line=dict(color='#2454ff', width=1.7)))
         fig.update_yaxes(title=f"Adjusted close ({meta.get('currency', 'local currency')})")
         st.plotly_chart(chart(fig, 220), width='stretch', config={'displayModeBar': False})
     with st.expander('Simulated stress test'):

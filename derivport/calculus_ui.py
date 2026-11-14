@@ -43,11 +43,11 @@ def _plot_style(fig: go.Figure, plotstyle, height=280):
     fig.update_layout(
         height=height, margin=dict(l=8, r=12, t=40, b=10),
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="Arial, sans-serif", size=11, color="#68778d"),
+        font=dict(family="Arial, sans-serif", size=11, color="#66706F"),
         legend=dict(orientation="h", y=1.15, x=0),
     )
-    fig.update_xaxes(showgrid=False, zeroline=False, linecolor="#dde5ef")
-    fig.update_yaxes(gridcolor="#edf1f6", zerolinecolor="#bac8d9")
+    fig.update_xaxes(showgrid=False, zeroline=False, linecolor="#E6E4DD")
+    fig.update_yaxes(gridcolor="#E6E4DD", zerolinecolor="#E6E4DD")
     return fig
 
 
@@ -111,15 +111,15 @@ def render_calculus_lab(expression: str, values: Mapping[str, float], k: float, 
             st.markdown("**The score and its approximations**")
             fig = go.Figure()
             for column, name, color, dash in (
-                ("score", "Actual score", "#17263e", "solid"),
-                ("tangent", "Tangent", "#467bb6", "dash"),
-                ("quadratic", "Quadratic", "#a58b64", "dot"),
+                ("score", "Actual score", "#2454FF", "solid"),
+                ("tangent", "Tangent", "#101820", "dash"),
+                ("quadratic", "Quadratic", "#A48645", "dot"),
             ):
                 fig.add_trace(go.Scatter(x=curve["x"], y=curve[column], name=name,
                     mode="lines", line=dict(color=color, width=2, dash=dash)))
             fig.add_trace(go.Scatter(x=[current, current + delta],
                 y=[result["baseline"], result["shifted"]], mode="markers",
-                marker=dict(color=["#17263e", "#467bb6"], size=8),
+                marker=dict(color="#2454FF", size=8),
                 name="Current / changed input", showlegend=False))
             fig.update_xaxes(title=f"{INPUT_LABELS[variable]} ({unit})")
             fig.update_yaxes(title="Ranking score")
@@ -132,8 +132,8 @@ def render_calculus_lab(expression: str, values: Mapping[str, float], k: float, 
             st.markdown("**The derivative and accumulated change**")
             fig = go.Figure(go.Scatter(x=curve["x"], y=curve["derivative"],
                 name="Score derivative", mode="lines", fill="tozeroy",
-                line=dict(color="#467bb6", width=2),
-                fillcolor="rgba(70,123,182,.16)"))
+                line=dict(color="#2454FF", width=2),
+                fillcolor="rgba(36,84,255,.12)"))
             fig.update_xaxes(title=f"{INPUT_LABELS[variable]} ({unit})")
             fig.update_yaxes(title="Score derivative")
             fig.update_layout(showlegend=False)
