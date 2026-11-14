@@ -1,0 +1,20 @@
+{
+  "symbol": "ORCL",
+  "name": "Oracle Corporation",
+  "exchange": "NYSE",
+  "currency": "USD",
+  "region": "United States",
+  "source": "Yahoo Finance via yfinance",
+  "source_url": "https://finance.yahoo.com/quote/ORCL/history/",
+  "cache_status": "downloaded",
+  "fetched_at": "2026-11-14T16:42:46+00:00",
+  "start": "1986-03-12",
+  "end": "2026-11-13",
+  "rows": 10249,
+  "adjusted": true,
+  "price_field": "Adj Close",
+  "point_in_time_archive": false,
+  "observations_excluded": 0,
+  "note": "Retrospectively adjusted snapshot; current UTC date excluded; no interpolation or currency conversion.",
+  "cache_sha256": "e72325bdc08f62e069f50772521c043488faf975064aaa9816a44c436c675efb"
+}

@@ -1,0 +1,20 @@
+{
+  "symbol": "TSLA",
+  "name": "Tesla, Inc.",
+  "exchange": "NasdaqGS",
+  "currency": "USD",
+  "region": "United States",
+  "source": "Yahoo Finance via yfinance",
+  "source_url": "https://finance.yahoo.com/quote/TSLA/history/",
+  "cache_status": "downloaded",
+  "fetched_at": "2026-11-14T16:42:45+00:00",
+  "start": "2010-06-29",
+  "end": "2026-11-13",
+  "rows": 4121,
+  "adjusted": true,
+  "price_field": "Adj Close",
+  "point_in_time_archive": false,
+  "observations_excluded": 0,
+  "note": "Retrospectively adjusted snapshot; current UTC date excluded; no interpolation or currency conversion.",
+  "cache_sha256": "fea00e0b1b3709480d6b80bae7c2a2f8c5f87aac342cd0a67343c24576b51a72"
+}

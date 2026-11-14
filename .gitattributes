@@ -1,0 +1,2 @@
+# Preserve the frozen CSV's byte-for-byte checksum and its original CRLF records.
+data/prices.csv -text whitespace=cr-at-eol

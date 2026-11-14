@@ -1,0 +1,20 @@
+{
+  "symbol": "META",
+  "name": "Meta Platforms, Inc.",
+  "exchange": "NasdaqGS",
+  "currency": "USD",
+  "region": "United States",
+  "source": "Yahoo Finance via yfinance",
+  "source_url": "https://finance.yahoo.com/quote/META/history/",
+  "cache_status": "downloaded",
+  "fetched_at": "2026-11-14T16:42:44+00:00",
+  "start": "2012-05-18",
+  "end": "2026-11-13",
+  "rows": 3644,
+  "adjusted": true,
+  "price_field": "Adj Close",
+  "point_in_time_archive": false,
+  "observations_excluded": 0,
+  "note": "Retrospectively adjusted snapshot; current UTC date excluded; no interpolation or currency conversion.",
+  "cache_sha256": "000eeb788dc1f2dab93c1e6c945f250d2e5dad6f52a7167433721354c3eececa"
+}

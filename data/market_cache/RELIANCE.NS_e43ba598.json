@@ -1,0 +1,20 @@
+{
+  "symbol": "RELIANCE.NS",
+  "name": "Reliance Industries Limited",
+  "exchange": "NSE",
+  "currency": "INR",
+  "region": "India",
+  "source": "Yahoo Finance via yfinance",
+  "source_url": "https://finance.yahoo.com/quote/RELIANCE.NS/history/",
+  "cache_status": "downloaded",
+  "fetched_at": "2026-11-14T16:42:42+00:00",
+  "start": "1996-01-01",
+  "end": "2026-11-13",
+  "rows": 7744,
+  "adjusted": true,
+  "price_field": "Adj Close",
+  "point_in_time_archive": false,
+  "observations_excluded": 0,
+  "note": "Retrospectively adjusted snapshot; current UTC date excluded; no interpolation or currency conversion.",
+  "cache_sha256": "2307d67107d4fc3bd394c93c4fdee31607c4dd56d756e028cf63ee4155d22688"
+}

@@ -1,0 +1,20 @@
+{
+  "symbol": "NOVO-B.CO",
+  "name": "Novo Nordisk A/S",
+  "exchange": "Copenhagen",
+  "currency": "DKK",
+  "region": "Denmark",
+  "source": "Yahoo Finance via yfinance",
+  "source_url": "https://finance.yahoo.com/quote/NOVO-B.CO/history/",
+  "cache_status": "downloaded",
+  "fetched_at": "2026-11-14T16:42:44+00:00",
+  "start": "2001-01-08",
+  "end": "2026-11-13",
+  "rows": 6512,
+  "adjusted": true,
+  "price_field": "Adj Close",
+  "point_in_time_archive": false,
+  "observations_excluded": 0,
+  "note": "Retrospectively adjusted snapshot; current UTC date excluded; no interpolation or currency conversion.",
+  "cache_sha256": "86cbdc26bc65ef51b5ee10bede3b08721bef9f7cd7967a2d639430ce1cb8981c"
+}

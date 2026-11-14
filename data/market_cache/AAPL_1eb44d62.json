@@ -1,0 +1,20 @@
+{
+  "symbol": "AAPL",
+  "name": "Apple Inc.",
+  "exchange": "NasdaqGS",
+  "currency": "USD",
+  "region": "United States",
+  "source": "Yahoo Finance via yfinance",
+  "source_url": "https://finance.yahoo.com/quote/AAPL/history/",
+  "cache_status": "downloaded",
+  "fetched_at": "2026-11-14T16:43:35+00:00",
+  "start": "1980-12-12",
+  "end": "2026-11-13",
+  "rows": 11574,
+  "adjusted": true,
+  "price_field": "Adj Close",
+  "point_in_time_archive": false,
+  "observations_excluded": 0,
+  "note": "Retrospectively adjusted snapshot; current UTC date excluded; no interpolation or currency conversion.",
+  "cache_sha256": "a6dcc81a3da8e6501c4394f05c6ca43742b3970b099c573cf4c839b5e7f0ce91"
+}

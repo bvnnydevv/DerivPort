@@ -1,0 +1,20 @@
+{
+  "symbol": "AVGO",
+  "name": "Broadcom Inc.",
+  "exchange": "NasdaqGS",
+  "currency": "USD",
+  "region": "United States",
+  "source": "Yahoo Finance via yfinance",
+  "source_url": "https://finance.yahoo.com/quote/AVGO/history/",
+  "cache_status": "downloaded",
+  "fetched_at": "2026-11-14T16:42:45+00:00",
+  "start": "2009-08-06",
+  "end": "2026-11-13",
+  "rows": 4346,
+  "adjusted": true,
+  "price_field": "Adj Close",
+  "point_in_time_archive": false,
+  "observations_excluded": 0,
+  "note": "Retrospectively adjusted snapshot; current UTC date excluded; no interpolation or currency conversion.",
+  "cache_sha256": "0e1e78daed406572535f2a0cddb922f8b737bf512cdd84cec22b78074a66fc2e"
+}

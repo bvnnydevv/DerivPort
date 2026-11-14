@@ -1,0 +1,20 @@
+{
+  "symbol": "0700.HK",
+  "name": "Tencent Holdings Limited",
+  "exchange": "HKSE",
+  "currency": "HKD",
+  "region": "Hong Kong",
+  "source": "Yahoo Finance via yfinance",
+  "source_url": "https://finance.yahoo.com/quote/0700.HK/history/",
+  "cache_status": "downloaded",
+  "fetched_at": "2026-11-14T16:42:41+00:00",
+  "start": "2004-06-16",
+  "end": "2026-11-13",
+  "rows": 5535,
+  "adjusted": true,
+  "price_field": "Adj Close",
+  "point_in_time_archive": false,
+  "observations_excluded": 0,
+  "note": "Retrospectively adjusted snapshot; current UTC date excluded; no interpolation or currency conversion.",
+  "cache_sha256": "d45209a591a7f88e539b86a6408feca6df8949f321b93726a59267fd1619267b"
+}

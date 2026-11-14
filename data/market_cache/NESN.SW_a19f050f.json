@@ -1,0 +1,20 @@
+{
+  "symbol": "NESN.SW",
+  "name": "Nestl\u00e9 S.A.",
+  "exchange": "Swiss",
+  "currency": "CHF",
+  "region": "Switzerland",
+  "source": "Yahoo Finance via yfinance",
+  "source_url": "https://finance.yahoo.com/quote/NESN.SW/history/",
+  "cache_status": "downloaded",
+  "fetched_at": "2026-11-14T16:42:44+00:00",
+  "start": "1990-01-03",
+  "end": "2026-11-13",
+  "rows": 9428,
+  "adjusted": true,
+  "price_field": "Adj Close",
+  "point_in_time_archive": false,
+  "observations_excluded": 0,
+  "note": "Retrospectively adjusted snapshot; current UTC date excluded; no interpolation or currency conversion.",
+  "cache_sha256": "9349efaab9e7686f61f803f8523f7f2bcf623c6bcb33d17a5a65bc4b7475aa46"
+}

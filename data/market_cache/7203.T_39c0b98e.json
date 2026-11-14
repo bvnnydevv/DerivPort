@@ -1,0 +1,20 @@
+{
+  "symbol": "7203.T",
+  "name": "Toyota Motor Corporation",
+  "exchange": "Tokyo",
+  "currency": "JPY",
+  "region": "Japan",
+  "source": "Yahoo Finance via yfinance",
+  "source_url": "https://finance.yahoo.com/quote/7203.T/history/",
+  "cache_status": "downloaded",
+  "fetched_at": "2026-11-14T16:42:41+00:00",
+  "start": "1999-05-06",
+  "end": "2026-11-13",
+  "rows": 6874,
+  "adjusted": true,
+  "price_field": "Adj Close",
+  "point_in_time_archive": false,
+  "observations_excluded": 0,
+  "note": "Retrospectively adjusted snapshot; current UTC date excluded; no interpolation or currency conversion.",
+  "cache_sha256": "ad1f71c402cbf191494bd6165af9962af3e446523360edea8b85ad1fe1c8a96e"
+}

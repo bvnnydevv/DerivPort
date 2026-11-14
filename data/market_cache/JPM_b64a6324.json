@@ -1,0 +1,20 @@
+{
+  "symbol": "JPM",
+  "name": "JPMorgan Chase & Co.",
+  "exchange": "NYSE",
+  "currency": "USD",
+  "region": "United States",
+  "source": "Yahoo Finance via yfinance",
+  "source_url": "https://finance.yahoo.com/quote/JPM/history/",
+  "cache_status": "downloaded",
+  "fetched_at": "2026-11-14T16:42:46+00:00",
+  "start": "1980-03-17",
+  "end": "2026-11-13",
+  "rows": 11762,
+  "adjusted": true,
+  "price_field": "Adj Close",
+  "point_in_time_archive": false,
+  "observations_excluded": 0,
+  "note": "Retrospectively adjusted snapshot; current UTC date excluded; no interpolation or currency conversion.",
+  "cache_sha256": "8ad8f1da01d96ce46d7a9024d52dd33c162c718a885daca5bbf56f22217af705"
+}

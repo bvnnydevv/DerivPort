@@ -1,0 +1,20 @@
+{
+  "symbol": "RY.TO",
+  "name": "Royal Bank of Canada",
+  "exchange": "Toronto",
+  "currency": "CAD",
+  "region": "Canada",
+  "source": "Yahoo Finance via yfinance",
+  "source_url": "https://finance.yahoo.com/quote/RY.TO/history/",
+  "cache_status": "downloaded",
+  "fetched_at": "2026-11-14T16:42:43+00:00",
+  "start": "1995-01-12",
+  "end": "2026-11-13",
+  "rows": 8002,
+  "adjusted": true,
+  "price_field": "Adj Close",
+  "point_in_time_archive": false,
+  "observations_excluded": 0,
+  "note": "Retrospectively adjusted snapshot; current UTC date excluded; no interpolation or currency conversion.",
+  "cache_sha256": "d6190e23a0db02c25d2a814e21c909b11be74e53c8f7c2e1f39cfe5c81f416c9"
+}

@@ -16,7 +16,7 @@ from derivport import (DEFAULT_FORMULA, FormulaError, analyze_cutoff, apply_rule
 from derivport.market_data import (MarketDataError, get_search_status,
     load_symbol_prices, read_cached_symbols, search_symbols, symbol_info)
 from derivport.projections import project_scenarios
-from derivport.calculus import differential, formula_to_latex
+from derivport.calculus import calculus_experiment, differential, formula_to_latex
 from derivport.calculus_ui import render_calculus_lab
 from algorithms.derivport_signal import NAME as SIGNAL_NAME, FORMULA as SIGNAL_FORMULA, DEFAULT_K as SIGNAL_K
 
@@ -326,7 +326,14 @@ with builder:
             st.caption('Automatic differentiation of your rule gives the local slope and curvature. The dotted line is its tangent; all other inputs stay fixed.')
         except FormulaError:
             st.caption('Derivatives are undefined or outside numerical range here; the current score remains valid.')
-        st.plotly_chart(chart(fig, 250), width='stretch', config={'displayModeBar': False}, key='calculus')
+        try:
+            # A sampled curve must not draw a line across an unsampled pole.
+            for endpoint in (curve.uncertainty.iloc[0], curve.uncertainty.iloc[-1]):
+                calculus_experiment(active_formula, values, 'uncertainty',
+                    float(endpoint - row.uncertainty), active_k, points=3)
+            st.plotly_chart(chart(fig, 250), width='stretch', config={'displayModeBar': False}, key='calculus')
+        except FormulaError:
+            st.info('This preview range includes an undefined point. Choose a valid interval in Calculus lab; your current score is unchanged.')
         if active_formula.strip() == DEFAULT_FORMULA and active_k == 2:
             st.latex(r'\Delta S=-k\,\Delta\varepsilon=-2(1)=-2\;\mathrm{pp}')
     render_calculus_lab(active_formula, values, active_k, plotstyle=chart)

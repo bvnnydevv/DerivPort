@@ -1,0 +1,20 @@
+{
+  "symbol": "ASML.AS",
+  "name": "ASML Holding N.V.",
+  "exchange": "Amsterdam",
+  "currency": "EUR",
+  "region": "Netherlands",
+  "source": "Yahoo Finance via yfinance",
+  "source_url": "https://finance.yahoo.com/quote/ASML.AS/history/",
+  "cache_status": "downloaded",
+  "fetched_at": "2026-11-14T16:42:42+00:00",
+  "start": "1998-07-20",
+  "end": "2026-11-13",
+  "rows": 7289,
+  "adjusted": true,
+  "price_field": "Adj Close",
+  "point_in_time_archive": false,
+  "observations_excluded": 0,
+  "note": "Retrospectively adjusted snapshot; current UTC date excluded; no interpolation or currency conversion.",
+  "cache_sha256": "b32b0eebdbe6223f6a0ea1d1723642eb4b362b2a764b4022e4022b2f139b0e96"
+}

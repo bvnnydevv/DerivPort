@@ -1,0 +1,20 @@
+{
+  "symbol": "AMD",
+  "name": "Advanced Micro Devices, Inc.",
+  "exchange": "NasdaqGS",
+  "currency": "USD",
+  "region": "United States",
+  "source": "Yahoo Finance via yfinance",
+  "source_url": "https://finance.yahoo.com/quote/AMD/history/",
+  "cache_status": "downloaded",
+  "fetched_at": "2026-11-14T16:42:45+00:00",
+  "start": "1980-03-17",
+  "end": "2026-11-13",
+  "rows": 11762,
+  "adjusted": true,
+  "price_field": "Adj Close",
+  "point_in_time_archive": false,
+  "observations_excluded": 0,
+  "note": "Retrospectively adjusted snapshot; current UTC date excluded; no interpolation or currency conversion.",
+  "cache_sha256": "c4652a16e9b970558f545ef757e9a6197643bc5e1eeb383c74dd1c697770192c"
+}

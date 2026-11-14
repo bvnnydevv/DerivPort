@@ -1,0 +1,20 @@
+{
+  "symbol": "MSFT",
+  "name": "Microsoft Corporation",
+  "exchange": "NasdaqGS",
+  "currency": "USD",
+  "region": "United States",
+  "source": "Yahoo Finance via yfinance",
+  "source_url": "https://finance.yahoo.com/quote/MSFT/history/",
+  "cache_status": "downloaded",
+  "fetched_at": "2026-11-14T16:43:35+00:00",
+  "start": "1986-03-13",
+  "end": "2026-11-13",
+  "rows": 10248,
+  "adjusted": true,
+  "price_field": "Adj Close",
+  "point_in_time_archive": false,
+  "observations_excluded": 0,
+  "note": "Retrospectively adjusted snapshot; current UTC date excluded; no interpolation or currency conversion.",
+  "cache_sha256": "aed0527ef602979192d339686bc8ab0bbdafc74dc008e2fd30e8a572755519a7"
+}
