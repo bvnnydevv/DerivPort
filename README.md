@@ -52,7 +52,25 @@ The file reproduces the app's scores and average tied ranks. [Algorithm document
 
 You can also edit `predicted_return`, `uncertainty`, `momentum`, `volatility`, `k`, numeric constants, arithmetic, and parentheses. A restricted AST parser rejects calls, attributes, powers, division by zero, and non-finite results. Invalid edits preserve the last valid formula, k, scores, and ranks.
 
-The score-versus-uncertainty chart holds other inputs fixed, marks the current score, and shows the local slope. The default slope is −k: at k = 2, one extra percentage point of uncertainty lowers the score by two percentage points. Custom slopes are numerical. Crossover examples distinguish a changing score from a changing relative rank.
+Formulas, substituted arithmetic, error definitions, and calculus are rendered in LaTeX. The score-versus-uncertainty chart holds other inputs fixed and marks the current score. For the default rule:
+
+$$
+S=\widehat r_{21}-k\varepsilon,\qquad
+\frac{\partial S}{\partial\varepsilon}=-k,\qquad
+\frac{\partial^2 S}{\partial\varepsilon^2}=0.
+$$
+
+At k = 2, one extra percentage point of uncertainty lowers the score by two percentage points. Crossover examples distinguish a changing score from a changing relative rank.
+
+The interactive calculus lab varies one input while keeping the others fixed. It compares the actual score change with first-order tangent and second-order Taylor approximations, plots the score and derivative, displays curvature, and checks the fundamental theorem of calculus by numerically integrating the derivative along the selected interval. Gradient and Hessian values come from exact automatic differentiation of the restricted arithmetic expression; numerical quadrature remains an approximation. Singular or undefined intervals are reported without replacing the last valid ranking.
+
+$$
+\Delta S\approx S'(x_0)\,\Delta x+
+\tfrac12 S''(x_0)(\Delta x)^2,\qquad
+S(b)-S(a)=\int_a^b S'(x)\,dx.
+$$
+
+These derivatives explain the **editable ranking arithmetic**, not the regression model's feature influence or a stock's future return. All return-like inputs remain in percentage points; k is dimensionless. The lab identifies units and holds other inputs fixed.
 
 **Research** hides subsequent returns, realized ranks, and single-date ranking accuracy until **Reveal next 21 trading days**. Recent cutoffs show a pending-outcome message instead of invented results. Reveal freezes that experiment's predictions; later rule edits are labeled **edited after seeing the outcome**. Another unrevealed cutoff provides a fresh experiment. Reveal context includes the universe, cutoff, and price-data fingerprint, so changing the experiment does not expose another experiment's result.
 
@@ -104,4 +122,4 @@ The repository's existing MIT license covers application code. Market data and i
 .venv/bin/python -m pytest -q
 ```
 
-Tests exercise the normal Streamlit entry point with outbound connections blocked: recent-date research with pending outcomes, hidden completed outcomes, formula preservation, real k-driven rank crossings, frozen reveal predictions, post-reveal edit labels, and fresh experiment contexts. Additional checks cover dated sources, completed training labels, future-price mutation invariance, tied/constant Spearman handling, measured uncertainty, identical simulations for identical rankings, global caches, dynamic universes, common-date backtests, and reproducible hypothetical projections through 2037.
+Tests exercise the normal Streamlit entry point with outbound connections blocked: recent-date research with pending outcomes, hidden completed outcomes, formula preservation, real k-driven rank crossings, frozen reveal predictions, post-reveal edit labels, fresh experiment contexts, LaTeX rendering, and interactive calculus. Additional checks cover dated sources, completed training labels, future-price mutation invariance, tied/constant Spearman handling, measured uncertainty, identical simulations for identical rankings, global caches, dynamic universes, common-date backtests, reproducible hypothetical projections through 2037, analytic derivatives, and numerical integral agreement.

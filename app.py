@@ -5,18 +5,19 @@ import hashlib
 import html
 import json
 from pathlib import Path
-import re
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 from derivport import (DEFAULT_FORMULA, FormulaError, analyze_cutoff, apply_rule,
     backtest_rule, default_crossovers, evaluate_history, formula_curve,
-    historical_forecasts, load_prices, local_slope, rank_correlation,
+    historical_forecasts, load_prices, rank_correlation,
     reveal_outcomes, simulate_paths, simulation_summary, SCENARIOS)
 from derivport.market_data import (MarketDataError, get_search_status,
     load_symbol_prices, read_cached_symbols, search_symbols, symbol_info)
 from derivport.projections import project_scenarios
+from derivport.calculus import calculus_experiment, differential, formula_to_latex
+from derivport.calculus_ui import render_calculus_lab
 from algorithms.derivport_signal import NAME as SIGNAL_NAME, FORMULA as SIGNAL_FORMULA, DEFAULT_K as SIGNAL_K
 
 ROOT = Path(__file__).parent
@@ -95,8 +96,7 @@ if 'pending_stock' in st.session_state:
     st.session_state.stock = pending
     st.session_state.history_mode = 'Full cached history'
 
-st.html('''<div class="masthead"><div class="brand">DerivPort<span>Quantitative research</span></div>
-<div class="mast-right">SIGNALS · REPLAY · SCENARIOS <span class="connection">Local cache</span></div></div>''')
+st.html('<div class="masthead"><div class="brand">DerivPort</div></div>')
 def clear_search():
     st.session_state.pop('search_results', None)
     st.session_state.pop('search_status', None)
@@ -227,7 +227,7 @@ available_notes = [n for n in notes if n['ticker'] == ticker and pd.Timestamp(n[
 note = max(available_notes, key=lambda n: n['published']) if available_notes else None
 research, builder, future = st.tabs(['Research', 'Algorithm builder', 'Future scenarios'], key='workspace')
 with research:
-    st.html(f'''<div class="stock-header"><div><h1>{esc(meta.get('name', ticker))} <span>{esc(ticker)}</span></h1>
+    st.html(f'''<div class="stock-header"><div><h1>{esc(meta.get('name', ticker))}</h1>
     <p>{esc(meta.get('exchange', ''))} · {esc(meta.get('currency', 'Unknown'))} · Historical adjusted prices</p></div>
     <div class="price">{prices.loc[pd.Timestamp(cutoff), ticker]:,.2f}<small>Adjusted close · {cutoff}</small></div></div>''')
     if ticker == 'AAPL' and cutoff == '2024-05-03' and not extended:
@@ -239,10 +239,10 @@ with research:
 with builder:
     st.html('<div class="page-title"><h1>Algorithm builder</h1><p>Write a ranking rule. Inspect the math. Test it on historical outcomes.</p></div>')
     with st.container(border=True, key='signal_card'):
-        st.html(f'<div class="summary-signal"><div><span class="signal-kicker">YOUR ALGORITHM</span><h2>{esc(SIGNAL_NAME)}</h2><p>A balanced model and momentum score with explicit error and volatility penalties.</p></div><span class="signal-badge">BALANCED</span></div>')
+        st.html(f'<div class="summary-signal"><div><h2>{esc(SIGNAL_NAME)}</h2><p>A balanced model and momentum score with explicit error and volatility penalties.</p></div></div>')
         signal_info, signal_actions = st.columns([2, 1], gap='large')
         with signal_info:
-            st.code(SIGNAL_FORMULA, language=None)
+            st.latex(r'S = ' + formula_to_latex(SIGNAL_FORMULA))
             st.caption('60% model estimate + 40% trailing momentum. k controls a penalty of 50% forecast error + 25% volatility. Fixed starting weights; no claim that they are optimal.')
         with signal_actions:
             def load_balanced_algorithm():
@@ -284,11 +284,14 @@ with builder:
         row = scores.loc[ticker]
         values = {name: float(row[name]) for name in ('predicted_return', 'uncertainty', 'momentum', 'volatility')}
         values['k'] = active_k
-        arithmetic = re.sub(r'\b(predicted_return|uncertainty|momentum|volatility|k)\b', lambda m: f"({values[m.group()]:.2f})", active_formula)
-        st.code(f'{arithmetic} ≈ {row.score:+.2f}', language=None)
+        st.latex(r'S = ' + formula_to_latex(active_formula))
+        st.latex(r'S \approx ' + formula_to_latex(active_formula, values) + rf' \approx {row.score:.3f}')
+        st.markdown(r'$\widehat r_{21}$ is the model estimate, $M_{21}$ momentum, $\varepsilon$ past forecast error, and $\sigma_{21}$ volatility. Return-like inputs are percentage points.')
         st.caption('Substituted inputs are rounded; scores use full precision. A ranking score is not a return forecast.')
         if active_formula.strip() == DEFAULT_FORMULA:
-            st.caption(f'Uncertainty penalty: {active_k:g} × {row.uncertainty:.2f} ≈ {active_k * row.uncertainty:.2f} pp subtracted from the prediction.')
+            st.latex(rf'k\varepsilon \approx ({active_k:g})({row.uncertainty:.3f}) \approx {active_k * row.uncertainty:.3f}\;\mathrm{{pp}}')
+        elif active_formula.strip() == SIGNAL_FORMULA:
+            st.latex(rf'k(0.5\varepsilon+0.25\sigma_{{21}}) \approx {active_k * (.5 * row.uncertainty + .25 * row.volatility):.3f}\;\mathrm{{pp}}')
         else:
             st.caption('Custom arithmetic can change score units; return × return differs from a return. Normalize ratios when a dimensionless term is intended.')
         change_note = st.session_state.get('rule_change')
@@ -312,15 +315,28 @@ with builder:
         fig.add_vline(x=row.uncertainty, line_dash='dot', line_color='#bbc3ce')
         fig.update_xaxes(title='Uncertainty (percentage points)')
         fig.update_yaxes(title='Rule score')
-        st.plotly_chart(chart(fig, 250), width='stretch', config={'displayModeBar': False}, key='calculus')
         try:
-            slope = local_slope(active_formula, values, active_k)
-            label = 'Exact slope = −k' if active_formula.strip() == DEFAULT_FORMULA else 'Numerical local slope'
-            st.caption(f'{label}: {slope:+.2f} score units per 1 pp uncertainty; other inputs held fixed.')
+            derivatives = differential(active_formula, values, active_k)
+            slope = derivatives.gradient['uncertainty']
+            curvature = derivatives.hessian['uncertainty']['uncertainty']
+            fig.add_trace(go.Scatter(x=curve.uncertainty,
+                y=row.score + slope * (curve.uncertainty - row.uncertainty), name='Tangent',
+                line=dict(color='#a1a7b0', width=1.5, dash='dot'), showlegend=False))
+            st.latex(rf'\left.\frac{{\partial S}}{{\partial\varepsilon}}\right|_{{\mathbf{{x}}_0}}={slope:.4g},\qquad \left.\frac{{\partial^2 S}}{{\partial\varepsilon^2}}\right|_{{\mathbf{{x}}_0}}={curvature:.4g}')
+            st.caption('Automatic differentiation of your rule gives the local slope and curvature. The dotted line is its tangent; all other inputs stay fixed.')
         except FormulaError:
-            st.caption('The numerical local slope is undefined here; the current score remains valid.')
+            st.caption('Derivatives are undefined or outside numerical range here; the current score remains valid.')
+        try:
+            # A sampled curve must not draw a line across an unsampled pole.
+            for endpoint in (curve.uncertainty.iloc[0], curve.uncertainty.iloc[-1]):
+                calculus_experiment(active_formula, values, 'uncertainty',
+                    float(endpoint - row.uncertainty), active_k, points=3)
+            st.plotly_chart(chart(fig, 250), width='stretch', config={'displayModeBar': False}, key='calculus')
+        except FormulaError:
+            st.info('This preview range includes an undefined point. Choose a valid interval in Calculus lab; your current score is unchanged.')
         if active_formula.strip() == DEFAULT_FORMULA and active_k == 2:
-            st.caption('At k = 2, one extra percentage point of uncertainty lowers the score by two percentage points.')
+            st.latex(r'\Delta S=-k\,\Delta\varepsilon=-2(1)=-2\;\mathrm{pp}')
+    render_calculus_lab(active_formula, values, active_k, plotstyle=chart)
     feature_export = scores[['predicted_return', 'uncertainty', 'momentum', 'volatility']].rename_axis('ticker').reset_index()
     feature_export.insert(1, 'cutoff', cutoff)
     st.download_button('Download this cutoff’s algorithm inputs', feature_export.to_csv(index=False).encode(),
@@ -365,7 +381,8 @@ with builder:
         st.plotly_chart(chart(fig, 280), width='stretch', config={'displayModeBar': False}, key='backtest_chart')
         m = result['metrics']
         st.caption(f"{m['n_dates']} completed periods / {m['n_forecasts']} forecasts. Forecast RMSE: AI {m['model_rmse']:.2f} pp; momentum {m['baseline_rmse']:.2f} pp. Linked returns compound successive top selections without execution, costs, taxes, FX conversion, or sizing.")
-        st.caption(f"Tested rule: {result['metadata']['formula']} · k = {result['metadata']['k']:g}. Fixed group: {', '.join(result['metadata']['universe'])}.")
+        st.latex(r'S = ' + formula_to_latex(result['metadata']['formula']) + rf',\qquad k={result["metadata"]["k"]:g}')
+        st.caption(f"Fixed group: {', '.join(result['metadata']['universe'])}.")
         with st.expander('Per-period backtest results'):
             st.dataframe(result['per_date'], width='stretch', hide_index=True)
             st.caption(result['metadata']['assumptions'])
@@ -390,6 +407,9 @@ with future:
         with p_col:
             projection_paths = st.number_input('Simulated paths', min_value=200, max_value=2000, value=600, step=200, key='projection_paths')
         st.caption('Monthly correlated lognormal scenarios. Volatility uses the last three years of observed log returns, annualized with 252 sessions/year, then multiplied by your setting. Drift and correlation are assumptions, not model estimates. Seed 2037 keeps the same assumptions reproducible; editing your ranking rule does not change the paths.')
+        st.latex(r'\Delta\log P_i=\mu\Delta t+\sigma_i\sqrt{\Delta t}\left(\sqrt{\rho}\,Z_0+\sqrt{1-\rho}\,Z_i\right)')
+        st.latex(r'\operatorname{Median}(P_T)=P_0e^{\mu T},\qquad \frac{\partial\operatorname{Median}(P_T)}{\partial\mu}=T P_0e^{\mu T}')
+        st.caption('This derivative describes the assumed lognormal scenario median. It is not an explanation of the regression or a forecast of actual future prices.')
     with run_col:
         run_projection = st.button('Simulate through target date', type='primary', width='stretch', key='project_future')
     projection_config = (tuple(universe), data_fingerprint, str(projection_target), projection_drift,
@@ -443,7 +463,7 @@ edited = bool(snapshot and (formula != snapshot['formula'] or k != snapshot['k']
 with panels:
     left, right = st.columns(2, gap='large')
     with left, st.container(border=True, key='analyst_company'):
-        st.html('<div class="analyst-label">COMPANY & BUSINESS</div><h3>Stock analyst</h3>')
+        st.html('<h3>Stock analyst</h3>')
         if note:
             source_age = (pd.Timestamp(cutoff) - pd.Timestamp(note['published'])).days
             if source_age > 180:
@@ -455,14 +475,16 @@ with panels:
         else:
             st.info('No suitable dated company source is cached for this stock and cutoff. There is insufficient evidence for a company interpretation.')
     with right, st.container(border=True, key='analyst_quant'):
-        st.html('<div class="analyst-label">MODEL & RANKING</div><h3>Quant analyst — model and ranking</h3>')
+        st.html('<h3>Quant analyst — model and ranking</h3>')
         a, b, c = st.columns(3)
         a.metric('Estimated next 21 sessions', pct(row.predicted_return))
         b.metric('Typical forecast error', f'{row.uncertainty:.2f} pp')
         c.metric('AI model rank', f'{row.model_rank:g} / {len(universe)}')
         st.markdown(f'The regression places **{ticker} at rank {row.model_rank:g}** by estimated return. It uses past momentum and volatility. Feature influence is not measured, so no individual feature is presented as the cause of the prediction.')
         st.caption(f'Error is RMSE from {int(row.uncertainty_n)} completed past out-of-sample forecasts, not a confidence interval.')
-        st.code(f'{active_formula}\n{arithmetic} ≈ {row.score:+.2f} → rank {row.student_rank:g}', language=None)
+        st.latex(r'S = ' + formula_to_latex(active_formula))
+        st.latex(r'S \approx ' + formula_to_latex(active_formula, values) + rf' \approx {row.score:.3f}')
+        st.caption(f'Your rule ranks this score {row.student_rank:g} out of {len(universe)}.')
     st.caption('The company view interprets reported business evidence; the model compares price-based forecasts. A strong business result can coexist with a low relative stock rank.' if note else 'The model view is available; comparison with a company interpretation is unsupported without a suitable dated source.')
 with ranks_area:
     heading('Rankings', 'Same group · same cutoff · descending scores')
@@ -502,6 +524,7 @@ with replay_area:
             rho = rank_correlation(order, outcomes.realized_rank)
             col.metric(f'{label} · Spearman ρ', 'Undefined' if rho is None else f'{rho:+.2f}')
         st.caption(f"Single-cutoff result through {pd.Timestamp(outcomes.attrs['end_date']):%Y-%m-%d}. Spearman compares ranked orders: +1 the same, −1 the reverse, 0 no rank association; ties use average ranks and constant rankings are undefined. Company notes made no numerical return forecast and receive no accuracy score.")
+        st.latex(r'\rho_s=\operatorname{Corr}\!\left(\operatorname{rank}_{\rm avg}(s),\operatorname{rank}_{\rm avg}(R^{\rm actual}_{21})\right)')
         path = prices.loc[pd.Timestamp(cutoff):pd.Timestamp(outcomes.attrs['end_date'])]
         path = (path / path.iloc[0] - 1) * 100
         fig = go.Figure()
@@ -532,9 +555,12 @@ with extras_area:
     with st.expander('Methodology, data & past evaluation'):
         st.markdown('**Research scope.** Finance education only: no brokerage, balances, sizing, trades, or buy/sell recommendations. Finance theme confirmed; a detailed official scoring rubric was not supplied.')
         st.markdown(f'**Global dates.** Any available date can be selected after sufficient shared history. Provider-wide US and international equity search is available online; a 109-symbol starter catalog and {len(read_cached_symbols())} price histories are cached offline. Coverage varies, so availability of every stock is not guaranteed. No missing-date filling is used. International experiments use 21 shared observed sessions, which can span more than 21 sessions on an individual exchange, using exchange-local daily closes. Local-currency returns exclude FX conversion.')
-        st.markdown('**Model.** StandardScaler + Ridge(alpha=25) uses momentum and volatility. Training labels complete by each cutoff. Momentum is trailing 21-session return. Volatility is the trailing daily-return sample standard deviation × √21 × 100. Return inputs are percentage points; k is dimensionless under the default rule.')
+        st.markdown('**Model.** Standardized Ridge regression uses momentum and volatility. Training labels complete by each cutoff. Return inputs are percentage points; k is dimensionless under the default rule.')
+        st.latex(r'M_{21,t}=100\left(\frac{P_t^{\rm adj}}{P_{t-21}^{\rm adj}}-1\right),\qquad \sigma_{21,t}=100\sqrt{21}\;\operatorname{SD}(r_{t-20},\ldots,r_t)')
+        st.latex(r'\widehat{\boldsymbol\beta}=\underset{\beta_0,\boldsymbol\beta}{\operatorname{argmin}}\;\sum_{i\in\mathcal{T}_t}\left(y_i-\beta_0-\boldsymbol\beta^\top\widetilde{\mathbf{x}}_i\right)^2+25\lVert\boldsymbol\beta\rVert_2^2')
         st.caption(f"Current fit: {analysis.training['n_rows']:,} rows; last completed training label {pd.Timestamp(analysis.training['last_label_end']):%Y-%m-%d}.")
-        st.markdown('**Uncertainty.** RMSE = √mean((prediction − actual)²), using up to 24 recent completed out-of-sample errors for that stock, with outcomes already known at cutoff. Fewer than six stock errors uses a disclosed pooled last-120-error fallback. This is an error scale, not a confidence interval.')
+        st.markdown('**Uncertainty.** Root mean squared error uses up to 24 recent completed out-of-sample errors for that stock, with outcomes already known at cutoff. Fewer than six stock errors uses a disclosed pooled last-120-error fallback. This is an error scale, not a confidence interval.')
+        st.latex(r'\varepsilon_t=\sqrt{\frac{1}{n_t}\sum_{i\in\mathcal{E}_t}\left(\widehat r_{i,21}-r_{i,21}^{\rm actual}\right)^2}')
         st.dataframe(base[['uncertainty', 'uncertainty_n', 'uncertainty_source']], width='stretch')
         past = analysis.error_summary
         a, b, c = st.columns(3)

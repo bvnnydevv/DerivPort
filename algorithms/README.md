@@ -2,10 +2,11 @@
 
 Your balanced **model + momentum** ranking algorithm. It blends the model's return estimate with recent price momentum, then discounts measured forecast error and volatility:
 
-```text
-score = 0.6 × predicted_return + 0.4 × momentum
-        − k × (0.5 × uncertainty + 0.25 × volatility)
-```
+$$
+S = 0.6\widehat r_{21} + 0.4M_{21} - k\left(0.5\varepsilon + 0.25\sigma_{21}\right)
+$$
+
+Here $\widehat r_{21}$ is the model estimate, $M_{21}$ trailing momentum, $\varepsilon$ completed forecast-error RMSE, and $\sigma_{21}$ volatility.
 
 The default is **k = 1**. All return-like inputs use the same 21-session horizon and numerical percentage-point scale: `3.5` means 3.5%. k is dimensionless. The coefficients are a transparent research hypothesis, chosen for readability rather than optimized to past results. A ranking score is not a return forecast or a buy/sell recommendation.
 
@@ -36,12 +37,21 @@ You can also import `score_row(row, k=1)` or `rank_stocks(rows, k=1)` from the f
 
 ## What each assumption does
 
+$$
+\frac{\partial S}{\partial\widehat r_{21}}=0.6,\quad
+\frac{\partial S}{\partial M_{21}}=0.4,\quad
+\frac{\partial S}{\partial\varepsilon}=-0.5k,\quad
+\frac{\partial S}{\partial\sigma_{21}}=-0.25k
+$$
+
 - Increasing the model estimate by 1 pp adds **0.6** score units.
 - Increasing momentum by 1 pp adds **0.4** score units.
 - Increasing uncertainty by 1 pp subtracts **0.5 × k** score units.
 - Increasing volatility by 1 pp subtracts **0.25 × k** score units.
 
 These are effects of the explicit ranking arithmetic, not explanations of the regression's feature influence. Rank changes only when a score crosses another stock's score.
+
+The app's calculus lab also compares tangent and quadratic Taylor approximations with actual score changes and the numerical integral of the derivative. It shows curvature and mixed partials; for this linear-in-uncertainty rule, $\partial^2 S/\partial\varepsilon^2=0$ while $\partial^2 S/(\partial k\,\partial\varepsilon)=-0.5$.
 
 ## Initial historical check
 

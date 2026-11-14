@@ -1,11 +1,14 @@
 """Replay integrity through Streamlit's normal app.py entry point."""
 
 import socket
+import html
+import re
 from io import BytesIO
 from datetime import date
 from pathlib import Path
 
 import pandas as pd
+import pytest
 from streamlit.testing.v1 import AppTest
 
 
@@ -322,3 +325,90 @@ def test_balanced_algorithm_preset_and_downloads_match_the_standalone_file(monke
     assert app.error
     assert app.session_state["active_algorithm_name"] == NAME
     pd.testing.assert_frame_equal(app.session_state["current_scores"], current)
+
+
+def test_latex_and_interactive_calculus_preserve_the_research_experiment(monkeypatch):
+    """The normal screen exposes real derivative/Taylor/integral calculations."""
+    def deny_network(*args, **kwargs):
+        raise AssertionError("Formula calculus must work entirely from cached inputs.")
+
+    monkeypatch.setattr(socket, "create_connection", deny_network)
+    monkeypatch.setattr(socket.socket, "connect", deny_network)
+    monkeypatch.setenv("STREAMLIT_BROWSER_GATHER_USAGE_STATS", "false")
+    app = AppTest.from_file(str(ROOT / "app.py"), default_timeout=120).run()
+    assert not app.exception
+    app.button(key="load_balanced_algorithm").click().run()
+    assert not app.exception
+    assert app.latex, "Ranking arithmetic must be rendered with LaTeX."
+    equations = "\n".join(element.value for element in app.latex)
+    assert "\\widehat" in equations
+    assert "\\varepsilon" in equations
+    assert "\\nabla S" in equations
+    assert "T_1(h)" in equations
+    assert "T_2(h)" in equations
+    assert "\\int_{x_0}^{x_0+h}" in equations
+
+    # Keep stock symbols in selectors/data, while removing ornamental labels
+    # around the primary headings and the old ticker bubble next to the title.
+    rendered_html = "\n".join(element.value for element in app.html if "<style>" not in element.value)
+    visible_html_text = " ".join(html.unescape(re.sub(r"<[^>]+>", " ", rendered_html)).split()).lower()
+    assert "company & business" not in visible_html_text
+    assert "model & ranking" not in visible_html_text
+    assert "signals · replay · scenarios" not in visible_html_text
+    for removed_class in ("analyst-label", "signal-kicker", "signal-badge"):
+        assert not re.search(rf'class=["\'][^"\']*\b{removed_class}\b', rendered_html)
+    title_match = re.search(r'<div class="stock-header".*?<h1>(.*?)</h1>', rendered_html, re.S)
+    assert title_match
+    assert "<span" not in title_match.group(1), "The decorative stock-symbol bubble should be removed."
+
+    original_scores = app.session_state["current_scores"].copy(deep=True)
+    app.selectbox(key="calc_variable").set_value("uncertainty").run()
+    app.slider(key="calc_delta").set_value(1.0).run()
+    assert not app.exception
+    linear = app.session_state["calc_result"]
+    assert linear["variable"] == "uncertainty"
+    assert linear["first_derivative"] == pytest.approx(-0.5)
+    assert linear["second_derivative"] == pytest.approx(0.0)
+    for key in ("actual_change", "linear_change", "quadratic_change", "integrated_change"):
+        assert linear[key] == pytest.approx(-0.5, abs=1e-9)
+    pd.testing.assert_frame_equal(app.session_state["current_scores"], original_scores)
+    assert not has_future_table(app)
+
+    # Switch the mathematical variable, rather than merely changing a chart
+    # label: dS/dk must include both actual uncertainty and volatility inputs.
+    selected = app.selectbox(key="stock").value
+    row = original_scores.loc[selected]
+    app.selectbox(key="calc_variable").set_value("k").run()
+    app.slider(key="calc_delta").set_value(0.5).run()
+    assert not app.exception
+    risk_weight = app.session_state["calc_result"]
+    expected_slope = -(0.5 * row.uncertainty + 0.25 * row.volatility)
+    assert risk_weight["first_derivative"] == pytest.approx(expected_slope)
+    assert risk_weight["actual_change"] == pytest.approx(expected_slope * 0.5)
+    pd.testing.assert_frame_equal(app.session_state["current_scores"], original_scores)
+
+    # A nonlinear expression has nonzero curvature; second-order Taylor must
+    # improve on the tangent and recover this quadratic's exact score change.
+    app.text_input(key="formula").set_value("uncertainty * uncertainty").run()
+    app.selectbox(key="calc_variable").set_value("uncertainty").run()
+    app.slider(key="calc_delta").set_value(1.0).run()
+    assert not app.exception
+    curved = app.session_state["calc_result"]
+    assert curved["second_derivative"] == pytest.approx(2.0)
+    assert curved["actual_change"] == pytest.approx(curved["quadratic_change"])
+    assert abs(curved["actual_change"] - curved["linear_change"]) == pytest.approx(1.0)
+    assert curved["integrated_change"] == pytest.approx(curved["actual_change"], abs=1e-8)
+
+    # The formula is valid at every stock's current input, but the requested
+    # interval crosses a pole. Reject that experiment without changing ranks.
+    pole = float(row.uncertainty) + 0.5
+    app.text_input(key="formula").set_value(f"1 / (uncertainty - {pole!r})").run()
+    app.slider(key="calc_delta").set_value(0.1).run()
+    assert not app.exception
+    assert "calc_result" in app.session_state
+    pole_scores = app.session_state["current_scores"].copy(deep=True)
+    app.slider(key="calc_delta").set_value(1.0).run()
+    assert not app.exception
+    assert "calc_result" not in app.session_state
+    pd.testing.assert_frame_equal(app.session_state["current_scores"], pole_scores)
+    assert not has_future_table(app)
