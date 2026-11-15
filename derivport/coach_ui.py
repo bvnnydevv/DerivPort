@@ -38,13 +38,13 @@ def _guide_message(messages, kind):
     del messages[:-16]
 
 
-def render_coach(ticker, cutoff, row, metadata, note=None, context='', inline=False, chart_context=None):
+def render_coach(ticker, cutoff, row, metadata, note=None, context='', inline=False, chart_context=None, height=510):
     snapshot = build_context(ticker, cutoff, row, metadata, note)
     key = context_key(snapshot, context)
     messages = conversation_for(st.session_state, key)
     api_key, model = _server_settings()
     chart_context = context if chart_context is None else chart_context
-    panel = st.container(border=True, key='coach_panel') if inline else st.popover('Ask the research coach', width='stretch')
+    panel = st.container(border=True, height=height, key='coach_panel') if inline else st.popover('Ask the research coach', width='stretch')
     with panel:
         st.markdown(f'**{ticker} coach** · {snapshot["cutoff"]}')
         if api_key:
@@ -93,7 +93,7 @@ def render_coach(ticker, cutoff, row, metadata, note=None, context='', inline=Fa
             if intent:
                 _guide_message(messages, intent)
             del messages[:-16]
-        history_height = (280 if inline else 360) if messages else 170
+        history_height = 'stretch' if inline else (360 if messages else 170)
         with history_slot.container(height=history_height, border=False, key='coach_history'):
             if messages:
                 for message in messages:

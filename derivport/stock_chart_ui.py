@@ -56,14 +56,20 @@ def render_stock_chart(adjusted_prices, ticker, cutoff, metadata, coach_snapshot
             <div class="price">{value:,.2f}<small>{basis} · {last_date:%d %b %Y}<br>{move}</small></div></div>''')
         snapshot = coach_snapshot or {}
         guide_context = snapshot.get('context') or f'{ticker}|{cutoff}'
+        toolbar_area, _ = st.columns([3.2, 1.4], gap='medium')
+        with toolbar_area:
+            toolbar = st.container(key='price_toolbar')
+            notice_slot = st.empty()
+            ohlc_slot = st.empty()
         price_area, coach_area = st.columns([3.2, 1.4], gap='medium')
         # The coach executes first so explicit actions can update chart options
         # before those widgets are instantiated on this rerun.
         with coach_area:
             render_coach(ticker, cutoff, snapshot.get('row', {}), metadata,
-                snapshot.get('note'), guide_context, inline=True, chart_context=guide_context)
+                snapshot.get('note'), guide_context, inline=True, chart_context=guide_context,
+                height=510 if candles is not None else 450)
         with price_area:
-            with st.container(key='price_toolbar'):
+            with toolbar:
                 range_col, settings_col, expand_col = st.columns([1.4, 1, 1], vertical_alignment='bottom')
                 with range_col:
                     period = st.selectbox('Chart range', PERIODS, index=2, key='chart_period')
@@ -92,10 +98,10 @@ def render_stock_chart(adjusted_prices, ticker, cutoff, metadata, coach_snapshot
                     expand = st.button('Fullscreen', icon=':material/fullscreen:', key='open_fullscreen_chart', width='stretch')
             notice = st.session_state.pop('candle_notice', None)
             if notice:
-                st.caption(notice)
+                notice_slot.caption(notice)
             if daily is not None:
                 last = daily.iloc[-1]
-                st.html('<div class="ohlc-strip">' + ''.join(
+                ohlc_slot.html('<div class="ohlc-strip">' + ''.join(
                     f'<span><b>{label}</b> {value:,.2f}</span>' for label, value in
                     [('O', last.open), ('H', last.high), ('L', last.low), ('C', last.close)])
                     + f'<span><b>VOL</b> {last.volume:,.0f}</span></div>')

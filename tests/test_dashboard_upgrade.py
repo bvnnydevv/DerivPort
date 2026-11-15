@@ -127,6 +127,78 @@ def test_display_modes_update_stock_builder_and_fullscreen_without_changing_rese
     assert len(backgrounds) == 3
 
 
+def test_coach_chart_actions_work_in_every_display_mode_without_changing_research(offline_dashboard):
+    app = dashboard()
+    # Keep a user-selected indicator while the coach temporarily adds its own.
+    app.multiselect(key='chart_overlays').set_value(['SMA 50']).run()
+    assert not app.exception
+    scores = app.session_state['current_scores'].copy(deep=True)
+    fields = ['open', 'high', 'low', 'close', 'volume']
+    bars = app.session_state['chart_data'][fields].copy(deep=True)
+    cutoff = app.session_state['cutoff']
+
+    def assert_research_unchanged(mode):
+        assert not app.exception
+        assert app.radio(key='display_mode').value == mode
+        assert app.session_state['cutoff'] == cutoff
+        pd.testing.assert_frame_equal(app.session_state['current_scores'], scores)
+        pd.testing.assert_frame_equal(app.session_state['chart_data'][fields], bars)
+        assert_unrevealed(app)
+
+    def coach_shapes(figure):
+        return [shape for shape in figure.layout.shapes if str(shape.name or '').startswith('coach-')]
+
+    for mode in ('Day', 'Night', 'Pause'):
+        app.radio(key='display_mode').set_value(mode).run()
+        assert_research_unchanged(mode)
+        palette = theme_from_state({'theme_name': mode})
+
+        app.button(key='coach_mark_trend').click().run()
+        assert_research_unchanged(mode)
+        figure = offline_dashboard['known_price_hero']
+        trend, = coach_shapes(figure)
+        assert trend.name == 'coach-trend'
+        assert pd.Timestamp(trend.x0) == bars.index[0]
+        assert pd.Timestamp(trend.x1) == bars.index[-1] <= pd.Timestamp(cutoff)
+        assert trend.y0 == pytest.approx(bars.close.iloc[0])
+        assert trend.y1 == pytest.approx(bars.close.iloc[-1])
+        assert trend.line.color == palette['accent']
+
+        app.button(key='open_fullscreen_chart').click().run()
+        assert_research_unchanged(mode)
+        fullscreen = offline_dashboard['fullscreen_price_chart']
+        assert fullscreen.layout.paper_bgcolor == palette['panel']
+        fullscreen_trend, = coach_shapes(fullscreen)
+        assert fullscreen_trend.to_plotly_json() == trend.to_plotly_json()
+
+        app.button(key='coach_mark_range').click().run()
+        assert_research_unchanged(mode)
+        low, high = coach_shapes(offline_dashboard['known_price_hero'])
+        assert (low.name, high.name) == ('coach-window-low', 'coach-window-high')
+        assert low.y0 == low.y1 == pytest.approx(bars.low.min())
+        assert high.y0 == high.y1 == pytest.approx(bars.high.max())
+        for shape in (low, high):
+            assert pd.Timestamp(shape.x0) == bars.index[0]
+            assert pd.Timestamp(shape.x1) == bars.index[-1] <= pd.Timestamp(cutoff)
+
+        app.button(key='coach_mark_average').click().run()
+        assert_research_unchanged(mode)
+        assert app.multiselect(key='chart_overlays').value == ['SMA 50', 'SMA 20']
+        figure = offline_dashboard['known_price_hero']
+        average = next(trace for trace in figure.data if trace.name == 'SMA 20')
+        pd.testing.assert_series_equal(pd.Series(average.y),
+            app.session_state['chart_data']['SMA 20'].reset_index(drop=True), check_names=False)
+        assert any(annotation.name == 'coach-moving-average-label' for annotation in figure.layout.annotations)
+
+        app.button(key='coach_clear_guides').click().run()
+        assert_research_unchanged(mode)
+        assert app.multiselect(key='chart_overlays').value == ['SMA 50']
+        assert not coach_shapes(offline_dashboard['known_price_hero'])
+        assert not any(str(annotation.name or '').startswith('coach-')
+            for annotation in offline_dashboard['known_price_hero'].layout.annotations)
+        assert 'coach_chart_guide' not in app.session_state
+
+
 def test_projection_risk_controls_and_distinct_simulation_charts_preserve_history(offline_dashboard):
     app = dashboard()
     scores = app.session_state['current_scores'].copy(deep=True)
