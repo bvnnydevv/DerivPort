@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 
 from derivport.market_data import MarketDataError
 from derivport.ohlc import load_candles
-from derivport.theme import style_plot
+from derivport.theme import style_plot, theme_from_state
 from derivport.coach_ui import render_coach
 from derivport.chart_guides import apply_chart_guide
 from derivport.stock_chart import (PERIODS, INTERVALS, STYLES, OVERLAYS,
@@ -114,7 +114,8 @@ def render_stock_chart(adjusted_prices, ticker, cutoff, metadata, coach_snapshot
                 summary = 'Adjusted-close line · no OHLC candles available for this cutoff'
             fig.update_layout(uirevision=f'{ticker}|{cutoff}|{period}|{interval}|{style}|{log_scale}',
                 newshape=dict(line_color='#f2cc60', line_width=1.5), dragmode='pan')
-            style_plot(fig)
+            # The page can be light while the user's existing chart stays dark.
+            style_plot(fig, theme_from_state({'theme_name': 'Midnight', 'theme_accent': '#d9e5d2'}))
             try:
                 apply_chart_guide(fig, exported, st.session_state.get('coach_chart_guide'), guide_context, cutoff)
             except ValueError as exc:

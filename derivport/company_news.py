@@ -7,7 +7,7 @@ Only headlines and source links are retained; articles are never scraped.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from html.parser import HTMLParser
 import ipaddress
 import re
@@ -15,9 +15,11 @@ from urllib.parse import quote, urlsplit, urlunsplit
 
 from .market_data import MarketDataError, normalize_symbol
 
-MAX_ARTICLES = 20
+MAX_ARTICLES = 100
+NEWS_WINDOW_DAYS = 7
 REQUEST_TIMEOUT = 8
 NEWS_NOTICE = ('Latest provider search results, not a point-in-time news archive. '
+    'Only dated headlines supplied from the past seven days are shown; provider coverage can be incomplete. '
     'Only titles mentioning the selected company name or ticker are shown; aliases and indirect stories may be missed. '
     'Publication timestamps are supplied by the provider. '
     'These headlines do not enter historical forecasts, rankings or the coach context.')
@@ -46,6 +48,9 @@ class CompanyNewsDigest:
     articles: tuple[NewsArticle, ...]
     source: str = 'Yahoo Finance search via yfinance'
     notice: str = NEWS_NOTICE
+    window_start: datetime | None = None
+    window_end: datetime | None = None
+    fetched_count: int = 0
 
     @property
     def search_url(self):
@@ -186,6 +191,23 @@ def _search(requested_query):
         raise_errors=True).news
 
 
+def _utc_now():
+    return datetime.now(timezone.utc)
+
+
+def articles_in_window(articles, end):
+    """Keep known publication dates within the inclusive rolling seven-day window.
+
+    Date-only entries retain their reported UTC calendar date at midnight; no
+    intraday time is invented. Unknown and future dates cannot establish that
+    an article belongs to this window and are excluded.
+    """
+    end = end.astimezone(timezone.utc)
+    start = end - timedelta(days=NEWS_WINDOW_DAYS)
+    return tuple(article for article in articles if article.published_at is not None
+        and start <= article.published_at <= end)
+
+
 def fetch_company_news(company, symbol, query=''):
     """Fetch on explicit caller action only. No imports or cache reads fetch news."""
     try:
@@ -202,7 +224,9 @@ def fetch_company_news(company, symbol, query=''):
         records = _search(requested_query)
     except Exception as exc:
         raise CompanyNewsError('Company news is unavailable from the provider right now. Try again later or open the company news source.') from exc
-    articles = tuple(article for article in normalize_articles(records, symbol)
+    now = _utc_now()
+    articles = tuple(article for article in articles_in_window(normalize_articles(records, symbol), now)
         if title_mentions_company(article.title, company, symbol))
     return CompanyNewsDigest(company=_text(company, 240), symbol=symbol, query=query,
-        fetched_at=datetime.now(timezone.utc), articles=articles)
+        fetched_at=now, articles=articles, window_start=now - timedelta(days=NEWS_WINDOW_DAYS),
+        window_end=now, fetched_count=min(len(records), 100))

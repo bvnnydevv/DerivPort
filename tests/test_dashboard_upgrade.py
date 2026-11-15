@@ -81,7 +81,8 @@ def test_theme_font_and_fullscreen_leave_scores_and_cutoff_unchanged(offline_das
     assert '--workspace:#121416' in rendered
     assert '--accent:#d194ff' in rendered
     current = offline_dashboard['known_price_hero']
-    assert current.layout.paper_bgcolor != previous_background
+    # The surrounding page changes theme; the stock canvas stays as requested.
+    assert current.layout.paper_bgcolor == previous_background
     assert 'Helvetica Neue' in current.layout.font.family
     pd.testing.assert_frame_equal(app.session_state['current_scores'], scores)
     assert_unrevealed(app)

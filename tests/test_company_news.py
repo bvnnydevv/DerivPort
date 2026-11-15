@@ -1,10 +1,15 @@
 """News sources remain bounded, explicit, and outside historical evidence."""
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
 
 import pytest
 
 from derivport import company_news as news
+
+
+@pytest.fixture(autouse=True)
+def fixed_news_clock(monkeypatch):
+    monkeypatch.setattr(news, '_utc_now', lambda: datetime(2025, 1, 3, 16, tzinfo=timezone.utc))
 
 
 def story(title='Apple announces update', url='https://example.com/story', timestamp=1735833600, tickers=None):
@@ -67,13 +72,16 @@ def test_fetch_is_explicit_and_search_contract_has_timeout_and_no_extra_results(
     assert len(calls) == 1
     assert calls[0][0] == 'AAPL earnings outlook'
     assert calls[0][1]['timeout'] == 8
-    assert calls[0][1]['news_count'] == 20
+    assert calls[0][1]['news_count'] == 100
     assert calls[0][1]['max_results'] == calls[0][1]['lists_count'] == 0
     assert digest.symbol == 'AAPL'
     assert digest.fetched_at.tzinfo == timezone.utc
     assert 'not a point-in-time' in digest.notice
     assert 'historical forecasts' in digest.notice
     assert digest.search_url == 'https://finance.yahoo.com/quote/AAPL/news/'
+    assert digest.window_end == digest.fetched_at
+    assert digest.window_end - digest.window_start == timedelta(days=7)
+    assert digest.fetched_count == 1
 
 
 def test_failures_return_no_fabricated_news_and_invalid_inputs_make_no_request(monkeypatch):
@@ -126,3 +134,32 @@ def test_fetch_removes_broad_provider_tags_without_a_literal_company_title_menti
 ])
 def test_conservative_company_name_and_ticker_mentions(title, company, symbol, expected):
     assert news.title_mentions_company(title, company, symbol) is expected
+
+
+def test_seven_day_window_includes_exact_boundaries_and_excludes_future_old_unknown_dates():
+    end = datetime(2025, 1, 10, 16, tzinfo=timezone.utc)
+    start = end - timedelta(days=7)
+    def article(name, published, precision='second'):
+        return news.NewsArticle(name, 'Issuer', 'https://example.com/' + name, published, precision)
+    items = [article('start', start), article('end', end),
+        article('old', start - timedelta(seconds=1)), article('future', end + timedelta(seconds=1)),
+        article('unknown', None, 'unknown'),
+        article('local', datetime(2025, 1, 3, 11, tzinfo=timezone(timedelta(hours=-5)))),
+        article('date-only', datetime(2025, 1, 5, tzinfo=timezone.utc), 'date')]
+    selected = news.articles_in_window(items, end)
+    assert [article.title for article in selected] == ['start', 'end', 'local', 'date-only']
+    assert selected[-1].timestamp_precision == 'date'
+    assert selected[-1].published_at.hour == 0
+
+
+def test_fetch_applies_date_window_to_real_provider_records_and_discloses_coverage(monkeypatch):
+    now = news._utc_now()
+    records = [story(title='Apple current update', timestamp=now.timestamp()),
+        story(title='Apple older report', url='https://example.com/old', timestamp=(now - timedelta(days=8)).timestamp()),
+        story(title='Apple future report', url='https://example.com/future', timestamp=(now + timedelta(hours=1)).timestamp()),
+        story(title='Apple undated report', url='https://example.com/unknown', timestamp='unknown')]
+    monkeypatch.setattr(news, '_search', lambda query: records)
+    digest = news.fetch_company_news('Apple Inc.', 'AAPL')
+    assert [article.title for article in digest.articles] == ['Apple current update']
+    assert digest.fetched_count == 4
+    assert 'coverage can be incomplete' in digest.notice

@@ -6,7 +6,10 @@ from derivport.theme import FONT, theme_from_state, theme_css, style_plot
 
 
 def test_custom_palette_contrasts_with_background_and_rejects_css_injection():
-    dark = theme_from_state({})
+    editorial = theme_from_state({})
+    assert editorial['name'] == 'Editorial'
+    assert editorial['background'] == '#eeefec'
+    dark = theme_from_state({'theme_name':'Midnight'})
     light = theme_from_state({'theme_name':'Custom','theme_background':'#ffffff','theme_accent':'#234567'})
     assert dark['text'] != light['text']
     assert light['accent_text'] == '#ffffff'

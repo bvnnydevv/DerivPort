@@ -46,13 +46,13 @@ def render_coach(ticker, cutoff, row, metadata, note=None, context='', inline=Fa
     chart_context = context if chart_context is None else chart_context
     panel = st.container(border=True, key='coach_panel') if inline else st.popover('Ask the research coach', width='stretch')
     with panel:
-        st.markdown(f'**{ticker} research coach**')
-        st.caption(f'{ticker} · evidence through {snapshot["cutoff"]}')
+        st.markdown(f'**{ticker} coach** · {snapshot["cutoff"]}')
         if api_key:
-            st.caption('AI coach · OpenAI. Submitting a question shares it, this public stock snapshot and this conversation with OpenAI. Keep personal details out.')
+            st.caption('AI · OpenAI. Send shares your question, public stock evidence and chat. Keep personal details out.')
         else:
-            st.caption('Guided coach · offline. Prepared lessons use this stock’s evidence; replies are not AI-generated.')
-        with st.popover('Chart tools', width='stretch'):
+            st.caption('Offline guide · prepared lessons, not AI-generated.')
+        tools, suggestions = st.columns(2, gap='small')
+        with tools, st.popover('Chart tools', width='stretch'):
             left, right = st.columns(2, gap='small')
             with left:
                 trend = st.button('Mark trend', key='coach_mark_trend', width='stretch')
@@ -66,13 +66,13 @@ def render_coach(ticker, cutoff, row, metadata, note=None, context='', inline=Fa
                     queue_chart_guide(st.session_state, kind, chart_context)
                     _guide_message(messages, kind)
             st.caption('Chart guides use observed prices only. Range marks are window extremes, not validated support or resistance.')
-        # Reserve conversation space before mounting the inline native composer.
-        # The native control supplies keyboard submission and an accessible SVG arrow.
-        history = st.container(height=280 if inline else 360, border=False, key='coach_history')
-        with st.popover('Suggested questions', width='stretch'):
+        with suggestions, st.popover('Questions', width='stretch'):
             lesson = st.selectbox('Choose a lesson', list(LESSONS), key='coach_lesson')
             lesson_submitted = st.button('Ask this question', key='coach_lesson_send', width='stretch')
             cleared = st.button('Clear conversation', key='coach_clear', width='stretch')
+        # Fill this earlier slot after submission, keeping history above the
+        # composer and sizing the first reply correctly in the same rerun.
+        history_slot = st.empty()
         with st.container(key='coach_composer'):
             question = st.chat_input(f'Ask about {ticker}…', key='coach_question', max_chars=2000)
 
@@ -93,7 +93,8 @@ def render_coach(ticker, cutoff, row, metadata, note=None, context='', inline=Fa
             if intent:
                 _guide_message(messages, intent)
             del messages[:-16]
-        with history:
+        history_height = (280 if inline else 360) if messages else 170
+        with history_slot.container(height=history_height, border=False, key='coach_history'):
             if messages:
                 for message in messages:
                     with st.container(border=False):
@@ -104,5 +105,5 @@ def render_coach(ticker, cutoff, row, metadata, note=None, context='', inline=Fa
                                 st.caption(strip_emojis(message['notice']))
                         st.markdown(strip_emojis(message['content']))
             else:
-                st.markdown('**Let’s read the evidence.**')
-                st.markdown('Ask a question below, choose a suggested question, or use a chart guide. Try: “What does this trend tell me?”')
+                st.markdown('**Ask about this stock.**')
+                st.markdown('Try “Explain this chart” or choose a question above.')

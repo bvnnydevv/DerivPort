@@ -15,7 +15,8 @@ from .news_events import analyze_news_event
 from .coach import strip_emojis
 
 
-MAX_VISIBLE_HEADLINES = 6
+MAX_VISIBLE_HEADLINES = 10
+MAX_DISPLAY_HEADLINES = 50
 
 
 def _stock_prices(prices, symbol):
@@ -34,6 +35,16 @@ def _date_label(article):
     if article.timestamp_precision == 'date':
         return article.published_at.strftime('%d %b %Y') + ' · date only'
     return article.published_at.strftime('%d %b %Y, %H:%M UTC')
+
+
+def _render_headline(article):
+    url = safe_article_url(article.url)
+    if url is None:
+        return
+    st.html('<article class="news-item"><a href="' + escape(url, quote=True)
+        + '" target="_blank" rel="noopener noreferrer">' + escape(strip_emojis(article.title))
+        + '</a><p>' + escape(strip_emojis(article.publisher)) + ' · ' + escape(_date_label(article))
+        + '</p></article>')
 
 
 def _event_date(article):
@@ -71,9 +82,12 @@ def _render_event_analysis(symbol, prices, cutoff, articles, plotstyle):
             'Current headlines can be newer than this research cutoff.')
         dated = [article for article in articles if article.published_at is not None]
         choices = ['manual'] + list(range(len(dated)))
+        choice_key = f'news_event_choice_{symbol}'
+        if st.session_state.get(choice_key, 'manual') not in choices:
+            st.session_state[choice_key] = 'manual'
         selected = st.selectbox('Choose an event', choices,
             format_func=lambda choice: 'Enter a date' if choice == 'manual' else strip_emojis(dated[choice].title),
-            key=f'news_event_choice_{symbol}')
+            key=choice_key)
         if selected == 'manual':
             event_date = st.date_input('Event publication date', value=pd.Timestamp(cutoff).date(),
                 key=f'news_event_date_{symbol}')
@@ -144,7 +158,7 @@ def render_company_news(company, symbol, prices, cutoff, plotstyle=None):
             st.session_state.pop(key, None)
         st.session_state.company_news_topic = ''
     with st.container(border=True, key='company_news_panel'):
-        st.markdown('### Company news')
+        st.markdown('### Company news · Past 7 days')
         st.caption(f'{company} · latest provider headlines, separate from historical research.')
         with st.form('company_news_search', border=False):
             query_column, update_column = st.columns([4, 1.2], vertical_alignment='bottom')
@@ -169,24 +183,30 @@ def render_company_news(company, symbol, prices, cutoff, plotstyle=None):
         articles = () if digest is None else digest.articles
         if digest is not None:
             publishers = {article.publisher for article in articles}
-            st.caption(f'{len(articles)} headlines · {len(publishers)} publishers · '
-                f'Updated {digest.fetched_at:%d %b %Y, %H:%M UTC} · {digest.source}')
-            if len(articles) > MAX_VISIBLE_HEADLINES:
-                st.caption(f'Showing the {MAX_VISIBLE_HEADLINES} most recent supplied headlines.')
+            dated = [article.published_at for article in articles if article.published_at is not None]
+            oldest = f' · oldest supplied {min(dated):%d %b %Y}' if dated else ''
+            st.caption(f'{len(articles)} headlines · {len(publishers)} publishers{oldest}')
+            st.caption(f'Updated {digest.fetched_at:%d %b %Y, %H:%M UTC} · {digest.source}')
+            window_start = getattr(digest, 'window_start', None)
+            window_end = getattr(digest, 'window_end', None)
+            if window_start is not None and window_end is not None:
+                st.caption(f'7-day snapshot: {window_start:%d %b %Y, %H:%M}–{window_end:%d %b %Y, %H:%M UTC}.')
+            if len(articles) > MAX_DISPLAY_HEADLINES:
+                st.caption(f'Showing the {MAX_DISPLAY_HEADLINES} most recent of {len(articles)} supplied headlines.')
             if digest.query:
                 st.caption(f'Search topic: {digest.query}')
             if not articles:
-                st.info('No matching headlines were supplied. Try another topic or update later.')
+                st.info('No matching headlines were supplied for the past 7 days. Try another topic or update later.')
             for article in articles[:MAX_VISIBLE_HEADLINES]:
-                url = safe_article_url(article.url)
-                if url is None:
-                    continue
-                st.html('<article class="news-item"><a href="' + escape(url, quote=True)
-                    + '" target="_blank" rel="noopener noreferrer">' + escape(strip_emojis(article.title))
-                    + '</a><p>' + escape(strip_emojis(article.publisher)) + ' · ' + escape(_date_label(article))
-                    + '</p></article>')
+                _render_headline(article)
+            more = articles[MAX_VISIBLE_HEADLINES:MAX_DISPLAY_HEADLINES]
+            if more:
+                with st.expander(f'More headlines ({len(more)})'):
+                    for article in more:
+                        _render_headline(article)
+            st.caption('A recent provider feed, not a complete 7-day news archive. Available coverage varies by company.')
             st.caption('Only headlines mentioning the company name or ticker are shown; aliases may be missed. Headlines, not AI summaries. '
                 'Latest news never enters historical forecasts, rankings or the coach context.')
         else:
-            st.caption('Search recent headlines when you need them. News loads only after Update news.')
+            st.caption('Load a 7-day headline snapshot with Update news. Coverage depends on the provider.')
         _render_event_analysis(symbol, prices, cutoff, articles, plotstyle)

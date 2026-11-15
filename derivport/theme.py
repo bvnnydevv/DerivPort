@@ -4,7 +4,7 @@ from __future__ import annotations
 import re
 
 FONT = 'Helvetica Neue, Helvetica, Arial, sans-serif'
-THEMES = {'Midnight': '#050505', 'Graphite': '#121416', 'Deep ocean': '#071b25', 'Custom': '#0c1425'}
+THEMES = {'Editorial': '#eeefec', 'Midnight': '#050505', 'Graphite': '#121416', 'Deep ocean': '#071b25', 'Custom': '#0c1425'}
 
 
 def _hex(value):
@@ -25,16 +25,17 @@ def _light(value):
 
 
 def theme_from_state(state):
-    name = state.get('theme_name', 'Midnight')
-    bg = _hex(state.get('theme_background', THEMES['Custom'])) if name == 'Custom' else THEMES.get(name, THEMES['Midnight'])
-    accent = _hex(state.get('theme_accent', '#d9e5d2'))
+    name = state.get('theme_name', 'Editorial')
+    bg = _hex(state.get('theme_background', THEMES['Custom'])) if name == 'Custom' else THEMES.get(name, THEMES['Editorial'])
+    accent = _hex(state.get('theme_accent', '#28543a'))
     light = _light(bg) > .35
-    text, muted = ('#102132', '#405366') if light else ('#f3f2ed', '#aaa9a1')
-    panel = _mix(bg, '#000000' if light else '#ffffff', .045)
-    return dict(name=name, background=bg, panel=panel, panel2=_mix(panel,text,.045),
+    feature = '#dce3d0' if light else _mix(bg, '#ffffff', .09)
+    text, muted = ('#1b2d22', '#626c60') if light else ('#f3f2ed', '#aaa9a1')
+    panel = _mix(bg, '#ffffff', .5) if light else _mix(bg, '#ffffff', .045)
+    return dict(name=name, feature=feature, background=bg, panel=panel, panel2=_mix(panel,text,.045),
         text=text, muted=muted, line=_mix(panel,text,.16), accent=accent,
         accent_text='#071018' if _light(accent) > .35 else '#ffffff',
-        compact=state.get('theme_density','Compact') == 'Compact')
+        compact=state.get('theme_density','Comfortable') == 'Compact')
 
 
 def current_theme():
@@ -44,7 +45,7 @@ def current_theme():
 
 def theme_css(palette):
     mapping = {'workspace':'background','panel':'panel','panel2':'panel2','ink':'text',
-        'muted':'muted','line':'line','accent':'accent','accent-text':'accent_text'}
+        'muted':'muted','feature':'feature','line':'line','accent':'accent','accent-text':'accent_text'}
     values = ';'.join(f'--{css}:{_hex(palette[key])}' for css,key in mapping.items())
     gap, pad = ('.55rem','14px') if palette['compact'] else ('.9rem','22px')
     return f':root{{{values};--sans:"Helvetica Neue",Helvetica,Arial,sans-serif;--mono:var(--sans);--gap:{gap};--pad:{pad}}}'
@@ -54,10 +55,10 @@ def render_theme_controls():
     import streamlit as st
     with st.popover('Theme', icon=':material/palette:', width='stretch'):
         st.selectbox('Website theme', list(THEMES), key='theme_name')
-        st.color_picker('Accent color', '#d9e5d2', key='theme_accent')
+        st.color_picker('Accent color', '#28543a', key='theme_accent')
         if st.session_state.theme_name == 'Custom':
             st.color_picker('Background color', '#0c1425', key='theme_background')
-        st.radio('Layout density', ['Compact','Comfortable'], horizontal=True, key='theme_density')
+        st.radio('Layout density', ['Compact','Comfortable'], index=1, horizontal=True, key='theme_density')
         st.checkbox('Show illustrations', value=True, key='theme_images')
         st.caption('Helvetica Neue throughout. Settings stay in this browser session.')
     return current_theme()
@@ -71,9 +72,14 @@ def style_plot(fig, palette=None):
         hoverlabel=dict(bgcolor=p['panel2'],font_color=p['text'],bordercolor=p['line']))
     fig.update_xaxes(color=p['muted'], gridcolor=p['line'], linecolor=p['line'])
     fig.update_yaxes(color=p['muted'], gridcolor=p['line'], linecolor=p['line'])
+    light_colors = {'#bc9bff':'#735195', '#b9a4e8':'#735195', '#ffbd69':'#a86620', '#dce7e4':'#43694e'} if _light(p['background']) > .35 else {}
     for trace in fig.data:
         if hasattr(trace,'line') and getattr(trace.line, 'color', None) == '#101820':
             trace.line.color = p['text']
         if hasattr(trace,'marker') and isinstance(getattr(trace.marker, 'color', None), str) and trace.marker.color == '#101820':
             trace.marker.color = p['text']
+        if hasattr(trace, 'line') and isinstance(getattr(trace.line, 'color', None), str) and trace.line.color in light_colors:
+            trace.line.color = light_colors[trace.line.color]
+        if hasattr(trace, 'marker') and isinstance(getattr(trace.marker, 'color', None), str) and trace.marker.color in light_colors:
+            trace.marker.color = light_colors[trace.marker.color]
     return fig

@@ -172,8 +172,9 @@ exchange_choices = ['All US exchanges'] + [venue for venue in US_EXCHANGES
     if any(row['exchange'] == venue for row in us_listings)]
 if st.session_state.get('exchange_filter') not in exchange_choices:
     st.session_state.exchange_filter = 'All US exchanges'
-stock_col, date_col, status_col = st.columns([2.2, 1.1, 1], gap='medium', vertical_alignment='bottom')
-market_settings = st.expander('Market settings', expanded=False)
+stock_col, date_col, settings_col, status_col = st.columns([2.4, 1.1, .8, 1], gap='medium', vertical_alignment='bottom')
+with settings_col:
+    market_settings = st.popover('Settings', width='stretch')
 with market_settings:
     exchange_col, mode_col = st.columns(2)
 with exchange_col:
@@ -327,7 +328,8 @@ with status_col:
     st.html(f'<div class="data-status">{len(prices):,} shared sessions · {len(universe)} stocks<br>Cache through {prices.index[-1]:%d %b %Y}</div>')
 if cutoff != chosen_date.isoformat():
     st.caption(f'{chosen_date} is not a shared trading date. Using the preceding observed session, {cutoff}.')
-st.caption(f"Historical data ends {latest:%Y-%m-%d}. Completed 21-session replays are available through {latest_replay:%Y-%m-%d}. Dates through 2037 are available under Future scenarios as simulations.")
+with market_settings:
+    st.caption(f"Historical data ends {latest:%Y-%m-%d}. Completed replays through {latest_replay:%Y-%m-%d}. Future dates through 2037 are simulations.")
 history = cached_history(prices)
 try:
     analysis = cached_analysis(prices, cutoff, history)
@@ -345,10 +347,11 @@ with research:
     if ticker == 'AAPL' and cutoff == '2024-05-03' and not extended:
         st.caption('Curated example: Apple after its May 2 earnings release. Choose any available date or change the stock group.')
     render_company_news(meta.get('name', ticker), ticker, prices[ticker], cutoff, plotstyle=lambda figure: chart(figure, 280))
-    panels = st.expander('Company & model details', expanded=False)
-    ranks_area = st.expander('Compare stock rankings', expanded=False)
-    replay_area = st.expander('Historical replay', expanded=False)
-    extras_area = st.expander('More research tools', expanded=False)
+    with st.expander('Research tools', expanded=False):
+        panels = st.expander('Company & model details', expanded=False)
+        ranks_area = st.expander('Compare stock rankings', expanded=False)
+        replay_area = st.expander('Historical replay', expanded=False)
+        extras_area = st.expander('More research tools', expanded=False)
 with builder:
     visual_heading('Build your own signal.', 'Choose what matters. See why stocks rank. Test your idea on the past.', 'rule-lab.svg')
     render_blocks(base, ticker)

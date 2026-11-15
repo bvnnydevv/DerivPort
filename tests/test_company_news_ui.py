@@ -1,5 +1,5 @@
 """Current news is explicit and event-price views respect the research cutoff."""
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import json
 
 from streamlit.testing.v1 import AppTest
@@ -50,7 +50,7 @@ def test_news_never_fetches_on_load_or_typing_only_explicit_update(monkeypatch):
     assert not app.exception
     assert calls==[('Apple','AAPL','earnings')]
     assert app.session_state['company_news_digest'].query=='earnings'
-    assert len(app.get('html'))==6
+    assert len(app.get('html'))==8
     html=' '.join(element.proto.body for element in app.get('html'))
     assert '&lt;script&gt;' in html and '<script>' not in html
     assert '01 Mar 2024, 00:00 UTC' in html
@@ -75,7 +75,7 @@ def test_provider_failure_retains_timestamped_previous_results(monkeypatch):
     assert not app.exception
     assert any('News provider unavailable' in item.value for item in app.info)
     assert app.session_state['company_news_digest'].fetched_at.year==2024
-    assert len(app.get('html'))==6
+    assert len(app.get('html'))==8
 
 
 def test_event_analysis_filters_later_prices_and_resets_when_cutoff_changes(monkeypatch):
@@ -138,3 +138,33 @@ def test_precise_article_instant_uses_new_york_event_calendar(monkeypatch):
     _,result=app.session_state['news_event_result']
     assert result.publication_date.date()==datetime(2024,2,15).date()
     assert result.event_session is None
+
+
+def test_seven_day_digest_expands_more_headlines_with_bounded_display(monkeypatch):
+    fetched=datetime(2024,3,2,12,tzinfo=timezone.utc)
+    articles=tuple(NewsArticle(f'Apple update {i}', 'Example News',f'https://example.com/update/{i}',
+        fetched-timedelta(hours=i*2),'second',('AAPL',)) for i in range(60))
+    supplied=CompanyNewsDigest('Apple','AAPL','',fetched,articles,
+        window_start=fetched-timedelta(days=7),window_end=fetched)
+    monkeypatch.setattr(news_ui,'fetch_company_news',lambda *args: supplied)
+    app=AppTest.from_string(APP,default_timeout=20).run()
+    assert any('Past 7 days' in heading.value for heading in app.markdown)
+    update_button(app).click().run()
+    assert not app.exception
+    assert len(app.get('html'))==50
+    assert any(expander.label=='More headlines (40)' for expander in app.expander)
+    assert any('60 headlines' in caption.value and 'oldest supplied 26 Feb 2024' in caption.value
+        for caption in app.caption)
+    assert any('50 most recent of 60' in caption.value for caption in app.caption)
+    assert any('not a complete 7-day news archive' in caption.value for caption in app.caption)
+    assert any('7-day snapshot: 24 Feb 2024, 12:00–02 Mar 2024, 12:00 UTC' in caption.value
+        for caption in app.caption)
+    # Headline choices for event study retain all supplied entries, even those
+    # beyond the compact reading list, and no event runs on a news update.
+    assert len(app.selectbox(key='news_event_choice_AAPL').options)==61
+    assert 'news_event_result' not in app.session_state
+    app.selectbox(key='news_event_choice_AAPL').set_value(59).run()
+    monkeypatch.setattr(news_ui,'fetch_company_news',lambda *args: digest())
+    update_button(app).click().run()
+    assert not app.exception
+    assert app.selectbox(key='news_event_choice_AAPL').value=='manual'
