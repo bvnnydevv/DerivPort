@@ -128,6 +128,11 @@ def render_stock_chart(adjusted_prices, ticker, cutoff, metadata, coach_snapshot
                 'modeBarButtonsToRemove': ['lasso2d', 'select2d'],
                 'editable': False, 'edits': {'shapePosition': True},
                 'toImageButtonOptions': {'filename': f'{ticker}_{cutoff}', 'scale': 2}}
+            st.session_state.stock_chart_snapshot = {
+                'ticker': ticker, 'cutoff': cutoff, 'context': guide_context,
+                'figure': go.Figure(fig), 'config': dict(config), 'frame': exported.copy(),
+                'period': period, 'interval': interval, 'style': style,
+            }
             st.plotly_chart(fig, theme=None, width='stretch', key='known_price_hero', config=config)
             if expand:
                 fullscreen_chart(fig, config, ticker, cutoff)

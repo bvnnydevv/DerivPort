@@ -23,6 +23,7 @@ from derivport.company_news_ui import render_company_news
 from derivport.ohlc import load_candles
 from derivport.theme import current_theme, theme_css, style_plot
 from derivport.blocks_ui import render_blocks
+from derivport.builder_charts_ui import render_builder_charts
 from derivport.projections import project_scenarios
 from derivport.projection_views import (RISK_PRESETS, apply_risk_preset,
     scenario_fan, scenario_distribution)
@@ -355,7 +356,9 @@ with research:
         extras_area = st.expander('More research tools', expanded=False)
 with builder:
     visual_heading('Build your own signal.', 'Choose what matters. See why stocks rank. Test your idea on the past.', 'rule-lab.svg')
-    render_blocks(base, ticker)
+    render_blocks(base, ticker, chart_renderer=lambda draft_formula, draft_k:
+        render_builder_charts(history, base.loc[ticker], ticker, cutoff, context,
+            draft_formula, draft_k))
     with st.expander('Example recipe & Python download'):
         with st.container(border=True, key='signal_card'):
             st.html(f'<div class="summary-signal"><div><h2>{esc(SIGNAL_NAME)}</h2><p>A balanced model and momentum score with explicit error and volatility penalties.</p></div></div>')
@@ -498,8 +501,14 @@ with builder:
         fig = go.Figure()
         for method, label in (('momentum', 'Momentum'), ('model', 'AI model'), ('student', 'Your algorithm')):
             fig.add_trace(go.Scatter(x=linked.index, y=linked[method], name=label, line=dict(color=COLORS[label], width=2)))
-        fig.update_yaxes(title='Linked top-stock return (%)')
+        stock_comparison = prices[ticker].reindex(linked.index)
+        if not stock_comparison.isna().any():
+            stock_return = (stock_comparison / stock_comparison.iloc[0] - 1) * 100
+            fig.add_trace(go.Scatter(x=linked.index, y=stock_return.tolist(),
+                name=f'{ticker} buy & hold', line=dict(color='#735195', width=2, dash='dot')))
+        fig.update_yaxes(title='Return from test start (%)')
         st.plotly_chart(chart(fig, 280), width='stretch', config={'displayModeBar': False}, key='backtest_chart')
+        st.caption(f'{ticker} buy & hold uses observed adjusted closes over the displayed test dates. Algorithm lines compound each method’s top-stock selections; all curves exclude costs and taxes.')
         m = result['metrics']
         st.caption(f"{m['n_dates']} completed periods / {m['n_forecasts']} forecasts. Forecast RMSE: AI {m['model_rmse']:.2f} pp; momentum {m['baseline_rmse']:.2f} pp. Linked returns compound successive top selections without execution, costs, taxes, FX conversion, or sizing.")
         st.latex(r'S = ' + formula_to_latex(result['metadata']['formula']) + rf',\qquad k={result["metadata"]["k"]:g}')

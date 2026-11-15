@@ -143,7 +143,7 @@ def _guided_start():
         _set_blocks(guided_blocks(share, risk))
 
 
-def render_blocks(base, ticker):
+def render_blocks(base, ticker, chart_renderer=None):
     """Begin with a readable recipe; advanced blocks use the same safe parser."""
     st.session_state.setdefault('block_items', preset_blocks())
     st.session_state.setdefault('block_revision', 0)
@@ -228,6 +228,8 @@ def render_blocks(base, ticker):
             row = preview.loc[ticker]
             st.html(f'<div class="recipe-result"><div><span>Draft score · {html.escape(ticker)}</span><strong>{row.score:+.2f}</strong></div><div><span>Rank in this group</span><strong>{row.student_rank:g} / {len(preview)}</strong></div><p>Higher score ranks higher. Apply when you are ready to test.</p></div>')
             st.caption(f'Draft at current inputs: {ticker} score {row.score:+.3f}, rank {row.student_rank:g} of {len(preview)} · k = {k:g}. This score is not a return forecast. Multiplication/division can change its units.')
+            if chart_renderer is not None:
+                chart_renderer(formula, k)
             breakdown = contribution_rows(st.session_state.block_items, base.loc[ticker], k)
             with st.expander(f'How {ticker} gets this score', expanded=True):
                 visible_columns = ['Ingredient', 'Input (pp)', 'Score contribution'] if mode == 'Guided' and all('Score contribution' in item for item in breakdown) else None
