@@ -96,6 +96,9 @@ input,textarea,[data-baseweb="input"]>div,[data-baseweb="select"]>div>div,[data-
 [data-testid="stTable"] th,[data-testid="stTable"] td{background:var(--panel)!important;border-color:var(--line)!important;color:var(--ink)!important}
 [data-testid="stPlotlyChart"]{background:var(--panel);border:0;padding:0;border-radius:0;overflow:hidden}
 [data-testid="stCode"],pre,[data-testid="stAlert"]{background:var(--panel2)!important;color:var(--ink)!important;border:1px solid var(--line);border-radius:4px}
+/* Streamlit paints notices on an inner surface, including info/warning/error/success. */
+[data-testid="stAlertContainer"]{background:var(--panel2)!important;color:var(--ink)!important}
+[data-testid^="stAlertContent"]{color:var(--ink)!important}
 [data-testid="stAlert"] p{font-size:13px;color:var(--ink)!important}
 .katex-display{max-width:100%;overflow-x:auto;overflow-y:hidden;padding:5px 0;color:var(--ink)}
 .footer{display:flex;justify-content:space-between;gap:20px;border-top:1px solid var(--line);padding:24px 0 8px;margin-top:36px;font:11px/1.6 var(--sans);color:var(--muted)}.footer span:first-child{font-size:20px;color:var(--ink);letter-spacing:-.7px}
