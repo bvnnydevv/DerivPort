@@ -26,6 +26,7 @@ The repository already includes `requirements.txt`, the Streamlit theme, local P
 - Open **Research** with AAPL and **Full cached history**. The supplied cache ends on **2026-11-13**; the latest cutoff correctly shows a pending 21-session outcome.
 - Select an earlier cutoff to demonstrate historical outcome reveal.
 - In **Algorithm builder**, click **Use my balanced algorithm**, open the calculus lab, and run a historical backtest.
+- In **Research & Benchmarking**, select development and final-test dates, then run the experiment. This heavier model comparison runs only when requested; prepare it before presenting.
 - In **Future scenarios**, dates through 2037 are hypothetical simulations.
 
 The bundled stocks work without a market-data request. Listing searches, uncached stocks, and refreshes use the external provider. New downloads belong to the running host's local cache; retain important demonstration data in the repository rather than relying on that runtime cache surviving a restart.

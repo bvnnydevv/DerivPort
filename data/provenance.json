@@ -1,5 +1,6 @@
 {
   "dataset": "DerivPort fixed five-stock educational historical cache",
+  "dataset_scope": "This record describes only the unchanged frozen prices.csv (2018–2024). Optional online global-explorer requests and separately cached extended histories are outside this frozen-dataset provenance; its original no-network statement refers to reproducing the frozen app path, not the current explorer's explicit lookup controls.",
   "retrieved": "2026-11-14",
   "vendor": "Yahoo Finance",
   "mirror_author": "Akmal Yaasir Fauzaan (Akma86)",
@@ -58,7 +59,7 @@
     }
   ],
   "source_notes": "20 paraphrased factual summaries checked against dated official earnings releases or issuer exhibits at SEC.gov; interpretation and limitations are DerivPort editorial analysis, not company statements. No quotations are used.",
-  "source_note_policy": "For a cutoff, select only notes with published <= cutoff. When none exists, show insufficient evidence. This is a small curated set, not complete news coverage.",
+  "source_note_policy": "For a cutoff, select only date-only notes with published < cutoff. A publication-day embargo prevents same-day after-close information from being treated as known at that closing price. When none exists, show insufficient evidence. This is a small curated set, not complete news coverage.",
   "curated_cutoffs": [
     "2023-08-04",
     "2023-11-03",

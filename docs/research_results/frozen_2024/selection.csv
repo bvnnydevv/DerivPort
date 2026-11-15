@@ -1,0 +1,7 @@
+model,selected_params,validation_rmse,validation_n_origins,validation_n_forecasts,last_validation_label_end,selection_frozen_at,tuned
+Ridge,"{""alpha"":25.0}",13.096214199526703,6,30,2022-11-01,2023-01-01,False
+Elastic Net,"{""alpha"":1.0,""l1_ratio"":0.75}",12.935730005219245,6,30,2022-11-01,2023-01-01,True
+Random Forest,"{""max_depth"":3}",13.100865794623695,6,30,2022-11-01,2023-01-01,True
+Gradient Boosting,"{""max_depth"":1}",12.885601578107343,6,30,2022-11-01,2023-01-01,True
+Momentum,{},19.41859398328446,6,30,2022-11-01,2023-01-01,False
+Zero return,{},12.652763441979063,6,30,2022-11-01,2023-01-01,False

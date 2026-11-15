@@ -14,10 +14,11 @@ from derivport import (DEFAULT_FORMULA, FormulaError, analyze_cutoff, apply_rule
     historical_forecasts, load_prices, rank_correlation,
     reveal_outcomes, simulate_paths, simulation_summary, SCENARIOS)
 from derivport.market_data import (MarketDataError, get_search_status,
-    load_symbol_prices, read_cached_symbols, search_symbols, symbol_info)
+    load_symbol_prices, read_cached_symbols, search_symbols, symbol_info, verify_frozen_cache)
 from derivport.projections import project_scenarios
 from derivport.calculus import calculus_experiment, differential, formula_to_latex
 from derivport.calculus_ui import render_calculus_lab
+from derivport.research_ui import render_benchmarking
 from algorithms.derivport_signal import NAME as SIGNAL_NAME, FORMULA as SIGNAL_FORMULA, DEFAULT_K as SIGNAL_K
 
 ROOT = Path(__file__).parent
@@ -51,6 +52,7 @@ def chart(fig, height=230):
 
 @st.cache_data(show_spinner=False)
 def frozen_prices():
+    verify_frozen_cache()
     return load_prices(ROOT / 'data/prices.csv')
 
 
@@ -223,9 +225,9 @@ except ValueError as exc:
     st.stop()
 base, meta = analysis.stocks, metadata[ticker]
 notes = json.loads((ROOT / 'data/notes.json').read_text())
-available_notes = [n for n in notes if n['ticker'] == ticker and pd.Timestamp(n['published']) <= pd.Timestamp(cutoff)]
+available_notes = [n for n in notes if n['ticker'] == ticker and pd.Timestamp(n['published']) < pd.Timestamp(cutoff)]
 note = max(available_notes, key=lambda n: n['published']) if available_notes else None
-research, builder, future = st.tabs(['Research', 'Algorithm builder', 'Future scenarios'], key='workspace')
+research, builder, future, benchmarking = st.tabs(['Research', 'Algorithm builder', 'Future scenarios', 'Research & Benchmarking'], key='workspace')
 with research:
     with st.container(key='market_hero'):
         st.html(f'''<div class="stock-header"><div><h1>{esc(meta.get('name', ticker))}</h1>
@@ -354,6 +356,7 @@ with builder:
         if active_formula.strip() == DEFAULT_FORMULA and active_k == 2:
             st.latex(r'\Delta S=-k\,\Delta\varepsilon=-2(1)=-2\;\mathrm{pp}')
     render_calculus_lab(active_formula, values, active_k, plotstyle=chart)
+    st.caption('Calculus charts are deterministic experiments on your mathematical rule, not market-return forecasts or simulated future prices.')
     feature_export = scores[['predicted_return', 'uncertainty', 'momentum', 'volatility']].rename_axis('ticker').reset_index()
     feature_export.insert(1, 'cutoff', cutoff)
     st.download_button('Download this cutoff’s algorithm inputs', feature_export.to_csv(index=False).encode(),
@@ -475,6 +478,9 @@ with future:
         st.download_button('Export simulated monthly percentiles', projected.quantiles.to_csv(index=False).encode(),
             file_name='derivport_hypothetical_scenarios.csv', mime='text/csv')
 
+with benchmarking:
+    render_benchmarking(prices, metadata, {item.name: item for item in series}, cutoff, chart)
+
 snapshot = st.session_state.reveals.get(context)
 edited = bool(snapshot and (formula != snapshot['formula'] or k != snapshot['k']))
 with panels:
@@ -482,6 +488,7 @@ with panels:
     with left, st.container(border=True, key='analyst_company'):
         st.html('<h3>Stock analyst</h3>')
         if note:
+            st.caption('Date-only releases become eligible on a later observed date; same-day releases are embargoed because publication times are unavailable.')
             source_age = (pd.Timestamp(cutoff) - pd.Timestamp(note['published'])).days
             if source_age > 180:
                 st.caption(f"Historical context only: this source is {source_age} days before the cutoff. More recent company evidence is not cached.")
@@ -551,6 +558,7 @@ with replay_area:
         st.plotly_chart(chart(fig, 260), width='stretch', config={'displayModeBar': False}, key='historical_outcomes')
 with extras_area:
     with st.expander('Full price history available at the cutoff'):
+        st.caption(f'Historical observed adjusted closes through {cutoff}; no later prices are plotted.')
         known = prices.loc[:cutoff, ticker]
         fig = go.Figure(go.Scatter(x=known.index, y=known, line=dict(color='#2454ff', width=1.7)))
         fig.update_yaxes(title=f"Adjusted close ({meta.get('currency', 'local currency')})")
@@ -570,7 +578,7 @@ with extras_area:
         st.plotly_chart(chart(fig, 240), width='stretch', config={'displayModeBar': False})
         st.caption('600 paths per scenario; fixed seed 2024. Initial top-score ties use ticker order; terminal first-place ties split credit. Simulated projections are separate from historical evidence.')
     with st.expander('Methodology, data & past evaluation'):
-        st.markdown('**Research scope.** Finance education only: no brokerage, balances, sizing, trades, or buy/sell recommendations. Finance theme confirmed; a detailed official scoring rubric was not supplied.')
+        st.markdown('**Research scope.** Finance education only: no real brokerage accounts, balances, orders, or buy/sell recommendations. Benchmark portfolio weights and fills are hypothetical research allocations. Finance theme confirmed; a detailed official scoring rubric was not supplied.')
         st.markdown(f'**Global dates.** Any available date can be selected after sufficient shared history. Provider-wide US and international equity search is available online; a 109-symbol starter catalog and {len(read_cached_symbols())} price histories are cached offline. Coverage varies, so availability of every stock is not guaranteed. No missing-date filling is used. International experiments use 21 shared observed sessions, which can span more than 21 sessions on an individual exchange, using exchange-local daily closes. Local-currency returns exclude FX conversion.')
         st.markdown('**Model.** Standardized Ridge regression uses momentum and volatility. Training labels complete by each cutoff. Return inputs are percentage points; k is dimensionless under the default rule.')
         st.latex(r'M_{21,t}=100\left(\frac{P_t^{\rm adj}}{P_{t-21}^{\rm adj}}-1\right),\qquad \sigma_{21,t}=100\sqrt{21}\;\operatorname{SD}(r_{t-20},\ldots,r_t)')

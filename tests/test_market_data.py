@@ -1,6 +1,9 @@
 """Global search, adjusted-price persistence, and clear offline fallback behavior."""
 
 from datetime import datetime, timezone
+import hashlib
+import json
+from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
@@ -144,4 +147,77 @@ def test_provider_unadjusted_close_is_never_substituted(tmp_path, monkeypatch):
     monkeypatch.setattr(market_data, "_provider", lambda: SimpleNamespace(Ticker=lambda symbol: ticker))
     with pytest.raises(market_data.MarketDataError, match="adjusted|unadjusted"):
         market_data.load_symbol_prices("TEST.L")
+    assert not list(tmp_path.iterdir())
+
+
+def test_cache_without_a_recorded_checksum_is_rejected(tmp_path, monkeypatch):
+    monkeypatch.setattr(market_data, 'CACHE_DIR', tmp_path)
+    csv_path, meta_path = market_data._cache_paths('TEST')
+    csv_path.write_text('date,adjusted_close\n2020-01-02,100\n')
+    meta_path.write_text(json.dumps({'symbol': 'TEST'}))
+    monkeypatch.setattr(market_data, '_provider', lambda: pytest.fail('Unverified cache reads must not silently download.'))
+    with pytest.raises(market_data.MarketDataError, match='checksum'):
+        market_data.load_symbol_prices('TEST')
+
+
+def test_frozen_fallback_verifies_provenance_hash_before_loading(tmp_path, monkeypatch):
+    cache_dir = tmp_path / 'cache'
+    cache_dir.mkdir()
+    path = tmp_path / 'prices.csv'
+    provenance = tmp_path / 'provenance.json'
+    payload = b'date,ticker,adjusted_close\n2020-01-02,AAPL,100\n2020-01-03,AAPL,101\n'
+    path.write_bytes(payload)
+    provenance.write_text(json.dumps({'cache_sha256': hashlib.sha256(payload).hexdigest()}))
+    monkeypatch.setattr(market_data, 'CACHE_DIR', cache_dir)
+    monkeypatch.setattr(market_data, 'BUNDLED_PATH', path)
+    monkeypatch.setattr(market_data, 'BUNDLED_PROVENANCE_PATH', provenance)
+    prices, _ = market_data.load_symbol_prices('AAPL')
+    assert list(prices) == [100., 101.]
+    path.write_text('date,ticker,adjusted_close\n2020-01-02,AAPL,99999\n')
+    with pytest.raises(market_data.MarketDataError, match='checksum'):
+        market_data.load_symbol_prices('AAPL')
+
+
+def test_second_cache_replace_failure_restores_previous_files(tmp_path, monkeypatch):
+    monkeypatch.setattr(market_data, 'CACHE_DIR', tmp_path)
+    dates = pd.bdate_range('2022-01-03', periods=80)
+    current = {'frame': pd.DataFrame({'Adj Close': np.arange(80) + 100.}, index=dates)}
+    ticker = SimpleNamespace(history=lambda **kwargs: current['frame'], history_metadata={'currency': 'USD'})
+    monkeypatch.setattr(market_data, '_provider', lambda: SimpleNamespace(Ticker=lambda symbol: ticker))
+    original, _ = market_data.load_symbol_prices('TEST')
+    csv_path, meta_path = market_data._cache_paths('TEST')
+    previous_files = {path.name: path.read_bytes() for path in tmp_path.iterdir()}
+    current['frame'] = pd.DataFrame({'Adj Close': np.arange(80) + 200.}, index=dates)
+    real_replace = Path.replace
+
+    def fail_json_replace(path, target):
+        if Path(target) == meta_path:
+            raise OSError('Injected second replacement failure')
+        return real_replace(path, target)
+
+    monkeypatch.setattr(Path, 'replace', fail_json_replace)
+    returned, meta = market_data.load_symbol_prices('TEST', refresh=True)
+    pd.testing.assert_series_equal(returned, original)
+    assert meta['refresh_failed'] and 'preserved' in meta['warning']
+    assert previous_files == {path.name: path.read_bytes() for path in tmp_path.iterdir()}
+    cached, _ = market_data.load_symbol_prices('TEST')
+    pd.testing.assert_series_equal(cached, original)
+
+
+def test_failed_new_cache_publication_leaves_no_partial_pair(tmp_path, monkeypatch):
+    monkeypatch.setattr(market_data, 'CACHE_DIR', tmp_path)
+    frame = pd.DataFrame({'Adj Close': np.arange(80) + 100.}, index=pd.bdate_range('2022-01-03', periods=80))
+    ticker = SimpleNamespace(history=lambda **kwargs: frame, history_metadata={})
+    monkeypatch.setattr(market_data, '_provider', lambda: SimpleNamespace(Ticker=lambda symbol: ticker))
+    _, meta_path = market_data._cache_paths('TEST')
+    real_replace = Path.replace
+
+    def fail_json_replace(path, target):
+        if Path(target) == meta_path:
+            raise OSError('Injected second replacement failure')
+        return real_replace(path, target)
+
+    monkeypatch.setattr(Path, 'replace', fail_json_replace)
+    with pytest.raises(market_data.MarketDataError):
+        market_data.load_symbol_prices('TEST')
     assert not list(tmp_path.iterdir())

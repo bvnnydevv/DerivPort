@@ -7,7 +7,7 @@ import pandas as pd
 
 from .analysis import (
     DEFAULT_FORMULA, HORIZON, apply_rule, historical_forecasts,
-    rank_correlation, validate_prices,
+    rank_correlation, validate_prices, validate_forecast_history,
 )
 from .formula import FormulaError
 
@@ -35,8 +35,7 @@ def backtest_rule(prices: pd.DataFrame, start: str | pd.Timestamp,
     if history is None:
         history = historical_forecasts(prices)
     universe = set(prices.columns)
-    if set(history.attrs.get("universe", history["ticker"].unique())) != universe:
-        raise ValueError("Forecast history must be recomputed for the current comparison universe.")
+    validate_forecast_history(prices, history)
     if history.empty:
         raise ValueError("There is not enough completed historical data to build and evaluate an out-of-sample forecast.")
     known = history.loc[(history["cutoff"] >= start) & (history["label_end"] <= effective_end)].copy()

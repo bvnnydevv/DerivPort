@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import hashlib
+import json
 from pathlib import Path
 
 import numpy as np
@@ -23,6 +25,40 @@ HISTORY_COLUMNS = [
     "predicted_return", "uncertainty", "uncertainty_n", "uncertainty_source",
     "training_last_label_end", "training_n",
 ]
+
+
+def price_fingerprint(prices: pd.DataFrame) -> str:
+    """Identify the exact ordered price snapshot, including symbols and dates."""
+    digest = hashlib.sha256(json.dumps(list(prices.columns)).encode())
+    digest.update(pd.util.hash_pandas_object(prices, index=True).to_numpy().tobytes())
+    return digest.hexdigest()
+
+
+def _history_fingerprint(history: pd.DataFrame) -> str:
+    return hashlib.sha256(pd.util.hash_pandas_object(
+        history[HISTORY_COLUMNS], index=False).to_numpy().tobytes()).hexdigest()
+
+
+def _stamp_history(history: pd.DataFrame, prices: pd.DataFrame) -> pd.DataFrame:
+    history.attrs.update(universe=tuple(prices.columns), price_fingerprint=price_fingerprint(prices),
+        horizon_sessions=HORIZON, protocol='ridge-alpha25-v1', history_fingerprint=_history_fingerprint(history))
+    return history
+
+
+def validate_forecast_history(prices: pd.DataFrame, history: pd.DataFrame) -> None:
+    """Reject stale or edited cached histories rather than silently mixing evidence.
+
+    This guards accidental reuse, not adversarial attestation. Recompute forecasts
+    after any price, horizon, protocol, or history-content change.
+    """
+    if set(history.attrs.get('universe', history.get('ticker', []))) != set(prices.columns):
+        raise ValueError('Forecast history must be recomputed for the current comparison universe.')
+    if (not set(HISTORY_COLUMNS).issubset(history.columns)
+            or history.attrs.get('price_fingerprint') != price_fingerprint(prices)
+            or history.attrs.get('horizon_sessions') != HORIZON
+            or history.attrs.get('protocol') != 'ridge-alpha25-v1'
+            or history.attrs.get('history_fingerprint') != _history_fingerprint(history)):
+        raise ValueError('Forecast history does not match this price snapshot or was edited. Recompute historical forecasts.')
 
 
 @dataclass
@@ -119,12 +155,12 @@ def historical_forecasts(prices: pd.DataFrame, start: str = "2020-01-01") -> pd.
     each historical prediction uses only errors completed at that same origin.
     No target or feature is shuffled into the past.
     """
+    prices = validate_prices(prices)
     features = build_features(prices)
     dates = prices.index[prices.index >= pd.Timestamp(start)]
     if len(prices) <= HORIZON:
         empty = pd.DataFrame(columns=HISTORY_COLUMNS)
-        empty.attrs["universe"] = tuple(prices.columns)
-        return empty
+        return _stamp_history(empty, prices)
     dates = dates[dates <= prices.index[-HORIZON - 1]][::HORIZON]
     records = []
     for cutoff in dates:
@@ -147,8 +183,7 @@ def historical_forecasts(prices: pd.DataFrame, start: str = "2020-01-01") -> pd.
         today["training_n"] = len(train)
         records.extend(today.to_dict("records"))
     result = pd.DataFrame(records, columns=HISTORY_COLUMNS)
-    result.attrs["universe"] = tuple(prices.columns)
-    return result
+    return _stamp_history(result, prices)
 
 
 def rank_correlation(first, second) -> float | None:
@@ -216,13 +251,13 @@ def evaluate_history(history: pd.DataFrame, formula: str = DEFAULT_FORMULA, k: f
 
 def analyze_cutoff(prices: pd.DataFrame, cutoff: str | pd.Timestamp,
                    history: pd.DataFrame | None = None) -> Analysis:
+    prices = validate_prices(prices)
     cutoff = pd.Timestamp(cutoff)
     if cutoff not in prices.index:
         raise ValueError("Choose a trading session available in the local cache.")
     if history is None:
         history = historical_forecasts(prices)
-    if set(history.attrs.get("universe", history["ticker"].unique())) != set(prices.columns):
-        raise ValueError("Forecast history must be recomputed for the current comparison universe.")
+    validate_forecast_history(prices, history)
     features = build_features(prices)
     today = features.loc[features["cutoff"] == cutoff].copy().set_index("ticker")
     if len(today) != len(prices.columns):

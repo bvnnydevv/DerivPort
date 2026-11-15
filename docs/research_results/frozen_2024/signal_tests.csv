@@ -1,0 +1,5 @@
+method,baseline,n_dates,mean_difference,ci_low,ci_high,p_value,p_adjusted,status
+Constrained weights,Balanced original,23,0.14347826086956522,-0.14347826086956517,0.4436956521739128,0.3356643356643357,1.0,approximate_date_block_inference
+Risk-adjusted return,Balanced original,23,-0.0782608695652174,-0.2348913043478261,0.06967391304347818,0.3206793206793207,1.0,approximate_date_block_inference
+Standardized weighted,Balanced original,23,-0.03043478260869565,-0.23913043478260865,0.19565217391304351,0.8121878121878122,1.0,approximate_date_block_inference
+Uncertainty-penalized,Balanced original,23,-0.07391304347826085,-0.20869565217391303,0.04793478260869559,0.2917082917082917,1.0,approximate_date_block_inference

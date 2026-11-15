@@ -85,3 +85,25 @@ def test_simulation_supports_a_custom_two_stock_comparison(stocks):
         distributions.loc[distributions["method"] == "Momentum", "return"].to_numpy(),
         distributions.loc[distributions["method"] == "Same rule", "return"].to_numpy(),
     )
+
+
+@pytest.mark.parametrize("n_paths", [600.5, True, "600"])
+def test_simulation_rejects_noninteger_path_counts(stocks, n_paths):
+    with pytest.raises(ValueError, match="integer"):
+        simulate_paths(stocks, n_paths=n_paths)
+
+
+@pytest.mark.parametrize("seed", [-1, True, 2.5])
+def test_simulation_rejects_invalid_seeds(stocks, seed):
+    with pytest.raises(ValueError, match="seed"):
+        simulate_paths(stocks, seed=seed)
+
+
+def test_simulation_rejects_incomplete_nonfinite_or_duplicate_stock_inputs(stocks):
+    invalid = [stocks.iloc[:1], stocks.assign(momentum=np.nan),
+               stocks.assign(volatility=np.inf), stocks.assign(volatility=-1),
+               stocks.assign(volatility=1e308), stocks.drop(columns="momentum"),
+               pd.concat([stocks, stocks.iloc[:1]])]
+    for frame in invalid:
+        with pytest.raises(ValueError):
+            simulate_paths(frame)

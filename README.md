@@ -1,6 +1,6 @@
 # DerivPort
 
-An educational stock-research and algorithm lab for the Veritas AI finance challenge. Compare dated company evidence with a **quant analyst — model and ranking**, edit a mathematical rule, and reveal what happened next. Use **Research**, **Algorithm builder**, and **Future scenarios** for historical evidence, retrospective testing, and hypothetical projections respectively. No brokerage connections, balances, position sizing, trades, or buy/sell recommendations.
+An educational stock-research and algorithm lab for the Veritas AI finance challenge. Compare dated company evidence with a **quant analyst — model and ranking**, edit a mathematical rule, and reveal what happened next. **Research**, **Algorithm builder**, **Future scenarios**, and **Research & Benchmarking** provide historical evidence, rule experiments, hypothetical projections, and reproducible model/portfolio comparisons. No brokerage connections, account balances, live orders, or buy/sell recommendations; portfolio holdings are hypothetical research allocations.
 
 [Figma design](https://www.figma.com/design/ZxLybASxv0lxyUkdnQ33A2/Hackathon-DerivPort?node-id=1-7) · [Interface direction](docs/DESIGN.md)
 
@@ -32,9 +32,25 @@ Choose a daily historical cutoff through the latest observed date in the selecte
 
 The supplied cache covers **part of 2026, through November 13**, not the rest of that year. Different exchange holidays mean a global comparison uses **shared sessions**, without forward filling. Returns are local-currency returns with no FX conversion.
 
+## Reproducible research and benchmarking
+
+The **Research & Benchmarking** tab adds six aligned return-forecast methods: unchanged Ridge, Elastic Net, Random Forest, Gradient Boosting, momentum, and zero return. The original balanced signal remains selectable alongside standardized, risk-adjusted, uncertainty-penalized, and development-fitted constrained alternatives. Model selection, preprocessing and signal fitting use chronological completed labels; final-test hyperparameters and weights stay frozen.
+
+Prediction accuracy, cross-sectional ranking IC, and hypothetical portfolio performance are reported separately. Portfolio experiments use delayed fills, diversified capped targets, residual cash, daily drawdowns, commission and slippage, and explicit liquidation. Mixed or unknown currencies disable portfolio results while preserving global return/ranking research. Statistical comparisons use paired date-block resampling and Holm adjustment; small samples remain explicitly inconclusive.
+
+Run the documented fixed-cache experiment offline:
+
+```sh
+.venv/bin/python scripts/run_research.py --dataset frozen --validation-start 2020-01-01 --test-start 2023-01-01 --end 2024-12-31 --output artifacts/research_runs/frozen-demo
+```
+
+The export includes input prices, sources, forecasts, scores, folds, trades, daily NAV, confidence diagnostics and a manifest with hashes, settings, software versions and the reproduction command. Additional cached universes use `--dataset cache --symbols AAPL,MSFT,JPM`; uncached symbols are rejected without a provider request.
+
+Read the [prioritized audit](docs/AUDIT.md), [mathematical methods](docs/RESEARCH_METHODS.md), [measured experiment](docs/RESEARCH_RESULTS.md), and [upgrade/file summary](docs/UPGRADE_SUMMARY.md). No alternative automatically replaces Ridge or the original balanced rule, and no positive performance improvement is assumed.
+
 ## Research and algorithm experiments
 
-Both analyst panels use the same stock and cutoff. Company notes separate reported facts, editorial interpretation, and open questions, with the publication date and official source link. Only notes published by the cutoff are eligible. The 20 verified notes are a limited collection; additional symbols and dates may lack suitable company evidence. No narrative or disagreement is invented, and qualitative notes receive no predictive-accuracy score.
+Both analyst panels use the same stock and cutoff. Company notes separate reported facts, editorial interpretation, and open questions, with the publication date and official source link. Date-only notes must be published strictly before the cutoff date; publication-day embargoes prevent after-close information from entering that day's view. The 20 verified notes are a limited collection; additional symbols and dates may lack suitable company evidence. No narrative or disagreement is invented, and qualitative notes receive no predictive-accuracy score.
 
 Three algorithms rank the same comparison group:
 

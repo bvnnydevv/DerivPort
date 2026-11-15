@@ -1,6 +1,7 @@
 """Checks on the actual, bundled demonstration data (no network required)."""
 
 import json
+import hashlib
 from pathlib import Path
 
 import numpy as np
@@ -63,3 +64,10 @@ def test_credits_are_bundled():
     serialized = json.dumps(provenance).lower()
     assert "http" in serialized
     assert "adjust" in serialized
+
+
+def test_original_frozen_bytes_match_the_recorded_immutable_snapshot():
+    expected = '812922aec7ee2a760d2e8cb91a447e8ef36099c796477c15d1ddd272a20132a1'
+    provenance = json.loads((ROOT / 'data/provenance.json').read_text())
+    assert provenance['cache_sha256'] == expected
+    assert hashlib.sha256((ROOT / 'data/prices.csv').read_bytes()).hexdigest() == expected

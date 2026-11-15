@@ -7,6 +7,7 @@ __pycache__/
 artifacts/*.png
 artifacts/*.jpg
 artifacts/*.zip
+artifacts/research_runs/
 data/market_cache/_provider/
 data/market_cache/*.tmp
 data/market_cache/*.csv

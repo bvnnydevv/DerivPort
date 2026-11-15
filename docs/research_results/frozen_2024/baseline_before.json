@@ -1,0 +1,11 @@
+{
+  "repository_commit": "534b7f2d3ad45534bd3fa41667456532bf73104c",
+  "method": "Independent execution from isolated git archive of the prior commit; same frozen data and common final-test dates.",
+  "n_dates": 23,
+  "n_forecasts": 115,
+  "ridge_rmse_pp": 11.564965016735893,
+  "balanced_mean_spearman_ic": -0.13043478260869565,
+  "first_forecast": "2023-01-03",
+  "last_outcome": "2024-12-04",
+  "existing_tests_passed": 154
+}

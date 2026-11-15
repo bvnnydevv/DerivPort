@@ -21,6 +21,7 @@ DATA_DIR = Path(__file__).resolve().parents[1] / 'data'
 CACHE_DIR = DATA_DIR / 'market_cache'
 CATALOG_PATH = DATA_DIR / 'market_catalog.csv'
 BUNDLED_PATH = DATA_DIR / 'prices.csv'
+BUNDLED_PROVENANCE_PATH = DATA_DIR / 'provenance.json'
 BUNDLED_SYMBOLS = ('AAPL', 'MSFT', 'NVDA', 'AMZN', 'GOOGL')
 _LAST_SEARCH_STATUS: dict = {}
 
@@ -72,21 +73,84 @@ def _validate_series(frame: pd.DataFrame, symbol: str) -> pd.Series:
     return result
 
 
+def verify_frozen_cache() -> str:
+    """Verify the original frozen CSV against its recorded byte-level digest."""
+    try:
+        provenance = json.loads(BUNDLED_PROVENANCE_PATH.read_text())
+        expected = provenance['cache_sha256']
+        digest = hashlib.sha256(BUNDLED_PATH.read_bytes()).hexdigest()
+    except (OSError, KeyError, TypeError, json.JSONDecodeError) as exc:
+        raise MarketDataError('The frozen cache provenance could not be verified; no unverified prices were used.') from exc
+    if not isinstance(expected, str) or not re.fullmatch(r'[0-9a-f]{64}', expected) or digest != expected:
+        raise MarketDataError('The frozen price cache checksum failed; restore the recorded dataset before using it.')
+    return digest
+
+
+def _publish_cache(csv_path: Path, meta_path: Path, series: pd.Series, meta: dict) -> None:
+    """Publish a cache pair with rollback if either replacement fails.
+
+    Each rename is atomic; readers reject the short intermediate pair through
+    its checksum rather than accepting unverified data. A failed second rename
+    restores the previous CSV, preserving the prior valid pair on disk.
+    """
+    previous = {path: path.read_bytes() if path.exists() else None for path in (csv_path, meta_path)}
+    token = uuid4().hex
+    temp_csv = csv_path.with_suffix('.csv.' + token + '.tmp')
+    temp_json = meta_path.with_suffix('.json.' + token + '.tmp')
+    replaced = []
+    temporary = [temp_csv, temp_json]
+    try:
+        series.to_csv(temp_csv, float_format='%.17g')
+        meta['cache_sha256'] = hashlib.sha256(temp_csv.read_bytes()).hexdigest()
+        temp_json.write_text(json.dumps(meta, indent=2) + '\n')
+        temp_csv.replace(csv_path)
+        replaced.append(csv_path)
+        temp_json.replace(meta_path)
+        replaced.append(meta_path)
+    except Exception as publication_error:
+        try:
+            for path in reversed(replaced):
+                if previous[path] is None:
+                    path.unlink(missing_ok=True)
+                else:
+                    rollback = path.with_suffix(path.suffix + '.' + token + '.rollback.tmp')
+                    temporary.append(rollback)
+                    rollback.write_bytes(previous[path])
+                    rollback.replace(path)
+        except Exception as rollback_error:
+            failure = MarketDataError('Cache publication failed and the previous disk cache could not be restored. Restore or refresh this stock before continuing.')
+            failure.cache_preserved = False
+            raise failure from rollback_error
+        raise MarketDataError('The verified download could not be saved to the local cache. Previous files were restored where present; no partial new cache was retained.') from publication_error
+    finally:
+        for path in temporary:
+            try:
+                path.unlink(missing_ok=True)
+            except OSError:
+                pass
+
+
 def _read_cached(symbol: str) -> tuple[pd.Series, dict] | None:
     csv_path, meta_path = _cache_paths(symbol)
     if csv_path.exists() and meta_path.exists():
         try:
             meta = json.loads(meta_path.read_text())
+            if not isinstance(meta, dict):
+                raise MarketDataError(f'{symbol}: cache metadata must be an object. Refresh this symbol.')
             if meta.get('symbol') != symbol:
                 raise MarketDataError(f'{symbol}: cache metadata does not match the requested symbol.')
-            if meta.get('cache_sha256') and hashlib.sha256(csv_path.read_bytes()).hexdigest() != meta['cache_sha256']:
+            expected = meta.get('cache_sha256')
+            if not isinstance(expected, str) or not re.fullmatch(r'[0-9a-f]{64}', expected):
+                raise MarketDataError(f'{symbol}: its cache has no valid recorded checksum. Refresh this symbol; no unverified prices were used.')
+            if hashlib.sha256(csv_path.read_bytes()).hexdigest() != expected:
                 raise MarketDataError(f'{symbol}: its cached file checksum failed. Refresh this symbol; no unverified prices were used.')
             series = _validate_series(pd.read_csv(csv_path), symbol)
             meta.update(cache_status='cached', start=series.index[0].date().isoformat(), end=series.index[-1].date().isoformat(), rows=len(series))
             return series, meta
-        except (OSError, json.JSONDecodeError, pd.errors.ParserError, pd.errors.EmptyDataError) as exc:
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError, pd.errors.ParserError, pd.errors.EmptyDataError) as exc:
             raise MarketDataError(f'{symbol}: its local cache could not be read. Refresh this symbol.') from exc
     if symbol in BUNDLED_SYMBOLS and BUNDLED_PATH.exists():
+        verify_frozen_cache()
         raw = pd.read_csv(BUNDLED_PATH)
         series = _validate_series(raw.loc[raw['ticker'] == symbol], symbol)
         meta = symbol_info(symbol)
@@ -204,18 +268,11 @@ def load_symbol_prices(symbol: str, refresh: bool = False) -> tuple[pd.Series, d
         meta = symbol_info(symbol)
         meta.update(name=provider_meta.get('longName') or provider_meta.get('shortName') or meta['name'], exchange=provider_meta.get('fullExchangeName') or provider_meta.get('exchangeName') or meta['exchange'], currency=provider_meta.get('currency') or meta['currency'], source='Yahoo Finance via yfinance', source_url=f'https://finance.yahoo.com/quote/{symbol}/history/', cache_status='downloaded', fetched_at=datetime.now(timezone.utc).isoformat(timespec='seconds'), start=str(series.index[0].date()), end=str(series.index[-1].date()), rows=len(series), adjusted=True, price_field='Adj Close', point_in_time_archive=False, observations_excluded=int(len(history)-len(series)), note='Retrospectively adjusted snapshot; current UTC date excluded; no interpolation or currency conversion.')
         csv_path, meta_path = _cache_paths(symbol)
-        token = uuid4().hex
-        temp_csv = csv_path.with_suffix('.csv.' + token + '.tmp')
-        temp_json = meta_path.with_suffix('.json.' + token + '.tmp')
-        series.to_csv(temp_csv, float_format='%.17g')
-        meta['cache_sha256'] = hashlib.sha256(temp_csv.read_bytes()).hexdigest()
-        temp_json.write_text(json.dumps(meta, indent=2) + '\n')
-        temp_csv.replace(csv_path)
-        temp_json.replace(meta_path)
+        _publish_cache(csv_path, meta_path, series, meta)
         return _validate_series(pd.read_csv(csv_path), symbol), meta
     except Exception as exc:
         message = str(exc) if isinstance(exc, MarketDataError) else _readable_error(symbol, exc)
-        if cached is not None:
+        if cached is not None and getattr(exc, 'cache_preserved', True):
             series, meta = cached
             return series, dict(meta, warning=message + ' The previous cached history was preserved.', refresh_failed=True)
         raise MarketDataError(message) from exc

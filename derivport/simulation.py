@@ -52,14 +52,29 @@ def simulate_paths(stocks: pd.DataFrame, scenario: str = "rally", n_paths: int =
     """
     if scenario not in SCENARIOS:
         raise ValueError("Choose rally, reversal, or sideways.")
+    if isinstance(n_paths, (bool, np.bool_)) or not isinstance(n_paths, (int, np.integer)):
+        raise ValueError("Use an integer number of simulated paths.")
     if n_paths < 200:
         raise ValueError("Use at least 200 paths for each scenario.")
     if n_paths > 20000:
         raise ValueError("Use at most 20,000 paths to keep the local demo responsive.")
+    if isinstance(seed, (bool, np.bool_)) or not isinstance(seed, (int, np.integer)) or seed < 0:
+        raise ValueError("The simulation seed must be a nonnegative integer.")
+    if not isinstance(stocks, pd.DataFrame) or len(stocks) < 2:
+        raise ValueError("Simulation requires at least two stocks.")
+    if not stocks.index.is_unique or not all(isinstance(name, str) and name.strip() for name in stocks.index):
+        raise ValueError("Simulation requires unique nonempty stock symbols.")
+    if not {"momentum", "volatility"}.issubset(stocks.columns):
+        raise ValueError("Simulation requires momentum and volatility for each stock.")
     tickers = tuple(sorted(stocks.index))
-    inputs = stocks.loc[list(tickers)]
+    try:
+        inputs = stocks.loc[list(tickers), ["momentum", "volatility"]].astype(float)
+    except (ValueError, TypeError, OverflowError) as exc:
+        raise ValueError("Simulation requires numeric finite momentum and nonnegative volatility.") from exc
+    if not np.isfinite(inputs.to_numpy()).all() or (inputs["volatility"] < 0).any():
+        raise ValueError("Simulation requires finite momentum and nonnegative finite volatility.")
     spec = SCENARIOS[scenario]
-    rng = np.random.default_rng(seed)
+    rng = np.random.default_rng(int(seed))
     correlation = spec["correlation"]
     common = rng.standard_normal((n_paths, 21, 1))
     individual = rng.standard_normal((n_paths, 21, len(tickers)))
@@ -77,10 +92,14 @@ def simulate_paths(stocks: pd.DataFrame, scenario: str = "rally", n_paths: int =
         drift[5:] = -0.0035 - tilt
     else:
         drift = np.zeros((21, len(tickers)))
-    increments = drift[None, :, :] + sigma[None, None, :] * noise
-    growth = np.exp(np.cumsum(increments, axis=1))
-    paths = np.concatenate([np.full((n_paths, 1, len(tickers)), 100.0), growth * 100], axis=1)
-    terminal = pd.DataFrame((growth[:, -1, :] - 1) * 100, columns=tickers)
+    with np.errstate(over="ignore", under="ignore", invalid="ignore"):
+        increments = drift[None, :, :] + sigma[None, None, :] * noise
+        growth = np.exp(np.cumsum(increments, axis=1))
+        paths = np.concatenate([np.full((n_paths, 1, len(tickers)), 100.0), growth * 100], axis=1)
+        terminal_values = (growth[:, -1, :] - 1) * 100
+    if not np.isfinite(paths).all() or (paths <= 0).any() or not np.isfinite(terminal_values).all():
+        raise ValueError("These inputs produce extreme or non-finite simulated paths; reduce volatility or momentum.")
+    terminal = pd.DataFrame(terminal_values, columns=tickers)
     terminal.index.name = "path"
     return Simulation(scenario, tickers, paths, terminal, spec["assumptions"], seed)
 
