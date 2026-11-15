@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 140" role="img" aria-label="Illustration of connected algorithm blocks">
+  <defs><pattern id="dots" width="12" height="12" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".7" fill="#40596d" opacity=".5"/></pattern><linearGradient id="glow" x1="0" x2="1"><stop stop-color="#122b35"/><stop offset="1" stop-color="#182738"/></linearGradient></defs>
+  <rect x="1" y="1" width="258" height="138" rx="16" fill="#101b28" stroke="#304454"/>
+  <rect x="8" y="8" width="244" height="124" rx="11" fill="url(#dots)"/>
+  <g fill="none" stroke="#5e758b" stroke-width="2" stroke-linecap="round"><path d="M84 45h16q12 0 12 13v21q0 12 12 12h12"/><path d="M84 96h16q12 0 12-13V62q0-12 12-12h12"/><path d="M196 70h17"/></g>
+  <g stroke-width="1.2"><path d="M24 28h17v-5h18v5h27v33H60v5H42v-5H24Z" fill="url(#glow)" stroke="#54d9b7"/><path d="M24 80h17v-5h18v5h27v32H60v5H42v-5H24Z" fill="#23233d" stroke="#b59bea"/><path d="M136 48h14v-5h18v5h30v43h-30v5h-18v-5h-14Z" fill="#342d28" stroke="#e8b477"/></g>
+  <g fill="none" stroke-linecap="round" stroke-width="2"><path d="M35 45h11m-5-5v10m15-10h17m-17 5h12m-12 5h17" stroke="#72e5c6"/><path d="M35 95h11m10-6h16m-16 6h12m-12 6h16" stroke="#cbb8f1"/><path d="M149 65h12m-6-6v12m15-12h14m-14 6h10m-10 6h14" stroke="#f4c88f"/></g>
+  <circle cx="224" cy="70" r="14" fill="#173d39" stroke="#54d9b7" stroke-width="1.2"/>
+  <path d="m218 70 4 4 8-9" fill="none" stroke="#78e8c8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <g fill="#6b8194"><circle cx="112" cy="70" r="3"/><circle cx="14" cy="14" r="1"/><circle cx="246" cy="126" r="1"/></g>
+</svg>

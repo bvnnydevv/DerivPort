@@ -4,6 +4,7 @@ from datetime import date
 import hashlib
 import html
 import json
+import base64
 from pathlib import Path
 import numpy as np
 import pandas as pd
@@ -16,9 +17,14 @@ from derivport import (DEFAULT_FORMULA, FormulaError, analyze_cutoff, apply_rule
 from derivport.market_data import (MarketDataError, get_search_status,
     load_symbol_prices, symbol_info, verify_frozen_cache)
 from derivport.us_markets import (US_EXCHANGES, cached_us_listings,
-    load_us_symbol_prices, search_us_symbols, us_catalog)
+    load_us_symbol_prices, search_us_symbols, us_catalog, directory_provenance, resolve_us_listing)
 from derivport.stock_chart_ui import render_stock_chart
+from derivport.ohlc import load_candles
+from derivport.theme import render_theme_controls, theme_css, style_plot
+from derivport.blocks_ui import render_blocks
 from derivport.projections import project_scenarios
+from derivport.projection_views import (RISK_PRESETS, apply_risk_preset,
+    scenario_fan, scenario_distribution)
 from derivport.calculus import calculus_experiment, differential, formula_to_latex
 from derivport.calculus_ui import render_calculus_lab
 from derivport.research_ui import render_benchmarking
@@ -28,7 +34,6 @@ ROOT = Path(__file__).parent
 DEFAULT_STOCKS = ['AAPL', 'AMZN', 'GOOGL', 'MSFT', 'NVDA']
 COLORS = {'Momentum': '#66706f', 'AI model': '#2454ff', 'Your algorithm': '#101820'}
 st.set_page_config(page_title='DerivPort | Equity research', layout='wide', page_icon='D')
-st.html(f"<style>{(ROOT / 'assets/style.css').read_text()}</style>")
 
 
 def esc(value):
@@ -43,14 +48,30 @@ def heading(title, description=''):
     st.html(f'<div class="section-title"><h2>{esc(title)}</h2><span>{esc(description)}</span></div>')
 
 
+def asset_uri(name, decorative=True):
+    path = ROOT / 'assets' / name
+    if not path.exists() or (decorative and not st.session_state.get('theme_images', True)):
+        return ''
+    mime = 'image/svg+xml' if path.suffix == '.svg' else 'image/jpeg'
+    return f'data:{mime};base64,' + base64.b64encode(path.read_bytes()).decode()
+
+
+def visual_heading(title, description, image):
+    uri = asset_uri(image)
+    picture = f'<img src="{uri}" alt="{esc(title)} illustration">' if uri else ''
+    st.html(f'<div class="visual-header"><div><h1>{esc(title)}</h1><p>{esc(description)}</p></div>{picture}</div>')
+
+
 def chart(fig, height=230):
-    fig.update_layout(height=height, margin=dict(l=5, r=10, t=15, b=5),
+    margins = dict(l=10, r=16, t=38, b=20) | fig.layout.margin.to_plotly_json()
+    legend = dict(orientation='h', y=1.03, x=0, yanchor='bottom') | fig.layout.legend.to_plotly_json()
+    fig.update_layout(height=height, margin=margins,
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(family='Arial, sans-serif', size=12, color='#66706f'),
-        legend=dict(orientation='h', y=1.15, x=0), hoverlabel=dict(bgcolor='white'))
+        font=dict(family='Trebuchet MS, Trebuchet, sans-serif', size=12),
+        legend=legend)
     fig.update_xaxes(showgrid=False, zeroline=False, linecolor='#e6e4dd')
     fig.update_yaxes(gridcolor='#e6e4dd', zerolinecolor='#b9bdb5')
-    return fig
+    return style_plot(fig, PALETTE)
 
 
 @st.cache_data(show_spinner=False)
@@ -61,7 +82,14 @@ def frozen_prices():
 
 @st.cache_data(show_spinner=False)
 def cached_symbol(symbol):
-    return load_symbol_prices(symbol)
+    if any(item['symbol'] == symbol for item in cached_us_listings()):
+        return load_symbol_prices(symbol)
+    result = load_us_symbol_prices(symbol)
+    try:
+        load_candles(symbol, allow_download=True)
+    except MarketDataError:
+        pass  # The chart honestly falls back to verified adjusted closes.
+    return result
 
 
 @st.cache_data(show_spinner='Preparing historical forecasts…')
@@ -101,7 +129,17 @@ if 'pending_stock' in st.session_state:
     st.session_state.stock = pending
     st.session_state.history_mode = 'Full cached history'
 
-st.html('<div class="masthead"><div class="brand">DerivPort</div></div>')
+brand_col, appearance_col = st.columns([7, 1], vertical_alignment='center')
+with appearance_col:
+    PALETTE = render_theme_controls()
+st.html('<style>' + (ROOT / 'assets/style.css').read_text() + '\n' + theme_css(PALETTE) + '</style>')
+COLORS = {'Momentum': '#90a4bf', 'AI model': PALETTE['accent'], 'Your algorithm': '#ffbd69'}
+with brand_col:
+    mark = asset_uri('derivport-mark.svg', decorative=False)
+    mark_html = f'<img class="brand-mark" src="{mark}" alt="DerivPort logo">' if mark else ''
+    photo = asset_uri('nyse.jpg')
+    photo_html = f'<img class="market-photo" src="{photo}" alt="New York Stock Exchange facade, photo by Ken Lund">' if photo else ''
+    st.html(f'<div class="masthead"><div class="brand">{mark_html}DerivPort</div>{photo_html}</div>')
 def clear_search():
     st.session_state.pop('search_results', None)
     st.session_state.pop('search_status', None)
@@ -113,14 +151,18 @@ def change_history_mode():
 
 
 def change_comparison_group():
+    st.session_state.pop('chart_auto_member', None)
     group = st.session_state.universe_selection
     if group and st.session_state.get('stock') not in group:
         st.session_state.stock = group[0]
         st.session_state.exchange_filter = 'All US exchanges'
 
 
-us_listings = cached_us_listings()
-us_lookup = {row['symbol']: row for row in us_listings}
+cached_listings = cached_us_listings()
+cached_lookup = {item['symbol']: item for item in cached_listings}
+us_listings = us_catalog()
+us_lookup = {row['symbol']: dict(cached_lookup.get(row['symbol'], {}), **row) for row in us_listings}
+us_lookup.update({key:value for key,value in cached_lookup.items() if key not in us_lookup})
 # Migrate a session opened before the US-only scope change.
 prior_group = st.session_state.get('universe_selection', DEFAULT_STOCKS)
 clean_group = [symbol for symbol in prior_group if symbol in us_lookup]
@@ -138,22 +180,45 @@ chart_listings = [row for row in us_listings if exchange_filter == 'All US excha
 stock_options = [row['symbol'] for row in chart_listings]
 if st.session_state.get('stock') not in stock_options:
     group = st.session_state.get('universe_selection', DEFAULT_STOCKS)
-    st.session_state.stock = next((symbol for symbol in group if symbol in stock_options), stock_options[0])
+    st.session_state.stock = next((symbol for symbol in group if symbol in stock_options),
+        next((symbol for symbol in cached_lookup if symbol in stock_options), stock_options[0]))
 with stock_col:
     ticker = st.selectbox('Stock', stock_options,
         format_func=lambda s: f"{s} · {us_lookup[s].get('name', s)}", key='stock')
-# Browsing a cached stock adds it to the research group before its widget is
-# created. An explicit group edit instead chooses a stock inside that group.
+# New selections download only that stock. Failed additions never poison the
+# comparison group; a recent IPO can still show an observed chart alone.
+if ticker not in cached_lookup:
+    try:
+        with st.spinner(f'Loading {ticker} price history…'):
+            cached_symbol(ticker)
+        cached_listings = cached_us_listings()
+        cached_lookup = {item['symbol']: item for item in cached_listings}
+    except MarketDataError as exc:
+        st.warning(str(exc))
+        try:
+            listing = resolve_us_listing(ticker)
+            bars, candle_meta = load_candles(ticker, allow_download=True)
+            st.info('Chart only: this stock does not yet have the verified adjusted history needed for the research models. Select another stock to continue research.')
+            render_stock_chart(bars.close, ticker, str(bars.index[-1].date()), dict(candle_meta, exchange=listing['exchange']))
+        except MarketDataError:
+            st.info('This listing is in the directory, but its price history is currently unavailable. Select a cached stock or try another listing.')
+        st.stop()
 group = list(st.session_state.get('universe_selection', DEFAULT_STOCKS))
+previous_auto = st.session_state.get('chart_auto_member')
+if previous_auto and previous_auto != ticker:
+    group = [symbol for symbol in group if symbol != previous_auto]
+    st.session_state.universe_selection = group
+    st.session_state.pop('chart_auto_member', None)
 if ticker not in group:
     st.session_state.universe_selection = (group + [ticker])[-10:]
+    st.session_state.chart_auto_member = ticker
 with mode_col:
     history_mode = st.selectbox('Price history', ['Full cached history', 'Frozen demo (2018–2024)'],
         key='history_mode', on_change=change_history_mode)
 extended = history_mode == 'Full cached history'
 
 with st.expander('Stocks & comparison group', expanded=False):
-    st.caption('US-listed stocks, grouped by listing exchange. The Exchange control above filters cached charts; use this directory to find and add more US listings. US-listed ADRs are included. Cached stocks work offline.')
+    st.caption(f"{len(us_listings):,} current US equity candidates from the NasdaqTrader directory. Choose any listing above; only the selected stock is downloaded. Cached histories work offline. Source snapshot: 2026-11-13; provider coverage varies.")
     directory_col, query_col, search_col = st.columns([1.4, 3, 1], vertical_alignment='bottom')
     with directory_col:
         directory_exchange = st.selectbox('Directory exchange', ['All US exchanges', *US_EXCHANGES], key='directory_exchange', on_change=clear_search)
@@ -200,7 +265,7 @@ with st.expander('Stocks & comparison group', expanded=False):
                     st.success(f"{refreshed['symbol']} cached through {refreshed['end']}.")
             except MarketDataError as exc:
                 st.error(str(exc))
-    st.multiselect('Comparison group · 2–10 stocks', list(us_lookup), default=DEFAULT_STOCKS,
+    st.multiselect('Comparison group · 2–10 stocks', list(cached_lookup), default=DEFAULT_STOCKS,
         format_func=lambda s: f"{us_lookup[s]['exchange']} · {s}",
         max_selections=10, key='universe_selection', on_change=change_comparison_group)
     st.caption('Full cached history includes the downloaded 2026 data. Frozen demo preserves the original five-stock 2018–2024 example. Choose the range in the visible Price history control.')
@@ -228,7 +293,10 @@ except MarketDataError as exc:
     st.error(str(exc))
     st.stop()
 if len(prices) < 295:
-    st.info('This group needs at least 295 shared observations for training, past forecast errors, and replay. Choose stocks with a longer shared history.')
+    st.info('Chart only: this comparison needs 295 shared observations for training and replay. Remove a recently listed stock from the group, or browse an established stock to restore research.')
+    own_history = next(item for item in series if item.name == ticker)
+    if not own_history.empty:
+        render_stock_chart(own_history, ticker, str(own_history.index[-1].date()), metadata[ticker])
     st.stop()
 earliest = max(prices.index[252], pd.Timestamp('2020-04-01'))
 latest = prices.index[-1]
@@ -270,7 +338,8 @@ available_notes = [n for n in notes if n['ticker'] == ticker and pd.Timestamp(n[
 note = max(available_notes, key=lambda n: n['published']) if available_notes else None
 research, builder, future, benchmarking = st.tabs(['Research', 'Algorithm builder', 'Future scenarios', 'Research & Benchmarking'], key='workspace')
 with research:
-    render_stock_chart(prices[ticker], ticker, cutoff, meta)
+    render_stock_chart(prices[ticker], ticker, cutoff, meta,
+        coach_snapshot=dict(row=base.loc[ticker], note=note, context=context))
     if ticker == 'AAPL' and cutoff == '2024-05-03' and not extended:
         st.caption('Curated example: Apple after its May 2 earnings release. Choose any available date or change the stock group.')
     panels = st.container()
@@ -278,7 +347,8 @@ with research:
     replay_area = st.container(border=True, key='replay_panel')
     extras_area = st.container()
 with builder:
-    st.html('<div class="page-title"><h1>Algorithm builder</h1><p>Write a ranking rule. Inspect the math. Test it on historical outcomes.</p></div>')
+    visual_heading('Algorithm builder', 'Connect blocks, inspect the formula, and test your idea against observed history.', 'rule-lab.svg')
+    render_blocks(base, ticker)
     with st.container(border=True, key='signal_card'):
         st.html(f'<div class="summary-signal"><div><h2>{esc(SIGNAL_NAME)}</h2><p>A balanced model and momentum score with explicit error and volatility penalties.</p></div></div>')
         signal_info, signal_actions = st.columns([2, 1], gap='large')
@@ -431,8 +501,15 @@ with builder:
         st.download_button('Export test results', result['per_date'].to_csv(index=False).encode(), file_name='derivport_backtest.csv', mime='text/csv')
 
 with future:
-    st.html('<div class="page-title"><h1>Future scenarios</h1><p>Explore hypothetical prices through 2037 under assumptions you control.</p></div>')
+    visual_heading('Future scenarios', 'Choose a risk assumption and explore hypothetical paths through 2037.', 'scenario-lab.svg')
     st.info(f'SIMULATED SCENARIOS · Actual historical prices stop at {latest:%Y-%m-%d}. Values after this anchor are hypothetical, not known prices or validated forecasts.')
+    def select_risk_preset():
+        apply_risk_preset(st.session_state)
+    def custom_projection_risk():
+        st.session_state.projection_risk = 'Custom'
+    st.radio('Projection risk assumption', ['Low','Medium','High','Custom'], index=1,
+        horizontal=True, key='projection_risk', on_change=select_risk_preset)
+    st.caption('Low = 0.75× historical volatility · Medium = 1× · High = 1.5×. Presets change volatility, not your log-drift assumption. Higher risk means a wider range of outcomes; it does not promise better returns.')
     target_col, drift_col, run_col = st.columns([1, 1, 1], vertical_alignment='bottom')
     with target_col:
         projection_target = st.date_input('Scenario end date', value=date(2037, 12, 31),
@@ -443,7 +520,7 @@ with future:
     with st.expander('Scenario assumptions'):
         v_col, c_col, p_col = st.columns(3)
         with v_col:
-            projection_volatility = st.slider('Historical volatility multiplier', .25, 3.0, 1.0, .25, key='projection_volatility')
+            projection_volatility = st.slider('Historical volatility multiplier', .25, 3.0, 1.0, .25, key='projection_volatility', on_change=custom_projection_risk)
         with c_col:
             projection_correlation = st.slider('Correlation between stocks', 0.0, 1.0, .6, .05, key='projection_correlation')
         with p_col:
@@ -473,18 +550,13 @@ with future:
         plotted_symbol = ticker if ticker in symbols else symbols[0]
         band = projected.quantiles.loc[projected.quantiles['ticker'] == plotted_symbol]
         heading(f'{plotted_symbol} · hypothetical price paths', f'{projected.dates[0]:%Y-%m-%d} to {projected.dates[-1]:%Y-%m-%d}')
-        fig = go.Figure()
-        fig.add_trace(go.Scatter(x=band['date'], y=band['p90'], mode='lines',
-            line=dict(width=0), showlegend=False, hoverinfo='skip'))
-        fig.add_trace(go.Scatter(x=band['date'], y=band['p10'], mode='lines',
-            line=dict(width=0), fill='tonexty', fillcolor='rgba(57,119,188,.12)',
-            name='Simulated 10th–90th percentiles', hoverinfo='skip'))
-        fig.add_trace(go.Scatter(x=band['date'], y=band['p50'], name='Simulated median',
-            line=dict(color='#2454ff', width=2, dash='dash')))
-        fig.add_trace(go.Scatter(x=[projected.dates[0]], y=[projected.latest_prices[plotted_symbol]],
-            mode='markers', marker=dict(color='#101820', size=7), name='Last actual cached close'))
-        fig.update_yaxes(title='Hypothetical adjusted-price level · local currency')
-        st.plotly_chart(chart(fig, 310), width='stretch', config={'displayModeBar': False}, key='future_scenario_chart')
+        fan_col, distribution_col = st.columns([1.6, 1])
+        with fan_col:
+            st.plotly_chart(chart(scenario_fan(projected, plotted_symbol), 340), theme=None,
+                width='stretch', config={'displayModeBar': True, 'displaylogo': False}, key='future_scenario_chart')
+        with distribution_col:
+            st.plotly_chart(chart(scenario_distribution(projected, plotted_symbol), 340), theme=None,
+                width='stretch', config={'displayModeBar': True, 'displaylogo': False}, key='future_distribution_chart')
         terminal = projected.terminal_returns
         summary_projection = pd.DataFrame({
             'Last actual close': projected.latest_prices,
@@ -549,7 +621,7 @@ with replay_area:
     with copy_col:
         st.html('<h3>Historical replay</h3>')
         if outcome_complete:
-            st.caption('Future returns and realized ranks stay hidden until reveal. International experiments use 21 shared trading sessions.')
+            st.caption('Future returns and realized ranks stay hidden until reveal. Replays use 21 shared observed trading sessions.')
         else:
             st.caption(f'Outcome pending: only {subsequent_sessions} of 21 subsequent shared sessions are cached. Research is available, but actual future returns and realized ranks do not exist in this cache yet.')
     with action:
@@ -601,7 +673,7 @@ with extras_area:
         st.caption('600 paths per scenario; fixed seed 2024. Initial top-score ties use ticker order; terminal first-place ties split credit. Simulated projections are separate from historical evidence.')
     with st.expander('Methodology, data & past evaluation'):
         st.markdown('**Research scope.** Finance education only: no real brokerage accounts, balances, orders, or buy/sell recommendations. Benchmark portfolio weights and fills are hypothetical research allocations. Finance theme confirmed; a detailed official scoring rubric was not supplied.')
-        st.markdown(f'**US stock universe.** Browse {len(us_catalog())} starter listings or search additional US equities by exchange. {len(us_listings)} US research histories are cached offline. Supported venues are NASDAQ, NYSE, NYSE American, NYSE Arca, Cboe and IEX when available. US-listed ADRs are included; international exchange listings, funds and OTC instruments are excluded from this interface. The directory is not exhaustive. Dates require sufficient shared observed history; no missing dates are filled.')
+        st.markdown(f"**US stock universe.** Browse {len(us_listings):,} current equity candidates from NasdaqTrader, including common/ordinary shares, ADRs, preferred shares and partnership equity units after disclosed filters. {len(cached_listings)} histories are cached locally. Exchanges include {', '.join(US_EXCHANGES)} when available. The snapshot is not a historical/delisted security master; name-based classification and provider history availability have limits. New downloads verify equity identity. Dates require sufficient shared observed history; no missing dates are filled.")
         st.markdown('**Price charts.** Candles use genuine daily open, high, low, close and volume from a separate chart cache, with no dividend adjustment. Weekly/monthly bars aggregate only observations known by the cutoff and can include a partial final period. SMA and EMA windows count the selected bar interval. Research features, forecasts and returns retain the original dividend-adjusted close inputs.')
         st.markdown('**Model.** Standardized Ridge regression uses momentum and volatility. Training labels complete by each cutoff. Return inputs are percentage points; k is dimensionless under the default rule.')
         st.latex(r'M_{21,t}=100\left(\frac{P_t^{\rm adj}}{P_{t-21}^{\rm adj}}-1\right),\qquad \sigma_{21,t}=100\sqrt{21}\;\operatorname{SD}(r_{t-20},\ldots,r_t)')
@@ -633,3 +705,5 @@ with extras_area:
         export = prices.loc[:cutoff].rename_axis('date').reset_index().melt(id_vars='date', var_name='ticker', value_name='adjusted_close')
         st.download_button('Export prices known by cutoff', export.to_csv(index=False).encode(), file_name=f'derivport_prices_through_{cutoff}.csv', mime='text/csv')
 st.html('<div class="footer"><span>DerivPort</span><span>Historical research. Transparent assumptions. No investment recommendations.</span></div>')
+with st.expander('Image credits'):
+    st.markdown('NYSE photograph: [Ken Lund / Wikimedia Commons](https://commons.wikimedia.org/wiki/File:New_York_Stock_Exchange,_Manhattan,_New_York_(7236984682).jpg), [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/). Display crop only. Rule and scenario illustrations are original DerivPort artwork.')

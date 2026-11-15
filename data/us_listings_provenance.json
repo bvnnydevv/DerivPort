@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "retrieved_at_utc": "2026-11-15T05:50:10+00:00",
+  "directory_sha256": "880331a910e5c19e5c739cc3035fe3bbfef5e257e4fa30939405512b8f0bf9b7",
+  "rows": 6094,
+  "exchange_counts": {
+    "Cboe": 1,
+    "NASDAQ": 3515,
+    "NYSE": 2302,
+    "NYSE American": 258,
+    "NYSE Arca": 4,
+    "TXSE": 14
+  },
+  "security_type_counts": {
+    "Common / ordinary equity": 5299,
+    "Depositary / registry shares": 327,
+    "Partnership equity units": 30,
+    "Preferred equity": 438
+  },
+  "sources": [
+    {
+      "filename": "nasdaqlisted.txt",
+      "url": "https://www.nasdaqtrader.com/dynamic/symdir/nasdaqlisted.txt",
+      "sha256": "f7eb7ca0af8db7d05c083c85d8c344f8001e8218ec408f4f13e92fae1f72ad6f",
+      "source_rows": 5604,
+      "included_rows": 3515,
+      "excluded": {
+        "etf_or_nextshares": 1278,
+        "nonstock_name_filter": 803,
+        "test_issue": 8
+      },
+      "file_creation_time": "2026-11-13T21:31",
+      "file_creation_timezone": "Unspecified by the source file"
+    },
+    {
+      "filename": "otherlisted.txt",
+      "url": "https://www.nasdaqtrader.com/dynamic/symdir/otherlisted.txt",
+      "sha256": "0bf4e933114548681a5106e98bf6aea4f90aa95bb4cfb360361edaa268c4fac9",
+      "source_rows": 7682,
+      "included_rows": 2579,
+      "excluded": {
+        "etf_or_nextshares": 4509,
+        "nonstock_name_filter": 564,
+        "test_issue": 30
+      },
+      "file_creation_time": "2026-11-13T21:31",
+      "file_creation_timezone": "Unspecified by the source file"
+    }
+  ],
+  "policy": "Current listed equities only. Exclude ETF/NextShares/test flags, name-identified investment funds, notes/bonds/debentures, warrants, rights and packaged units. Keep common/ordinary shares, ADR/ADS/registry shares, preferred equity and common/preferred partnership units. Security-name classification is imperfect; provider equity identity and history remain subject to verification on first download. Not a historical security master.",
+  "scope": "Current NasdaqTrader Nasdaq and other-exchange US listings, after disclosed instrument filters. No OTC, delisted-security or historical-constituent archive; vendor price/alias coverage is not guaranteed.",
+  "source_definitions": "https://www.nasdaqtrader.com/Trader.aspx?id=SymbolDirDefs",
+  "additional_exchange_definitions": [
+    "https://www.nasdaqtrader.com/TraderNews.aspx?id=DTN2026-10",
+    "https://www.nyse.com/publicdocs/nyse/data/NYSE_Texas_Support_of_Primary_Listings.pdf"
+  ],
+  "currency_policy": "The source directory has no currency field. Currency remains Unknown until the price provider supplies it."
+}

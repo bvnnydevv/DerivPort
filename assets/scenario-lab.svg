@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 140" role="img" aria-label="Illustration of a range of hypothetical future paths">
+  <defs><linearGradient id="fan" x1="0" x2="1"><stop stop-color="#b392f1" stop-opacity=".02"/><stop offset="1" stop-color="#b392f1" stop-opacity=".3"/></linearGradient></defs>
+  <rect x="1" y="1" width="258" height="138" rx="16" fill="#101b28" stroke="#304454"/>
+  <g stroke="#273b4e" stroke-width="1"><path d="M28 28v83h203"/><path d="M29 86h202M29 61h202M29 36h202" stroke-dasharray="3 5"/></g>
+  <path d="M59 91C103 80 145 45 224 24v87C150 111 103 100 59 91Z" fill="url(#fan)"/>
+  <path d="M59 91C107 80 149 45 224 24" fill="none" stroke="#c4adf8" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <path d="M59 91C111 98 163 112 224 111" fill="none" stroke="#8e72be" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <path d="M59 91C101 86 113 73 143 71S186 53 224 49" fill="none" stroke="#bca0f1" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="m59 91 19-6 15 5 16-18 17 10 18-24 17 10 22-27 19 3 22-20" fill="none" stroke="#e7b66a" stroke-width="1" opacity=".5"/>
+  <circle cx="59" cy="91" r="4.2" fill="#58d8b7" stroke="#102b31" stroke-width="2"/>
+  <path d="M59 30v80" stroke="#58d8b7" stroke-width="1" stroke-dasharray="2 4" opacity=".65"/>
+  <g font-family="Trebuchet MS,Trebuchet,sans-serif" font-size="8" letter-spacing=".6" fill="#a9bdcf"><text x="40" y="124">ANCHOR</text><text x="179" y="124">SCENARIOS</text></g>
+</svg>

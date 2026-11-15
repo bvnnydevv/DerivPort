@@ -1,19 +1,27 @@
 """US-listed equity scope for the explorer, without changing research caches.
 
 Listing venue determines eligibility, rather than issuer domicile or USD alone.
-The catalog is a starter list; it is not an exhaustive security master. Existing
-international price APIs remain available for reproducing historical research.
+The bundled current directory comes from official NasdaqTrader listing files;
+it is not a historical security master or a guarantee of provider price coverage.
+Existing international APIs remain available for reproducing historical research.
 """
 from __future__ import annotations
 
+import csv
+from functools import lru_cache
+import hashlib
+import io
 import json
+from pathlib import Path
 import re
 from uuid import uuid4
 
 from derivport import market_data
 from derivport.market_data import MarketDataError
 
-US_EXCHANGES = ('NASDAQ', 'NYSE', 'NYSE American', 'NYSE Arca', 'Cboe', 'IEX')
+US_EXCHANGES = ('NASDAQ', 'NYSE', 'NYSE American', 'NYSE Arca', 'Cboe', 'IEX', 'TXSE', 'NYSE Texas', 'LTSE')
+DIRECTORY_PATH = Path(__file__).resolve().parents[1] / 'data' / 'us_listings.csv'
+DIRECTORY_PROVENANCE_PATH = DIRECTORY_PATH.with_name('us_listings_provenance.json')
 
 # Provider codes/names are matched exactly after punctuation/spacing removal.
 # Do not use a NASDAQ/NYSE prefix match: foreign Nasdaq markets are not US venues.
@@ -31,6 +39,9 @@ _EXCHANGE_ALIASES = {
     'BATS': 'Cboe', 'BTS': 'Cboe', 'CBOE': 'Cboe',
     'CBOEBZX': 'Cboe', 'CBOEUS': 'Cboe',
     'IEX': 'IEX', 'IEXG': 'IEX', 'INVESTORSEXCHANGE': 'IEX',
+    'TXSE': 'TXSE', 'TEXASSTOCKEXCHANGE': 'TXSE',
+    'NYSETEXAS': 'NYSE Texas', 'NYSECHICAGO': 'NYSE Texas',
+    'LTSE': 'LTSE', 'LONGTERMSTOCKEXCHANGE': 'LTSE',
 }
 
 
@@ -80,8 +91,45 @@ def filter_us_listings(rows, exchange: str | None = None, *, assume_equity: bool
     return sorted(results.values(), key=lambda row: (order[row['exchange']], row['symbol']))
 
 
+@lru_cache(maxsize=2)
+def _snapshot_rows(raw: bytes) -> tuple[dict, ...]:
+    rows = list(csv.DictReader(io.StringIO(raw.decode('utf-8'))))
+    required = {'symbol', 'name', 'exchange', 'currency', 'quoteType', 'listing_symbol', 'source_file', 'security_type'}
+    if not rows or not required.issubset(rows[0]) or len({r['symbol'] for r in rows}) != len(rows):
+        raise MarketDataError('The US directory has an invalid schema or duplicate symbols. Refresh its verified snapshot.')
+    for row in rows:
+        if not row['name'] or row['quoteType'] != 'EQUITY' or row['source_file'] not in ('nasdaqlisted.txt', 'otherlisted.txt') or _us_row(row) is None:
+            raise MarketDataError('The US directory contains an invalid listing. Restore or refresh its verified snapshot.')
+    return tuple(rows)
+
+
+def _verified_snapshot() -> tuple[bytes, dict]:
+    try:
+        raw = DIRECTORY_PATH.read_bytes()
+        provenance = json.loads(DIRECTORY_PROVENANCE_PATH.read_text())
+        if provenance.get('schema_version') != 1 or not isinstance(provenance.get('directory_sha256'), str):
+            raise ValueError('Invalid metadata schema')
+        if hashlib.sha256(raw).hexdigest() != provenance['directory_sha256']:
+            raise ValueError('Checksum mismatch')
+        if len(_snapshot_rows(raw)) != provenance.get('rows'):
+            raise ValueError('Snapshot row count mismatch')
+        return raw, provenance
+    except (OSError, ValueError, UnicodeDecodeError, TypeError, AttributeError) as exc:
+        raise MarketDataError('The US listing directory could not be verified. Restore the bundled CSV/provenance pair or run scripts/refresh_us_directory.py.') from exc
+
+
+def directory_provenance() -> dict:
+    """Return verified current snapshot metadata, without contacting a provider."""
+    return _verified_snapshot()[1]
+
+
 def us_catalog(exchange: str | None = None) -> list[dict]:
-    return filter_us_listings(market_data.load_catalog(), exchange, assume_equity=True)
+    if not DIRECTORY_PATH.exists() and not DIRECTORY_PROVENANCE_PATH.exists():
+        # Source checkouts predating the directory retain a small offline base;
+        # a damaged or partially present snapshot never silently falls back.
+        return filter_us_listings(market_data.load_catalog(), exchange, assume_equity=True)
+    raw, _ = _verified_snapshot()
+    return filter_us_listings(_snapshot_rows(raw), exchange)
 
 
 def _cached_metadata(symbol: str) -> dict | None:
@@ -118,7 +166,13 @@ def cached_us_listings(exchange: str | None = None) -> list[dict]:
 
 def search_us_symbols(query: str, online: bool = True, exchange: str | None = None) -> list[dict]:
     # search_symbols excludes funds, futures, indices and currencies upstream.
-    return filter_us_listings(market_data.search_symbols(query, online), exchange, assume_equity=True)
+    if online:
+        return filter_us_listings(market_data.search_symbols(query, online), exchange, assume_equity=True)
+    normalized = str(query).strip().casefold()
+    rows = [row for row in us_catalog(exchange) if not normalized
+        or normalized in row['symbol'].casefold() or normalized in row['name'].casefold()]
+    return sorted(rows, key=lambda row: (row['symbol'].casefold() != normalized,
+        not row['symbol'].casefold().startswith(normalized), row['exchange'], row['symbol']))
 
 
 def resolve_us_listing(symbol: str, metadata: dict | None = None) -> dict:
@@ -129,6 +183,7 @@ def resolve_us_listing(symbol: str, metadata: dict | None = None) -> dict:
     """
     symbol = market_data.normalize_symbol(symbol)
     catalog = next((row for row in us_catalog() if row['symbol'] == symbol), None)
+    curated = next((row for row in filter_us_listings(market_data.load_catalog(), assume_equity=True) if row['symbol'] == symbol), None)
     candidate = dict(metadata) if metadata is not None else _cached_metadata(symbol)
     if candidate is not None:
         candidate['symbol'] = symbol
@@ -139,7 +194,7 @@ def resolve_us_listing(symbol: str, metadata: dict | None = None) -> dict:
         # to a catalog identity and accidentally approve a non-equity.
         if metadata is not None:
             raise MarketDataError(f'{symbol}: choose a US-listed stock on a supported exchange. Funds and international listings are excluded.')
-    elif catalog is not None:
+    elif catalog is not None and (curated is not None or not catalog.get('source_file')):
         return catalog
     if not re.fullmatch(r'[A-Z][A-Z0-9-]{0,15}', symbol):
         raise MarketDataError('Only US-listed stock symbols are available here, such as AAPL or BRK-B.')

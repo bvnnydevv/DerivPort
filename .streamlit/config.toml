@@ -1,10 +1,12 @@
 [theme]
-base = "light"
-primaryColor = "#2454ff"
-backgroundColor = "#f3f1eb"
-secondaryBackgroundColor = "#ffffff"
-textColor = "#101820"
-font = "sans serif"
+base = "dark"
+primaryColor = "#41d6b3"
+backgroundColor = "#090f19"
+secondaryBackgroundColor = "#132235"
+textColor = "#e7eef7"
+font = "Trebuchet MS, Trebuchet, sans-serif"
+headingFont = "Trebuchet MS, Trebuchet, sans-serif"
+codeFont = "Trebuchet MS, Trebuchet, sans-serif"
 
 [browser]
 gatherUsageStats = false

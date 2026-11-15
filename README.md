@@ -4,6 +4,8 @@ An educational stock-research and algorithm lab for the Veritas AI finance chall
 
 [Figma design](https://www.figma.com/design/ZxLybASxv0lxyUkdnQ33A2/Hackathon-DerivPort?node-id=1-7) · [Interface direction](docs/DESIGN.md)
 
+The [DerivPort logo component](https://www.figma.com/design/ZxLybASxv0lxyUkdnQ33A2/Hackathon-DerivPort?node-id=8-8) was created and exported in Figma. Its editable source and exact SVG provenance are documented in [Brand](docs/BRAND.md).
+
 ## Run locally
 
 Tested with Python **3.13**:
@@ -24,9 +26,11 @@ Deploy this repository on [Streamlit Community Cloud](https://share.streamlit.io
 
 **Full cached history** is the default data range, making the supplied 2026 observations available directly. For the reproducible presentation, choose **Frozen demo (2018–2024)**, the original AAPL/MSFT/NVDA/AMZN/GOOGL group, and **Apple on May 3, 2024**. That example follows Apple's May 2 earnings release and was curated for clear, mixed business evidence, not to demonstrate a successful forecast.
 
-The explorer now shows **US-listed stocks only**. Use the visible **Exchange** selector to separate cached NASDAQ and NYSE charts. **Stocks & comparison group** provides an exchange-filtered US starter directory and online search; additional supported venues include NYSE American, NYSE Arca, Cboe and IEX when equities are available. US-listed ADRs qualify by listing venue; international exchange listings, ETFs and OTC instruments are excluded. Direct symbol additions verify the US venue and equity type. Provider coverage varies; this is not an exhaustive directory of current, historical or delisted securities.
+The explorer shows **6,094 current US equity candidates** from the official NasdaqTrader Nasdaq and other-exchange directories, source files dated **2026-11-13**. Use **Exchange** and the searchable **Stock** selector to browse the full snapshot, rather than only the bundled stocks. Exchanges include NASDAQ, NYSE, NYSE American, NYSE Arca, Cboe and TXSE where qualifying listings are present. US-listed ADRs, preferred shares and partnership equity units are included; explicit filters remove ETFs, test issues, debt and derivatives. New downloads verify the provider's equity identity. Name-based classification and provider history coverage have limits: this is a current listing snapshot, not every historical, delisted or OTC security.
 
-**15 US adjusted-price histories** are available offline through November 13, 2026. Select **2–10 stocks** for research; browsing a cached stock automatically includes it in the comparison group. The visible data-range selector switches between full cached history and the unchanged frozen demo. Earlier international cache files and low-level APIs remain archived for reproducibility but are not exposed in the explorer. New runtime downloads are ignored by Git.
+**15 US adjusted-price histories** are supplied offline through November 13, 2026; the full listing directory also works offline. Selecting an uncached stock downloads only that stock's available history, rather than thousands of series at startup. Select **2–10 stocks** for research. A temporarily browsed stock joins the group while selected; explicit group edits remain available. Recently listed stocks can show an observed chart even when they lack enough shared history for the model. Unavailable additions do not block returning to a cached stock. Earlier international cache files and low-level APIs remain archived for reproducibility but are not exposed in the explorer. New runtime downloads are ignored by Git.
+
+Refresh the verified listing snapshot explicitly with `.venv/bin/python scripts/refresh_us_directory.py`. Its source URLs, filters, counts, timestamps and checksums are recorded in `data/us_listings_provenance.json`; failed publication restores the previous snapshot.
 
 Choose a daily historical cutoff through the latest observed date in the selected group. Weekends and missing dates normalize to the preceding shared session. Cutoffs begin after at least 252 shared observations and no earlier than April 1, 2020. Research can use the latest close even when its next 21 sessions have not happened; outcome reveal remains disabled until all 21 subsequent observations are cached. The old 2024 limit came from the default frozen cache, and the earlier replay-date cap reserved those 21 future observations.
 
@@ -34,11 +38,30 @@ The supplied cache covers **part of 2026, through November 13**, not the rest of
 
 ## Customizable stock charts
 
-The main stock chart defaults to **real candlesticks**, with genuine daily open, high, low, close and volume. Change **Chart range** (1M through All), **Candle interval** (daily/weekly/monthly), or **Chart type** (candles/OHLC/line). **Customize** controls SMA 20/50 and EMA 20 indicators, volume, grid lines, logarithmic price scale, and up/down colors. Pan, zoom, crosshair, draw-line/freehand/rectangle, erase, reset and image-export tools are in the chart toolbar. Drawings are temporary browser annotations; chart preferences persist during the session.
+The main stock chart defaults to **real candlesticks**, with genuine daily open, high, low, close and volume. Change **Chart range** (1M through All), **Candle interval** (daily/weekly/monthly), or **Chart type** (candles/OHLC/line). **Customize** controls SMA 20/50 and EMA 20 indicators, volume, grid lines, logarithmic price scale, and up/down colors. **Fullscreen** opens a viewport-sized chart workspace; close it to return. Pan, zoom, crosshair, draw-line/freehand/rectangle, erase, reset and image-export tools remain available. Drawings are temporary browser annotations; chart preferences persist during the session.
 
 The bundled candle snapshot contains **33,450 daily bars across 15 US stocks**, from 2018-01-02 through 2026-11-13, so the standard charts work offline. **All** means all cached candles. An explicit download/refresh can request the provider's available full daily history. Chart-data export includes only the displayed observations and indicators. Weekly/monthly bars truncate observations at the historical cutoff before aggregation, and their last bar can be partial; indicator periods count bars of the selected interval.
 
 Candles use a separate vendor OHLCV cache with no dividend adjustment; research retains the original dividend-adjusted close inputs. A historical candle close can therefore differ from the research close. Close-only history displays an explicitly labeled line until real candles are downloaded; OHLC bars and volume are never invented. These are cached daily observations, with no intraday or live quote feed. See [chart data and provenance](docs/CHART_DATA.md).
+
+## Appearance, blocks and the stock coach
+
+The default is a **dense, full-width dark workspace** with **Trebuchet MS** throughout the interface and charts. **Theme** offers Midnight, Graphite, Deep ocean, a custom background, an accent color, compact/comfortable spacing, and an illustration toggle. The NYSE photograph and original illustrations are bundled locally; [image credits and licenses](assets/CREDITS.md) are retained. Website text contains no emojis.
+
+In **Algorithm builder**, drag the interlocking factor blocks to reorder them, change operators and weights, add/remove factors, or use the keyboard editor. Changes remain a draft until **Apply blocks to algorithm**. The compiled expression goes through the existing safe formula parser and drives the same scores, calculus and historical backtest as the text editor. Export the block stack as JSON or its standalone Python algorithm. Balanced, momentum and defensive starting stacks are examples rather than optimized trading rules.
+
+The **research coach is embedded inside the selected stock panel**. Ask a lesson or a question, then press **Send**. Its chart controls can mark an observed endpoint trend, identify the displayed window's low/high levels, show a moving average, or clear coach guides. Natural-language drawing requests map to these bounded actions; no model-generated code or arbitrary coordinates are executed. Guides use only observations through the selected cutoff, reset with the research context, and do not claim validated support/resistance or future price targets.
+
+Without an API key, the coach provides explicitly labeled **offline guided lessons** grounded in the selected evidence. To enable actual AI-generated explanations, configure `OPENAI_API_KEY` in the hosting service's secrets or the ignored `.streamlit/secrets.toml`; optionally set `OPENAI_MODEL` (default `gpt-5.4-mini`). Never commit a real key. Example secret names:
+
+```toml
+OPENAI_API_KEY = "your-server-side-key"
+OPENAI_MODEL = "gpt-5.4-mini"
+```
+
+Only pressing **Send** makes an AI request, sharing that question, the selected public historical snapshot and a bounded conversation. Future outcomes and private account/holding fields are excluded; the app never requests brokerage details. An AI-service failure falls back to a clearly labeled local lesson. The integration uses OpenAI's [Responses API](https://developers.openai.com/api/reference/resources/responses/methods/create) and the documented [model](https://developers.openai.com/api/docs/models/gpt-5.4-mini). Live API access requires a configured account/key; automated verification uses stubs rather than a paid request.
+
+**Future scenarios** adds Low/Medium/High volatility presets (0.75×/1×/1.5× historical volatility), plus Custom. Presets preserve the user's log-drift and correlation settings. A purple percentile fan and a separate amber terminal-return histogram distinguish hypothetical scenarios from observed stock charts. The same log drift preserves the analytical median-growth assumption, while volatility changes the distribution and can also change its arithmetic mean; higher risk is not a promise of higher returns.
 
 ## Reproducible research and benchmarking
 

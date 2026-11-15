@@ -24,11 +24,12 @@ The repository already includes `requirements.txt`, the Streamlit theme, local P
 ## Check the live demo
 
 - Open **Research** with AAPL and **Full cached history**. The supplied cache ends on **2026-11-13**; the latest cutoff correctly shows a pending 21-session outcome.
-- Verify real candlesticks, weekly/monthly intervals and Customize controls. Use Exchange to switch between cached NASDAQ and NYSE stocks. The 15 bundled candle histories work offline.
+- Verify real candlesticks, weekly/monthly intervals, Customize and Fullscreen. The full 6,094-listing directory and 15 bundled candle histories work offline; new stocks load their histories on selection.
+- Change Theme, drag and apply algorithm blocks, and ask the stock-panel coach to mark a chart guide. The offline guide needs no key. For AI-generated replies, set `OPENAI_API_KEY` and optionally `OPENAI_MODEL` in app secrets; never commit those credentials.
 - Select an earlier cutoff to demonstrate historical outcome reveal.
 - In **Algorithm builder**, click **Use my balanced algorithm**, open the calculus lab, and run a historical backtest.
 - In **Research & Benchmarking**, select development and final-test dates, then run the experiment. This heavier model comparison runs only when requested; prepare it before presenting.
-- In **Future scenarios**, dates through 2037 are hypothetical simulations.
+- In **Future scenarios**, compare Low/Medium/High assumptions and the purple scenario fan with the amber terminal-return distribution. Dates through 2037 are hypothetical simulations.
 
 The bundled stocks work without a market-data request. Listing searches, uncached stocks, and refreshes use the external provider. New downloads belong to the running host's local cache; retain important demonstration data in the repository rather than relying on that runtime cache surviving a restart.
 
