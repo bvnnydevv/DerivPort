@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 
 from derivport.market_data import MarketDataError
 from derivport.ohlc import load_candles
-from derivport.theme import style_plot, theme_from_state
+from derivport.theme import current_theme, style_stock_plot, sync_chart_colors
 from derivport.coach_ui import render_coach
 from derivport.chart_guides import apply_chart_guide
 from derivport.stock_chart import (PERIODS, INTERVALS, STYLES, OVERLAYS,
@@ -32,6 +32,8 @@ def fullscreen_chart(figure, config, ticker, cutoff):
 
 def render_stock_chart(adjusted_prices, ticker, cutoff, metadata, coach_snapshot=None):
     """Render cutoff-safe observed OHLCV, with an honest close-only fallback."""
+    palette = current_theme()
+    sync_chart_colors(st.session_state, palette)
     candles, provenance, unavailable = None, {}, None
     try:
         candles, provenance = cached_candles(ticker)
@@ -74,8 +76,8 @@ def render_stock_chart(adjusted_prices, ticker, cutoff, metadata, coach_snapshot
                         show_volume = st.checkbox('Volume', value=True, key='chart_volume', disabled=candles is None)
                         show_grid = st.checkbox('Grid lines', value=True, key='chart_grid')
                         log_scale = st.checkbox('Log price scale', value=False, key='chart_log')
-                        up_color = st.color_picker('Up candles / line', '#34d399', key='chart_up')
-                        down_color = st.color_picker('Down candles', '#fb7185', key='chart_down')
+                        up_color = st.color_picker('Up candles / line', key='chart_up')
+                        down_color = st.color_picker('Down candles', key='chart_down')
                         st.caption('Indicators use the selected daily, weekly or monthly bars. The last weekly/monthly bar can be partial at the cutoff.')
                         if st.button('Download / refresh candles', key='refresh_candles', width='stretch'):
                             try:
@@ -114,12 +116,11 @@ def render_stock_chart(adjusted_prices, ticker, cutoff, metadata, coach_snapshot
                 summary = 'Adjusted-close line · no OHLC candles available for this cutoff'
             fig.update_layout(uirevision=f'{ticker}|{cutoff}|{period}|{interval}|{style}|{log_scale}',
                 newshape=dict(line_color='#f2cc60', line_width=1.5), dragmode='pan')
-            # The page can be light while the user's existing chart stays dark.
-            style_plot(fig, theme_from_state({'theme_name': 'Midnight', 'theme_accent': '#d9e5d2'}))
             try:
                 apply_chart_guide(fig, exported, st.session_state.get('coach_chart_guide'), guide_context, cutoff)
             except ValueError as exc:
                 st.caption(f'Chart guide unavailable: {exc}')
+            style_stock_plot(fig, palette)
             config = {
                 'displayModeBar': True, 'displaylogo': False, 'scrollZoom': True,
                 # Line/rectangle/erase are already added by the figure's modebar.

@@ -9,6 +9,7 @@ import streamlit as st
 from streamlit.testing.v1 import AppTest
 
 from derivport import market_data, ohlc, us_markets
+from derivport.theme import theme_from_state
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -27,6 +28,7 @@ def offline_dashboard(monkeypatch):
     real_chart = st.plotly_chart
     def capture_chart(*args, **kwargs):
         if kwargs.get('key') in ('known_price_hero', 'fullscreen_price_chart',
+                'builder_stock_chart', 'builder_algorithm_chart',
                 'future_scenario_chart', 'future_distribution_chart'):
             figures[kwargs['key']] = go.Figure(args[0])
         return real_chart(*args, **kwargs)
@@ -68,42 +70,61 @@ def test_full_stock_directory_and_exchange_navigation_use_cached_defaults_offlin
     assert_unrevealed(app)
 
 
-def test_fixed_editorial_font_and_fullscreen_leave_scores_and_cutoff_unchanged(offline_dashboard):
+def test_display_modes_update_stock_builder_and_fullscreen_without_changing_research(offline_dashboard):
     app = dashboard()
     scores = app.session_state['current_scores'].copy(deep=True)
+    bars = app.session_state['chart_data'].copy(deep=True)
     cutoff = app.session_state['cutoff']
-    previous_background = offline_dashboard['known_price_hero'].layout.paper_bgcolor
-    # A session opened before the appearance control was removed must also
-    # return to the fixed editorial palette without changing the experiment.
-    app.session_state['theme_name'] = 'Graphite'
-    app.session_state['theme_accent'] = '#d194ff'
-    app.session_state['theme_density'] = 'Compact'
-    app.run()
-    assert not app.exception
-    rendered = '\n'.join(element.value for element in app.html)
-    assert 'Helvetica Neue' in rendered
-    assert '--workspace:#eeefec' in rendered
-    assert '--accent:#28543a' in rendered
-    assert app.session_state['theme_name'] == 'Editorial'
-    assert app.session_state['theme_density'] == 'Comfortable'
+    stock_options = app.selectbox(key='stock').options
+    chart_options = app.selectbox(key='chart_style').options
+    assert app.radio(key='display_mode').value == 'Day'
+    assert app.radio(key='display_mode').options == ['Day', 'Night', 'Pause']
     assert not any(element.proto.popover.label == 'Theme' for element in app.get('popover'))
-    assert not any(widget.key in ('theme_name', 'theme_accent', 'theme_density')
-        for widget in [*app.selectbox, *app.color_picker, *app.radio])
-    current = offline_dashboard['known_price_hero']
-    # The fixed editorial page surrounds an unchanged dark stock canvas.
-    assert current.layout.paper_bgcolor == previous_background
-    assert 'Helvetica Neue' in current.layout.font.family
-    pd.testing.assert_frame_equal(app.session_state['current_scores'], scores)
-    assert_unrevealed(app)
-    app.button(key='open_fullscreen_chart').click().run()
-    assert not app.exception
-    assert 'fullscreen_price_chart' in offline_dashboard
-    fullscreen = offline_dashboard['fullscreen_price_chart']
-    assert fullscreen.data[0].type == current.data[0].type == 'candlestick'
-    assert list(fullscreen.data[0].x) == list(current.data[0].x)
-    assert app.session_state['cutoff'] == cutoff
-    pd.testing.assert_frame_equal(app.session_state['current_scores'], scores)
-    assert_unrevealed(app)
+    backgrounds = set()
+    for mode in ('Night', 'Pause', 'Day'):
+        app.radio(key='display_mode').set_value(mode).run()
+        assert not app.exception
+        palette = theme_from_state({'theme_name': mode})
+        rendered = '\n'.join(element.value for element in app.html)
+        assert 'Helvetica Neue' in rendered
+        assert f"--workspace:{palette['background']}" in rendered
+        assert app.session_state['theme_name'] == mode
+        backgrounds.add(palette['background'])
+        current = offline_dashboard['known_price_hero']
+        for key in ('known_price_hero', 'builder_stock_chart', 'builder_algorithm_chart'):
+            figure = offline_dashboard[key]
+            assert figure.layout.paper_bgcolor == palette['panel']
+            assert figure.layout.plot_bgcolor == palette['panel']
+            assert 'Helvetica Neue' in figure.layout.font.family
+        assert current.data[0].type == 'candlestick'
+        mirror = offline_dashboard['builder_stock_chart']
+        assert list(mirror.data[0].x) == list(current.data[0].x)
+        assert list(mirror.data[0].close) == list(current.data[0].close)
+        assert app.selectbox(key='stock').options == stock_options
+        assert app.selectbox(key='chart_style').options == chart_options
+        assert app.session_state['cutoff'] == cutoff
+        pd.testing.assert_frame_equal(app.session_state['chart_data'], bars)
+        pd.testing.assert_frame_equal(app.session_state['current_scores'], scores)
+        assert_unrevealed(app)
+
+        # An ordinary rerun must retain the selected mode, and opening the
+        # separate chart dialog must use that mode without altering OHLCV.
+        app.run()
+        assert not app.exception
+        assert app.radio(key='display_mode').value == mode
+        app.button(key='open_fullscreen_chart').click().run()
+        assert not app.exception
+        fullscreen = offline_dashboard['fullscreen_price_chart']
+        assert fullscreen.layout.paper_bgcolor == palette['panel']
+        assert fullscreen.layout.plot_bgcolor == palette['panel']
+        assert fullscreen.data[0].type == 'candlestick'
+        for field in ('x', 'open', 'high', 'low', 'close'):
+            assert list(getattr(fullscreen.data[0], field)) == list(getattr(current.data[0], field))
+        assert app.session_state['cutoff'] == cutoff
+        pd.testing.assert_frame_equal(app.session_state['chart_data'], bars)
+        pd.testing.assert_frame_equal(app.session_state['current_scores'], scores)
+        assert_unrevealed(app)
+    assert len(backgrounds) == 3
 
 
 def test_projection_risk_controls_and_distinct_simulation_charts_preserve_history(offline_dashboard):

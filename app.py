@@ -21,7 +21,7 @@ from derivport.us_markets import (US_EXCHANGES, cached_us_listings,
 from derivport.stock_chart_ui import render_stock_chart
 from derivport.company_news_ui import render_company_news
 from derivport.ohlc import load_candles
-from derivport.theme import current_theme, theme_css, style_plot
+from derivport.theme import DISPLAY_MODES, current_theme, theme_css, style_plot
 from derivport.blocks_ui import render_blocks
 from derivport.builder_charts_ui import render_builder_charts
 from derivport.projections import project_scenarios
@@ -131,16 +131,21 @@ if 'pending_stock' in st.session_state:
     st.session_state.stock = pending
     st.session_state.history_mode = 'Full cached history'
 
-# One fixed editorial palette, including sessions opened before theme removal.
-st.session_state.theme_name = 'Editorial'
-st.session_state.theme_accent = '#28543a'
+# Select a session-local display mode before styling any of the workspaces.
+if st.session_state.get('display_mode') not in DISPLAY_MODES:
+    st.session_state.display_mode = 'Day'
+brand_col, display_col = st.columns([3, 1.25], vertical_alignment='center')
+with brand_col:
+    st.html('<div class="masthead"><div class="brand">Derivport</div></div>')
+with display_col:
+    with st.container(key='display_modes'):
+        st.radio('Display mode', DISPLAY_MODES, key='display_mode', horizontal=True,
+            label_visibility='collapsed', help='Day: soft gray. Night: dark. Pause: bright green, inspired by the reference.')
+st.session_state.theme_name = st.session_state.display_mode
 st.session_state.theme_density = 'Comfortable'
 PALETTE = current_theme()
 st.html('<style>' + (ROOT / 'assets/style.css').read_text() + '\n' + theme_css(PALETTE) + '</style>')
 COLORS = {'Momentum': '#90a4bf', 'AI model': PALETTE['accent'], 'Your algorithm': '#ffbd69'}
-mark = asset_uri('derivport-mark.svg', decorative=False)
-mark_html = f'<img class="brand-mark" src="{mark}" alt="DerivPort logo">' if mark else ''
-st.html(f'<div class="masthead"><div class="brand">{mark_html}DerivPort</div></div>')
 
 def clear_search():
     st.session_state.pop('search_results', None)

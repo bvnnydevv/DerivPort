@@ -1,7 +1,7 @@
-/* Editorial layout. Colors and density are supplied by derivport.theme. */
+/* Shared layout. Day, Night and Pause colors are supplied by derivport.theme. */
 .stApp{background:var(--workspace);color:var(--ink)}
 .block-container{max-width:1400px!important;margin:0 auto;padding:24px 40px 40px!important}
-header[data-testid="stHeader"]{height:0;background:transparent}
+header[data-testid="stHeader"]{display:none!important;pointer-events:none;height:0;background:transparent}
 [data-testid="stToolbar"],#MainMenu,footer{display:none}
 html,body,p,input,textarea,button,select,label,code,pre,table,th,td,summary{font-family:var(--sans)!important}
 body,input,textarea,select,button{color:var(--ink)}
@@ -13,9 +13,16 @@ body,input,textarea,select,button{color:var(--ink)}
 .stApp [data-testid="stCaptionContainer"] p{font-size:12px;line-height:1.5;color:var(--muted)}
 .stApp [data-testid="stMarkdownContainer"] a{color:var(--accent)}
 .stApp [data-testid="stWidgetLabel"] p{font-size:12px;font-weight:400;color:var(--muted)}
-.masthead{display:flex;align-items:center;min-height:48px;padding:0 0 20px;margin-bottom:4px;border-bottom:1px solid var(--line)}
-.brand{display:flex;align-items:center;gap:10px;font:500 25px/1 var(--sans);letter-spacing:-1px;color:var(--ink)}
-.brand-mark{width:27px;height:27px;padding:4px;background:#263e30;border-radius:3px;object-fit:contain}
+.masthead{display:flex;align-items:center;min-height:48px;padding:0;margin-bottom:4px}
+.brand{font:500 25px/1 var(--sans);letter-spacing:.025em;color:var(--ink)}
+.st-key-display_modes{display:flex;justify-content:flex-end;align-items:center;min-height:48px}
+.st-key-display_modes [role="radiogroup"]{gap:0!important;flex-wrap:nowrap!important;padding:3px;border:1px solid var(--line);border-radius:24px;background:var(--panel)}
+.st-key-display_modes [data-testid="stRadioOption"]{margin:0!important;padding:7px 16px;border-radius:20px;min-height:32px;cursor:pointer}
+.st-key-display_modes [data-testid="stRadioOption"]:has(input:checked){background:var(--ink);color:var(--workspace)!important}
+.st-key-display_modes [data-testid="stRadioOption"]>div>div:first-child{display:none}
+.st-key-display_modes [data-testid="stRadioOption"] [data-testid="stMarkdownContainer"]{color:inherit!important}
+.st-key-display_modes [data-testid="stRadioOption"] p{font-size:12px;color:inherit!important;margin:0}
+.st-key-display_modes [data-testid="stRadioOption"]:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
 .data-status{font:11px/1.6 var(--sans);color:var(--muted);text-align:right;padding-bottom:7px}
 [role="tablist"]{width:100%;gap:28px!important;padding:0;margin:16px 0 24px;border-bottom:1px solid var(--line);background:transparent}
 [role="tab"]{padding:10px 0!important;min-height:42px;height:auto!important;border:0!important;border-radius:0!important;background:transparent!important;color:var(--muted)!important;font-size:13px;font-weight:400}
@@ -31,8 +38,7 @@ body,input,textarea,select,button{color:var(--ink)}
 .st-key-price_toolbar{padding:0;margin:0 0 4px;border:0}
 .ohlc-strip{display:flex;gap:14px;flex-wrap:wrap;font:11px/1.4 var(--sans);font-variant-numeric:tabular-nums;color:var(--ink)}
 .ohlc-strip b{font-size:10px;font-weight:400;color:var(--muted);margin-right:3px}
-/* Preserve the existing dark stock canvas, candles, tools and fullscreen. */
-.st-key-market_hero [data-testid="stPlotlyChart"]{background:#101010;border:0;border-radius:8px;padding:0;overflow:hidden}
+.st-key-market_hero [data-testid="stPlotlyChart"]{background:var(--panel);border:0;border-radius:8px;padding:0;overflow:hidden}
 .st-key-coach_panel{background:var(--feature);border:0!important;border-radius:0!important;padding:20px!important}
 .st-key-coach_panel [data-testid="stCaptionContainer"] p{font-size:11px}
 .st-key-coach_history{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
@@ -43,6 +49,15 @@ body,input,textarea,select,button{color:var(--ink)}
 .stApp button[kind="primary"]{background:var(--accent)!important;color:var(--accent-text)!important;border-color:var(--accent)!important}
 .stApp button[kind="primary"] p{color:var(--accent-text)!important}
 .stApp button:disabled{opacity:.45}
+/* React Aria widgets used by current Streamlit, including portaled controls. */
+.stApp [data-testid="stPopoverButton"]{background:transparent!important;color:var(--ink)!important;border:1px solid var(--line)!important;border-radius:4px;min-height:38px;box-shadow:none}
+.stApp [data-testid="stPopoverButton"] [data-testid="stMarkdownContainer"],.stApp [data-testid="stPopoverButton"] p{color:var(--ink)!important;font-size:12px}
+[data-testid="stSelectbox"] .react-aria-ComboBox>[role="group"],[data-testid="stMultiSelect"] [role="group"],[data-testid="stDateInputField"]{background:var(--panel)!important;color:var(--ink)!important;border:1px solid var(--line)!important;border-radius:4px!important}
+[data-testid="stSelectbox"] button,[data-testid="stMultiSelect"] button,[data-testid="stDateInput"] button{background:transparent!important;color:var(--muted)!important}
+[data-testid="stDateInput"] [data-type]{color:var(--ink)!important}
+[data-testid="stChatInput"]>div{background:transparent!important}
+input::placeholder,textarea::placeholder{color:var(--muted)!important;opacity:1}
+[data-testid="stRadioOption"] [data-testid="stMarkdownContainer"],[data-testid="stCheckbox"] [data-testid="stMarkdownContainer"]{color:var(--ink)!important}
 button:focus-visible,[role="tab"]:focus-visible,summary:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent)!important;outline-offset:3px}
 [data-testid="stTextInput"] [data-baseweb="input"],[data-testid="stSelectbox"] [data-baseweb="select"]>div,[data-testid="stMultiSelect"] [data-baseweb="select"]>div,[data-testid="stDateInput"] [data-baseweb="input"],[data-testid="stNumberInput"] [data-baseweb="input"],[data-testid="stTextArea"] [data-baseweb="textarea"]{border-radius:4px!important;background:var(--panel)!important;border:1px solid var(--line)!important;color:var(--ink)!important;min-height:40px;box-shadow:none}
 input,textarea,[data-baseweb="input"]>div,[data-baseweb="select"]>div>div,[data-baseweb="select"] [role="combobox"]{color:var(--ink)!important;background:transparent!important;font-family:var(--sans)!important}
@@ -84,14 +99,14 @@ input,textarea,[data-baseweb="input"]>div,[data-baseweb="select"]>div>div,[data-
 [data-testid="stAlert"] p{font-size:13px;color:var(--ink)!important}
 .katex-display{max-width:100%;overflow-x:auto;overflow-y:hidden;padding:5px 0;color:var(--ink)}
 .footer{display:flex;justify-content:space-between;gap:20px;border-top:1px solid var(--line);padding:24px 0 8px;margin-top:36px;font:11px/1.6 var(--sans);color:var(--muted)}.footer span:first-child{font-size:20px;color:var(--ink);letter-spacing:-.7px}
-[data-testid="stDialog"] [role="dialog"]{width:100vw!important;max-width:none!important;height:100dvh!important;max-height:100dvh!important;margin:0!important;border:0!important;border-radius:0!important;background:#050505!important;color:#f3f2ed!important;--ink:#f3f2ed;--muted:#aaa9a1;--panel:#101010;--line:#343434;padding:12px!important;overflow:auto}
-[data-testid="stDialog"] [role="dialog"]>div{max-width:none!important}[data-testid="stDialog"] [data-testid="stCaptionContainer"] p{color:#aaa9a1}
-.st-key-fullscreen_canvas{height:calc(100dvh - 125px)!important;min-height:340px;display:flex;flex-direction:column}.st-key-fullscreen_canvas [data-testid="stPlotlyChart"]{flex:1;height:100%!important;min-height:0;background:#101010;border:0;padding:0}
+[data-testid="stDialog"] [role="dialog"]{width:100vw!important;max-width:none!important;height:100dvh!important;max-height:100dvh!important;margin:0!important;border:0!important;border-radius:0!important;background:var(--workspace)!important;color:var(--ink)!important;padding:12px!important;overflow:auto}
+[data-testid="stDialog"] [role="dialog"]>div{max-width:none!important}[data-testid="stDialog"] [data-testid="stCaptionContainer"] p{color:var(--muted)}
+.st-key-fullscreen_canvas{height:calc(100dvh - 125px)!important;min-height:340px;display:flex;flex-direction:column}.st-key-fullscreen_canvas [data-testid="stPlotlyChart"]{flex:1;height:100%!important;min-height:0;background:var(--panel);border:0;padding:0}
 .st-key-fullscreen_canvas .js-plotly-plot,.st-key-fullscreen_canvas .plot-container{height:100%!important}
 @media(max-width:1000px){.block-container{padding:20px 24px!important}[role="tablist"]{gap:22px!important}.stock-header h1{font-size:32px!important}.price{font-size:52px}.st-key-coach_panel{padding:16px!important}}
 @media(max-width:680px){.block-container{padding:18px 16px!important}.masthead{padding-bottom:16px}.stock-header{align-items:flex-start;gap:20px;flex-direction:column;padding-bottom:20px}.stock-header h1{font-size:32px!important}.price{font-size:50px;text-align:left}.data-status{text-align:left}[role="tablist"]{gap:18px!important;overflow:auto}[role="tab"]{min-width:max-content}.visual-header h1{font-size:34px!important}.section-title,.footer{flex-direction:column;gap:8px}.recipe-result{gap:24px}.recipe-result p{margin-left:0}.brand{font-size:23px}}
-[data-testid="stDialog"] button[aria-label="Close"]{color:#f3f2ed!important}
-/* Select menus mount in a portal; force their nested text to the light palette. */
+[data-testid="stDialog"] button[aria-label="Close"]{color:var(--ink)!important}
+/* Select menus mount in a portal; their nested text follows every palette. */
 [role="listbox"],[role="option"],[data-baseweb="menu"]{color:var(--ink)!important;background-color:var(--panel)!important}
 [role="option"] *,[data-baseweb="menu"] li *,[role="listbox"] [data-testid="stMarkdownContainer"]{color:var(--ink)!important;-webkit-text-fill-color:var(--ink)!important;font-family:var(--sans)!important}
 [role="option"][aria-selected="true"],[role="option"]:hover,[data-baseweb="menu"] li:hover{background-color:var(--feature)!important}

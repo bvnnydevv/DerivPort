@@ -23,7 +23,7 @@ DerivPort is an educational finance project for the Veritas AI Hackathon. Explor
 | **Future scenarios** | Explore assumption-driven paths through 2037, with adjustable growth, volatility, and correlation. |
 | **Benchmarks** | Compare six forecasting methods, alternative ranking rules, and hypothetical portfolios using chronological evaluation. |
 
-The interface uses a light pastel-gray layout with a dark stock-chart canvas. Settings and deeper research tools stay collapsed until needed.
+Switch between **Day** (pastel gray), **Night** (dark), and **Pause** (bright green) at the top of the page. Stock charts, fullscreen charts, and algorithm views follow the selected mode. Settings and deeper research tools stay collapsed until needed.
 
 ## Quick start
 

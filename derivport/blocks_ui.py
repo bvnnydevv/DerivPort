@@ -12,31 +12,37 @@ from .blocks import (FACTORS, MAX_BLOCKS, OPERATORS, PRESETS, compile_blocks,
     move_block, normalize_blocks, preset_blocks, python_algorithm)
 from .calculus import formula_to_latex
 from .formula import FormulaError
+from .theme import current_theme
 from .builder_guide import FACTOR_GUIDE, GUIDED_STARTS, RISK_WEIGHTS, contribution_rows, describe_blocks, guided_blocks
 
 _HTML = '<section class="score-board"><div class="board-top"><span>STACK YOUR SIGNAL</span><span>Drag ⠿ to reorder · Alt + ↑ / ↓ also works</span></div><div class="block-stack"></div><div class="board-bottom"><span>+ Connect another factor</span><div class="block-palette"></div></div><p class="block-hint">The stack runs from top to bottom. Changes stay a draft until you apply them.</p></section>'
 _CSS = '''
-:host{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;color:var(--st-text-color,#eef3f8)}
+:host{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;color:var(--st-text-color,#1b2d22)}
 *{box-sizing:border-box;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif}
-.score-board{border:1px solid #383838;border-radius:24px;padding:18px;background:#111}
-.board-top{display:flex;justify-content:space-between;gap:12px;align-items:center;color:#9eb1be;font-size:11px;margin-bottom:18px;letter-spacing:.07em}
-.board-top span:first-child{color:#d8e8f1;font-weight:bold}.board-top span:last-child{letter-spacing:0}
+.score-board{--board-panel:#f7f8f5;--board-panel2:#edf0e9;--board-text:#1b2d22;--board-muted:#626c60;--board-line:#c7cdc6;--board-feature:#dce3d0;--board-accent:#28543a;border:1px solid var(--board-line);border-radius:24px;padding:18px;background:var(--board-panel);color:var(--board-text)}
+.board-top{display:flex;justify-content:space-between;gap:12px;align-items:center;color:var(--board-muted);font-size:11px;margin-bottom:18px;letter-spacing:.07em}
+.board-top span:first-child{color:var(--board-text);font-weight:bold}.board-top span:last-child{letter-spacing:0}
 .block-stack{display:flex;flex-direction:column;gap:10px;padding:0 10px 6px}
-.block{position:relative;border:1px solid var(--tone);border-left:5px solid var(--tone);background:#1b1b1b;border-radius:8px;padding:12px 12px;display:grid;grid-template-columns:24px 70px minmax(130px,1.5fr) 95px 60px 30px;gap:10px;align-items:center;box-shadow:0 3px 0 #000;min-height:62px}
-.block::before{content:"";position:absolute;left:32px;top:-7px;width:38px;height:7px;border:1px solid var(--tone);border-bottom:0;border-radius:5px 5px 0 0;background:#1b1b1b}
-.block.dragging{opacity:.45}.block.drop-target{outline:2px dashed #dce9ef;outline-offset:3px}
+.block{position:relative;border:1px solid var(--tone);border-left:5px solid var(--tone);background:var(--board-panel2);border-radius:8px;padding:12px 12px;display:grid;grid-template-columns:24px 70px minmax(130px,1.5fr) 95px 60px 30px;gap:10px;align-items:center;box-shadow:0 3px 0 var(--board-line);min-height:62px}
+.block::before{content:"";position:absolute;left:32px;top:-7px;width:38px;height:7px;border:1px solid var(--tone);border-bottom:0;border-radius:5px 5px 0 0;background:var(--board-panel2)}
+.block.dragging{opacity:.45}.block.drop-target{outline:2px dashed var(--board-accent);outline-offset:3px}
 .grip{color:var(--tone);font-size:26px;cursor:grab;user-select:none;text-align:center}.grip:active{cursor:grabbing}
-.block select,.block input[type=number]{width:100%;min-width:0;color:#ecf5fb;background:#0d0d0d;border:1px solid #555;border-radius:6px;padding:8px;font-size:12px}
-.block select.factor{color:var(--tone);font-weight:bold}.block label{display:flex;align-items:center;gap:5px;white-space:nowrap;font-size:12px;color:#d9e4eb}.block input[type=checkbox]{accent-color:var(--tone)}
-button{border:1px solid #555;border-radius:6px;padding:7px;background:#252525;color:#d8e7f0;cursor:pointer;font-size:12px}button:hover{border-color:#d2e6ef;background:#333}button:focus-visible,select:focus-visible,input:focus-visible,.grip:focus-visible{outline:2px solid #fff;outline-offset:2px}button:disabled{opacity:.35;cursor:default}.remove{padding:5px;color:#f3a3b4;font-size:20px;border:0;background:transparent}
-.board-bottom{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;color:#d4e1e9;font-size:12px}.block-palette{display:flex;gap:6px;flex-wrap:wrap}.block-palette button{border-color:var(--tone);color:var(--tone)}.block-hint{font-size:11px;line-height:1.5;color:#9eb1be;margin:14px 0 0}
-@media(max-width:740px){.block{grid-template-columns:20px 55px minmax(80px,1fr) 58px;gap:7px;padding:10px 8px}.block .grip{grid-row:1 / span 2}.block .operation{grid-column:2;grid-row:1}.block .factor{grid-column:3 / span 2;grid-row:1}.block .weight{grid-column:2 / span 2;grid-row:2}.block label{grid-column:4;grid-row:2}.block .remove{position:absolute;right:-6px;top:-12px;background:#172832;border:1px solid #516b7e;border-radius:50%;width:26px;height:26px;line-height:12px}.score-board{padding:12px}.block select,.block input[type=number]{padding:7px 4px;font-size:11px}.board-top,.board-bottom{align-items:flex-start;flex-direction:column}.block-stack{padding:0 0 4px}}
+.block select,.block input[type=number]{width:100%;min-width:0;color:var(--board-text);background:var(--board-panel);border:1px solid var(--board-line);border-radius:6px;padding:8px;font-size:12px}
+.block select.factor{color:var(--tone);font-weight:bold}.block select option{color:var(--board-text);background:var(--board-panel)}.block label{display:flex;align-items:center;gap:5px;white-space:nowrap;font-size:12px;color:var(--board-text)}.block input[type=checkbox]{accent-color:var(--tone)}
+button{border:1px solid var(--board-line);border-radius:6px;padding:7px;background:var(--board-panel2);color:var(--board-text);cursor:pointer;font-size:12px}button:hover{border-color:var(--board-accent);background:var(--board-feature)}button:focus-visible,select:focus-visible,input:focus-visible,.grip:focus-visible{outline:2px solid var(--board-accent);outline-offset:2px}button:disabled{opacity:.35;cursor:default}.remove{padding:5px;color:var(--board-text);font-size:20px;border:0;background:transparent}
+.board-bottom{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;color:var(--board-text);font-size:12px}.block-palette{display:flex;gap:6px;flex-wrap:wrap}.block-palette button{border-color:var(--tone);color:var(--tone)}.block-hint{font-size:11px;line-height:1.5;color:var(--board-muted);margin:14px 0 0}
+@media(max-width:740px){.block{grid-template-columns:20px 55px minmax(80px,1fr) 58px;gap:7px;padding:10px 8px}.block .grip{grid-row:1 / span 2}.block .operation{grid-column:2;grid-row:1}.block .factor{grid-column:3 / span 2;grid-row:1}.block .weight{grid-column:2 / span 2;grid-row:2}.block label{grid-column:4;grid-row:2}.block .remove{position:absolute;right:-6px;top:-12px;background:var(--board-panel);border:1px solid var(--board-line);border-radius:50%;width:26px;height:26px;line-height:12px}.score-board{padding:12px}.block select,.block input[type=number]{padding:7px 4px;font-size:11px}.board-top,.board-bottom{align-items:flex-start;flex-direction:column}.block-stack{padding:0 0 4px}}
 '''
 _JS = '''
 export default function(component){
  const {parentElement,data,setStateValue}=component;
  const stack=parentElement.querySelector('.block-stack'),palette=parentElement.querySelector('.block-palette');
- const factors=data.factors,tones={predicted_return:'#d8e6d2',momentum:'#b2a4c9',uncertainty:'#b9a917',volatility:'#ff5838'};
+ const board=parentElement.querySelector('.score-board'),theme=data.palette;
+ Object.entries({panel:'panel',panel2:'panel2',text:'text',muted:'muted',line:'line',feature:'feature',accent:'accent'}).forEach(([token,key])=>board.style.setProperty('--board-'+token,theme[key]));
+ const rgb=[1,3,5].map(i=>parseInt(theme.text.slice(i,i+2),16));
+ const dark=.2126*rgb[0]+.7152*rgb[1]+.0722*rgb[2]>150;
+ const factors=data.factors,tones=dark?{predicted_return:'#d8e6d2',momentum:'#c9b7e4',uncertainty:'#d5be4b',volatility:'#ff8d78'}:{predicted_return:'#24623e',momentum:'#735195',uncertainty:'#766000',volatility:'#aa342b'};
+ board.style.colorScheme=dark?'dark':'light';
  let blocks=structuredClone(data.blocks),dragged=null;
  const send=()=>setStateValue('edit',{blocks:structuredClone(blocks),revision:data.revision,nonce:Date.now()});
  const el=(tag,cls,text)=>{let e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e;};
@@ -183,7 +189,8 @@ def render_blocks(base, ticker, chart_renderer=None):
             with explanation:
                 st.caption('Each block changes the running score. Drag to reorder; use + or − to keep an additive recipe. Multiplication and division can change its units.')
             _board_component()(data={'blocks': st.session_state.block_items,
-                'revision': st.session_state.block_revision, 'factors': FACTORS, 'max_blocks': MAX_BLOCKS},
+                'revision': st.session_state.block_revision, 'factors': FACTORS, 'max_blocks': MAX_BLOCKS,
+                'palette': current_theme()},
                 default={'edit': None}, key='blocks_canvas', on_edit_change=_receive_blocks)
             with st.expander('Keyboard block editor'):
                 for position, block in enumerate(st.session_state.block_items):
