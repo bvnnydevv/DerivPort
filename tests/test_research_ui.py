@@ -95,12 +95,13 @@ def test_research_experiment_exports_real_evidence_without_revealing_the_replay(
     assert not replay_outcomes_are_visible(app)
     assert "actual_return" not in app.session_state["current_scores"]
 
-    # A narrower international group clamps saved dates and hides incompatible
-    # old evidence. This interaction must not launch another benchmark.
+    # A different US group hides incompatible old evidence. This interaction
+    # must not launch another benchmark or retain an active stock outside it.
     old_run = result["manifest"]["run_id"]
-    app.multiselect(key="universe_selection").set_value(["7203.T", "SAP.DE"]).run()
+    app.multiselect(key="universe_selection").set_value(["JPM", "XOM"]).run()
     assert not app.exception
-    assert set(app.session_state["current_scores"].index) == {"7203.T", "SAP.DE"}
+    assert set(app.session_state["current_scores"].index) == {"JPM", "XOM"}
+    assert app.selectbox(key="stock").value in {"JPM", "XOM"}
     assert app.session_state["research_experiment"]["manifest"]["run_id"] == old_run
     assert any("Previous results are hidden" in item.value for item in app.info)
     assert not any("interval_lower" in table.value.columns for table in app.dataframe)

@@ -24,6 +24,7 @@ The repository already includes `requirements.txt`, the Streamlit theme, local P
 ## Check the live demo
 
 - Open **Research** with AAPL and **Full cached history**. The supplied cache ends on **2026-11-13**; the latest cutoff correctly shows a pending 21-session outcome.
+- Verify real candlesticks, weekly/monthly intervals and Customize controls. Use Exchange to switch between cached NASDAQ and NYSE stocks. The 15 bundled candle histories work offline.
 - Select an earlier cutoff to demonstrate historical outcome reveal.
 - In **Algorithm builder**, click **Use my balanced algorithm**, open the calculus lab, and run a historical backtest.
 - In **Research & Benchmarking**, select development and final-test dates, then run the experiment. This heavier model comparison runs only when requested; prepare it before presenting.

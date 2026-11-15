@@ -46,6 +46,18 @@ h3 { font-size:22px!important; font-weight:650!important; line-height:1.25!impor
 .st-key-market_hero .stock-header p,.st-key-market_hero .price small,
 .st-key-market_hero [data-testid="stCaptionContainer"] p { color:#bfc8cb; }
 .st-key-market_hero [data-testid="stPlotlyChart"] { background:var(--ink); border:0; padding:0; border-radius:0; }
+.st-key-price_toolbar { border-top:1px solid #34434a; padding-top:14px; margin-top:5px; }
+.st-key-price_toolbar [data-testid="stWidgetLabel"] p { color:#bdc9cc; font-size:11px; }
+.st-key-price_toolbar [data-baseweb="select"]>div { background:#1b2b34!important; border-color:#41535d!important; border-radius:7px!important; }
+.st-key-price_toolbar [data-baseweb="select"] [role="combobox"],
+.st-key-price_toolbar [data-baseweb="select"] [data-testid="stMarkdownContainer"],
+.st-key-price_toolbar [data-baseweb="select"]>div>div { color:#f0f5f3; }
+.st-key-price_toolbar [data-baseweb="select"] svg { fill:#bdc9cc; }
+.st-key-price_toolbar [data-testid="stPopover"] button { border-radius:7px; min-height:42px; }
+.ohlc-strip { display:flex; gap:20px; flex-wrap:wrap; color:#e4ece9; font:11px var(--mono); font-variant-numeric:tabular-nums; }
+.ohlc-strip b { color:#93a8a3; font-size:10px; font-weight:500; margin-right:4px; }
+.st-key-market_hero [data-testid="stDownloadButton"] button { background:#192b32; color:#dbe9e3; border-color:#42574e; min-height:36px; font-size:11px; }
+.st-key-market_hero [data-testid="stDownloadButton"] button p { color:#dbe9e3; font-size:11px; }
 .st-key-analyst_company {
   background:transparent; border:0!important; border-radius:0!important;
   padding:16px 28px 18px 0!important; box-shadow:none;

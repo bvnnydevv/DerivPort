@@ -134,21 +134,21 @@ def test_offline_replay_reveal_and_invalid_rule_preservation(monkeypatch):
     assert any(metric.value == "Undefined" for metric in app.metric)
 
 
-def test_offline_global_comparison_and_algorithm_backtest(monkeypatch):
+def test_offline_us_comparison_and_algorithm_backtest(monkeypatch):
     def deny_network(*args, **kwargs):
-        raise AssertionError("Cached global research and backtests must work offline.")
+        raise AssertionError("Cached US research and backtests must work offline.")
 
     monkeypatch.setattr(socket, "create_connection", deny_network)
     monkeypatch.setattr(socket.socket, "connect", deny_network)
     monkeypatch.setenv("STREAMLIT_BROWSER_GATHER_USAGE_STATS", "false")
     app = AppTest.from_file(str(ROOT / "app.py"), default_timeout=120).run()
     assert not app.exception
-    app.multiselect(key="universe_selection").set_value(["7203.T", "SAP.DE"]).run()
+    app.multiselect(key="universe_selection").set_value(["JPM", "XOM"]).run()
     assert not app.exception
     choose_history_mode(app, frozen=False)
     app.date_input(key="decision_date").set_value(date(2025, 2, 14)).run()
     assert not app.exception
-    assert set(app.session_state["current_scores"].index) == {"7203.T", "SAP.DE"}
+    assert set(app.session_state["current_scores"].index) == {"JPM", "XOM"}
     assert app.session_state["cutoff"] == "2025-02-14"
     assert not has_future_table(app)
     assert any("No suitable dated company source" in element.value for element in app.info)
@@ -178,9 +178,53 @@ def test_offline_global_comparison_and_algorithm_backtest(monkeypatch):
     assert not app.exception
     assert any("overlaps a backtest" in element.value.lower() for element in app.info)
 
-    app.multiselect(key="universe_selection").set_value(["7203.T"]).run()
+    app.multiselect(key="universe_selection").set_value(["JPM"]).run()
     assert not app.exception
     assert any("at least two" in element.value.lower() for element in app.info)
+
+
+def test_us_exchange_filters_chart_stocks_and_keeps_comparison_group_offline(monkeypatch):
+    def deny_network(*args, **kwargs):
+        raise AssertionError("Exchange filters must use local verified listings.")
+
+    monkeypatch.setattr(socket, "create_connection", deny_network)
+    monkeypatch.setattr(socket.socket, "connect", deny_network)
+    monkeypatch.setenv("STREAMLIT_BROWSER_GATHER_USAGE_STATS", "false")
+    app = AppTest.from_file(str(ROOT / "app.py"), default_timeout=120).run()
+    assert not app.exception
+    original_group = list(app.multiselect(key="universe_selection").value)
+    all_stocks = app.selectbox(key="stock").options
+    group_options = app.multiselect(key="universe_selection").options
+    for foreign in ("7203.T", "SAP.DE", "RY.TO", "0700.HK"):
+        assert not any(foreign in option for option in all_stocks + group_options)
+
+    app.selectbox(key="exchange_filter").set_value("NASDAQ").run()
+    assert not app.exception
+    nasdaq = app.selectbox(key="stock").options
+    assert any(option.startswith("AAPL ·") for option in nasdaq)
+    assert not any(option.startswith("JPM ·") for option in nasdaq)
+    assert app.multiselect(key="universe_selection").value == original_group
+
+    # Filtering a venue with no current comparison member chooses a visible
+    # stock and includes it before any ranking/calculus/benchmark is computed.
+    app.selectbox(key="exchange_filter").set_value("NYSE").run()
+    assert not app.exception
+    nyse = app.selectbox(key="stock").options
+    assert any(option.startswith("JPM ·") for option in nyse)
+    assert not any(option.startswith("AAPL ·") for option in nyse)
+    active = app.selectbox(key="stock").value
+    assert active in app.multiselect(key="universe_selection").value
+    assert set(original_group) <= set(app.multiselect(key="universe_selection").value)
+    assert active in app.session_state["current_scores"].index
+    assert not has_future_table(app)
+
+    app.selectbox(key="stock").set_value("XOM").run()
+    assert not app.exception
+    assert "XOM" in app.multiselect(key="universe_selection").value
+    assert "XOM" in app.session_state["current_scores"].index
+    assert len(app.multiselect(key="universe_selection").value) <= 10
+    assert not app.session_state["reveals"]
+    assert not has_future_table(app)
 
 
 def test_latest_2026_research_keeps_unobserved_outcomes_pending(monkeypatch):

@@ -14,7 +14,10 @@ from derivport import (DEFAULT_FORMULA, FormulaError, analyze_cutoff, apply_rule
     historical_forecasts, load_prices, rank_correlation,
     reveal_outcomes, simulate_paths, simulation_summary, SCENARIOS)
 from derivport.market_data import (MarketDataError, get_search_status,
-    load_symbol_prices, read_cached_symbols, search_symbols, symbol_info, verify_frozen_cache)
+    load_symbol_prices, symbol_info, verify_frozen_cache)
+from derivport.us_markets import (US_EXCHANGES, cached_us_listings,
+    load_us_symbol_prices, search_us_symbols, us_catalog)
+from derivport.stock_chart_ui import render_stock_chart
 from derivport.projections import project_scenarios
 from derivport.calculus import calculus_experiment, differential, formula_to_latex
 from derivport.calculus_ui import render_calculus_lab
@@ -109,37 +112,77 @@ def change_history_mode():
         st.session_state.pop(key, None)
 
 
-stock_col, date_col, mode_col, status_col = st.columns([1.25, 1.05, 1.2, 1.1], gap='medium', vertical_alignment='bottom')
+def change_comparison_group():
+    group = st.session_state.universe_selection
+    if group and st.session_state.get('stock') not in group:
+        st.session_state.stock = group[0]
+        st.session_state.exchange_filter = 'All US exchanges'
+
+
+us_listings = cached_us_listings()
+us_lookup = {row['symbol']: row for row in us_listings}
+# Migrate a session opened before the US-only scope change.
+prior_group = st.session_state.get('universe_selection', DEFAULT_STOCKS)
+clean_group = [symbol for symbol in prior_group if symbol in us_lookup]
+if clean_group != prior_group:
+    st.session_state.universe_selection = clean_group or list(DEFAULT_STOCKS)
+exchange_choices = ['All US exchanges'] + [venue for venue in US_EXCHANGES
+    if any(row['exchange'] == venue for row in us_listings)]
+if st.session_state.get('exchange_filter') not in exchange_choices:
+    st.session_state.exchange_filter = 'All US exchanges'
+exchange_col, stock_col, date_col, mode_col, status_col = st.columns(
+    [1, 1.6, 1.1, 1.3, 1.1], gap='medium', vertical_alignment='bottom')
+with exchange_col:
+    exchange_filter = st.selectbox('Exchange', exchange_choices, key='exchange_filter')
+chart_listings = [row for row in us_listings if exchange_filter == 'All US exchanges' or row['exchange'] == exchange_filter]
+stock_options = [row['symbol'] for row in chart_listings]
+if st.session_state.get('stock') not in stock_options:
+    group = st.session_state.get('universe_selection', DEFAULT_STOCKS)
+    st.session_state.stock = next((symbol for symbol in group if symbol in stock_options), stock_options[0])
+with stock_col:
+    ticker = st.selectbox('Stock', stock_options,
+        format_func=lambda s: f"{s} · {us_lookup[s].get('name', s)}", key='stock')
+# Browsing a cached stock adds it to the research group before its widget is
+# created. An explicit group edit instead chooses a stock inside that group.
+group = list(st.session_state.get('universe_selection', DEFAULT_STOCKS))
+if ticker not in group:
+    st.session_state.universe_selection = (group + [ticker])[-10:]
 with mode_col:
     history_mode = st.selectbox('Price history', ['Full cached history', 'Frozen demo (2018–2024)'],
         key='history_mode', on_change=change_history_mode)
 extended = history_mode == 'Full cached history'
 
 with st.expander('Stocks & comparison group', expanded=False):
-    st.caption('Search US and international equities or enter a Yahoo Finance symbol directly. Provider coverage and historical availability vary. Cached stocks work offline.')
-    query_col, search_col = st.columns([4, 1], vertical_alignment='bottom')
+    st.caption('US-listed stocks, grouped by listing exchange. The Exchange control above filters cached charts; use this directory to find and add more US listings. US-listed ADRs are included. Cached stocks work offline.')
+    directory_col, query_col, search_col = st.columns([1.4, 3, 1], vertical_alignment='bottom')
+    with directory_col:
+        directory_exchange = st.selectbox('Directory exchange', ['All US exchanges', *US_EXCHANGES], key='directory_exchange', on_change=clear_search)
+    venue = None if directory_exchange == 'All US exchanges' else directory_exchange
     with query_col:
-        query = st.text_input('Company or symbol', placeholder='Apple, ASML, 0700.HK, SAP.DE, 7203.T…', key='stock_query', on_change=clear_search)
+        query = st.text_input('Company or symbol', placeholder='Apple, JPMorgan, NVDA, BRK-B…', key='stock_query', on_change=clear_search)
     with search_col:
         if st.button('Search listings', key='search_listings', width='stretch'):
             with st.spinner('Searching equity listings…'):
-                st.session_state.search_results = search_symbols(query, online=True)
+                st.session_state.search_results = search_us_symbols(query, online=True, exchange=venue)
                 st.session_state.search_status = get_search_status()
-    matches = st.session_state.get('search_results', [])
+    matches = st.session_state.get('search_results', us_catalog(venue) if not query else search_us_symbols(query, online=False, exchange=venue))
     if matches:
         lookup = {item['symbol']: item for item in matches}
+        if st.session_state.get('listing_match') not in lookup:
+            st.session_state.pop('listing_match', None)
         match = st.selectbox('Matching listings', list(lookup),
             format_func=lambda s: f"{s} · {lookup[s]['name']} · {lookup[s]['exchange']}", key='listing_match')
     else:
         match = query.strip().upper()
     if st.session_state.get('search_status'):
         st.caption(st.session_state.search_status['message'])
+        st.caption('Only supported US-listed equities are shown. This starter directory and provider search do not guarantee coverage of every US stock.')
     load_col, refresh_col = st.columns(2)
     with load_col:
         if st.button('Cache and add stock', disabled=not bool(match), key='add_stock'):
             try:
                 with st.spinner(f'Loading adjusted history for {match}…'):
-                    _, added_meta = load_symbol_prices(match)
+                    _, added_meta = load_us_symbol_prices(match)
                 st.session_state.pending_stock = added_meta['symbol']
                 cached_symbol.clear()
                 st.rerun()
@@ -149,7 +192,7 @@ with st.expander('Stocks & comparison group', expanded=False):
         if st.button('Refresh selected listing', disabled=not bool(match), key='refresh_stock'):
             try:
                 with st.spinner('Refreshing adjusted price history…'):
-                    _, refreshed = load_symbol_prices(match, refresh=True)
+                    _, refreshed = load_us_symbol_prices(match, refresh=True)
                 cached_symbol.clear()
                 if refreshed.get('warning'):
                     st.warning(refreshed['warning'])
@@ -157,10 +200,11 @@ with st.expander('Stocks & comparison group', expanded=False):
                     st.success(f"{refreshed['symbol']} cached through {refreshed['end']}.")
             except MarketDataError as exc:
                 st.error(str(exc))
-    st.multiselect('Comparison group · 2–10 stocks', read_cached_symbols(), default=DEFAULT_STOCKS,
-        max_selections=10, key='universe_selection')
+    st.multiselect('Comparison group · 2–10 stocks', list(us_lookup), default=DEFAULT_STOCKS,
+        format_func=lambda s: f"{us_lookup[s]['exchange']} · {s}",
+        max_selections=10, key='universe_selection', on_change=change_comparison_group)
     st.caption('Full cached history includes the downloaded 2026 data. Frozen demo preserves the original five-stock 2018–2024 example. Choose the range in the visible Price history control.')
-    st.caption('Rankings and backtests use this fixed group. International comparisons use shared observed dates and local-currency returns, without FX conversion or filling missing days.')
+    st.caption('Rankings and backtests use this US stock group across exchanges. Only shared observed sessions are used; no missing dates are filled.')
 
 universe = sorted(st.session_state.get('universe_selection', DEFAULT_STOCKS))
 if len(universe) < 2:
@@ -176,6 +220,7 @@ try:
                 start='2018-01-02', end='2024-12-31', fetched_at='2026-11-14', cache_status='frozen demo')
         else:
             values, info = cached_symbol(symbol)
+        info = dict(info, exchange=us_lookup[symbol]['exchange'])
         series.append(values.rename(symbol))
         metadata[symbol] = info
     prices = pd.concat(series, axis=1, sort=True).dropna().sort_index()
@@ -193,14 +238,10 @@ st.session_state.latest_replay_date = latest_replay.date().isoformat()
 if earliest > latest:
     st.info('This group needs more historical data. Choose an earlier-listed stock.')
     st.stop()
-if st.session_state.get('stock') not in universe:
-    st.session_state.stock = 'AAPL' if 'AAPL' in universe else universe[0]
 initial_date = latest.date() if extended else date(2024, 5, 3)
 existing_date = pd.Timestamp(st.session_state.get('decision_date', initial_date))
 if not earliest <= existing_date <= latest:
     st.session_state.decision_date = min(max(existing_date, earliest), latest).date()
-with stock_col:
-    ticker = st.selectbox('Stock', universe, format_func=lambda s: f"{s} · {metadata[s].get('name', s)}", key='stock')
 with date_col:
     default_date = min(max(pd.Timestamp(initial_date), earliest), latest).date()
     chosen_date = st.date_input('Historical cutoff', value=default_date, min_value=earliest.date(),
@@ -229,26 +270,7 @@ available_notes = [n for n in notes if n['ticker'] == ticker and pd.Timestamp(n[
 note = max(available_notes, key=lambda n: n['published']) if available_notes else None
 research, builder, future, benchmarking = st.tabs(['Research', 'Algorithm builder', 'Future scenarios', 'Research & Benchmarking'], key='workspace')
 with research:
-    with st.container(key='market_hero'):
-        st.html(f'''<div class="stock-header"><div><h1>{esc(meta.get('name', ticker))}</h1>
-        <p>{esc(meta.get('exchange', ''))} · {esc(meta.get('currency', 'Unknown'))} · Historical adjusted prices</p></div>
-        <div class="price">{prices.loc[pd.Timestamp(cutoff), ticker]:,.2f}<small>Adjusted close · {cutoff}</small></div></div>''')
-        known_recent = prices.loc[:cutoff, ticker].tail(126)
-        price_fig = go.Figure(go.Scatter(x=known_recent.index, y=known_recent,
-            mode='lines', line=dict(color='#d6f23c', width=2.5),
-            name='Adjusted close', hovertemplate='%{x|%d %b %Y}<br>%{y:,.2f}<extra></extra>'))
-        price_fig.add_trace(go.Scatter(x=[known_recent.index[-1]], y=[known_recent.iloc[-1]],
-            mode='markers', marker=dict(color='#d6f23c', size=7),
-            showlegend=False, hoverinfo='skip'))
-        chart(price_fig, 270)
-        price_fig.update_layout(paper_bgcolor='#101820', plot_bgcolor='#101820',
-            font_color='#c5cfc8', showlegend=False,
-            margin=dict(l=5, r=12, t=10, b=5), hoverlabel=dict(bgcolor='#f3f1eb', font_color='#101820'))
-        price_fig.update_xaxes(linecolor='#39443f', tickformat='%b %Y', nticks=6)
-        price_fig.update_yaxes(gridcolor='#2b3732', zeroline=False, side='right', nticks=4,
-            title=None)
-        st.plotly_chart(price_fig, width='stretch', config={'displayModeBar': False}, key='known_price_hero')
-        st.caption(f'Adjusted close · {len(known_recent)} observed sessions · {known_recent.index[0]:%d %b %Y}–{known_recent.index[-1]:%d %b %Y}')
+    render_stock_chart(prices[ticker], ticker, cutoff, meta)
     if ticker == 'AAPL' and cutoff == '2024-05-03' and not extended:
         st.caption('Curated example: Apple after its May 2 earnings release. Choose any available date or change the stock group.')
     panels = st.container()
@@ -579,7 +601,8 @@ with extras_area:
         st.caption('600 paths per scenario; fixed seed 2024. Initial top-score ties use ticker order; terminal first-place ties split credit. Simulated projections are separate from historical evidence.')
     with st.expander('Methodology, data & past evaluation'):
         st.markdown('**Research scope.** Finance education only: no real brokerage accounts, balances, orders, or buy/sell recommendations. Benchmark portfolio weights and fills are hypothetical research allocations. Finance theme confirmed; a detailed official scoring rubric was not supplied.')
-        st.markdown(f'**Global dates.** Any available date can be selected after sufficient shared history. Provider-wide US and international equity search is available online; a 109-symbol starter catalog and {len(read_cached_symbols())} price histories are cached offline. Coverage varies, so availability of every stock is not guaranteed. No missing-date filling is used. International experiments use 21 shared observed sessions, which can span more than 21 sessions on an individual exchange, using exchange-local daily closes. Local-currency returns exclude FX conversion.')
+        st.markdown(f'**US stock universe.** Browse {len(us_catalog())} starter listings or search additional US equities by exchange. {len(us_listings)} US research histories are cached offline. Supported venues are NASDAQ, NYSE, NYSE American, NYSE Arca, Cboe and IEX when available. US-listed ADRs are included; international exchange listings, funds and OTC instruments are excluded from this interface. The directory is not exhaustive. Dates require sufficient shared observed history; no missing dates are filled.')
+        st.markdown('**Price charts.** Candles use genuine daily open, high, low, close and volume from a separate chart cache, with no dividend adjustment. Weekly/monthly bars aggregate only observations known by the cutoff and can include a partial final period. SMA and EMA windows count the selected bar interval. Research features, forecasts and returns retain the original dividend-adjusted close inputs.')
         st.markdown('**Model.** Standardized Ridge regression uses momentum and volatility. Training labels complete by each cutoff. Return inputs are percentage points; k is dimensionless under the default rule.')
         st.latex(r'M_{21,t}=100\left(\frac{P_t^{\rm adj}}{P_{t-21}^{\rm adj}}-1\right),\qquad \sigma_{21,t}=100\sqrt{21}\;\operatorname{SD}(r_{t-20},\ldots,r_t)')
         st.latex(r'\widehat{\boldsymbol\beta}=\underset{\beta_0,\boldsymbol\beta}{\operatorname{argmin}}\;\sum_{i\in\mathcal{T}_t}\left(y_i-\beta_0-\boldsymbol\beta^\top\widetilde{\mathbf{x}}_i\right)^2+25\lVert\boldsymbol\beta\rVert_2^2')
