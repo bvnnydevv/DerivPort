@@ -21,7 +21,7 @@ from derivport.us_markets import (US_EXCHANGES, cached_us_listings,
 from derivport.stock_chart_ui import render_stock_chart
 from derivport.company_news_ui import render_company_news
 from derivport.ohlc import load_candles
-from derivport.theme import render_theme_controls, theme_css, style_plot
+from derivport.theme import current_theme, theme_css, style_plot
 from derivport.blocks_ui import render_blocks
 from derivport.projections import project_scenarios
 from derivport.projection_views import (RISK_PRESETS, apply_risk_preset,
@@ -130,15 +130,16 @@ if 'pending_stock' in st.session_state:
     st.session_state.stock = pending
     st.session_state.history_mode = 'Full cached history'
 
-brand_col, appearance_col = st.columns([7, 1], vertical_alignment='center')
-with appearance_col:
-    PALETTE = render_theme_controls()
+# One fixed editorial palette, including sessions opened before theme removal.
+st.session_state.theme_name = 'Editorial'
+st.session_state.theme_accent = '#28543a'
+st.session_state.theme_density = 'Comfortable'
+PALETTE = current_theme()
 st.html('<style>' + (ROOT / 'assets/style.css').read_text() + '\n' + theme_css(PALETTE) + '</style>')
 COLORS = {'Momentum': '#90a4bf', 'AI model': PALETTE['accent'], 'Your algorithm': '#ffbd69'}
-with brand_col:
-    mark = asset_uri('derivport-mark.svg', decorative=False)
-    mark_html = f'<img class="brand-mark" src="{mark}" alt="DerivPort logo">' if mark else ''
-    st.html(f'<div class="masthead"><div class="brand">{mark_html}DerivPort</div></div>')
+mark = asset_uri('derivport-mark.svg', decorative=False)
+mark_html = f'<img class="brand-mark" src="{mark}" alt="DerivPort logo">' if mark else ''
+st.html(f'<div class="masthead"><div class="brand">{mark_html}DerivPort</div></div>')
 
 def clear_search():
     st.session_state.pop('search_results', None)

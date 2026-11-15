@@ -1,4 +1,4 @@
-"""Session theme controls and shared chart styling."""
+"""Shared editorial palette and chart styling."""
 from __future__ import annotations
 
 import re
@@ -49,19 +49,6 @@ def theme_css(palette):
     values = ';'.join(f'--{css}:{_hex(palette[key])}' for css,key in mapping.items())
     gap, pad = ('.55rem','14px') if palette['compact'] else ('.9rem','22px')
     return f':root{{{values};--sans:"Helvetica Neue",Helvetica,Arial,sans-serif;--mono:var(--sans);--gap:{gap};--pad:{pad}}}'
-
-
-def render_theme_controls():
-    import streamlit as st
-    with st.popover('Theme', icon=':material/palette:', width='stretch'):
-        st.selectbox('Website theme', list(THEMES), key='theme_name')
-        st.color_picker('Accent color', '#28543a', key='theme_accent')
-        if st.session_state.theme_name == 'Custom':
-            st.color_picker('Background color', '#0c1425', key='theme_background')
-        st.radio('Layout density', ['Compact','Comfortable'], index=1, horizontal=True, key='theme_density')
-        st.checkbox('Show illustrations', value=True, key='theme_images')
-        st.caption('Helvetica Neue throughout. Settings stay in this browser session.')
-    return current_theme()
 
 
 def style_plot(fig, palette=None):

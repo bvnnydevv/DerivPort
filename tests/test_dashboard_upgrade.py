@@ -68,20 +68,29 @@ def test_full_stock_directory_and_exchange_navigation_use_cached_defaults_offlin
     assert_unrevealed(app)
 
 
-def test_theme_font_and_fullscreen_leave_scores_and_cutoff_unchanged(offline_dashboard):
+def test_fixed_editorial_font_and_fullscreen_leave_scores_and_cutoff_unchanged(offline_dashboard):
     app = dashboard()
     scores = app.session_state['current_scores'].copy(deep=True)
     cutoff = app.session_state['cutoff']
     previous_background = offline_dashboard['known_price_hero'].layout.paper_bgcolor
-    app.selectbox(key='theme_name').set_value('Graphite')
-    app.color_picker(key='theme_accent').set_value('#d194ff').run()
+    # A session opened before the appearance control was removed must also
+    # return to the fixed editorial palette without changing the experiment.
+    app.session_state['theme_name'] = 'Graphite'
+    app.session_state['theme_accent'] = '#d194ff'
+    app.session_state['theme_density'] = 'Compact'
+    app.run()
     assert not app.exception
     rendered = '\n'.join(element.value for element in app.html)
     assert 'Helvetica Neue' in rendered
-    assert '--workspace:#121416' in rendered
-    assert '--accent:#d194ff' in rendered
+    assert '--workspace:#eeefec' in rendered
+    assert '--accent:#28543a' in rendered
+    assert app.session_state['theme_name'] == 'Editorial'
+    assert app.session_state['theme_density'] == 'Comfortable'
+    assert not any(element.proto.popover.label == 'Theme' for element in app.get('popover'))
+    assert not any(widget.key in ('theme_name', 'theme_accent', 'theme_density')
+        for widget in [*app.selectbox, *app.color_picker, *app.radio])
     current = offline_dashboard['known_price_hero']
-    # The surrounding page changes theme; the stock canvas stays as requested.
+    # The fixed editorial page surrounds an unchanged dark stock canvas.
     assert current.layout.paper_bgcolor == previous_background
     assert 'Helvetica Neue' in current.layout.font.family
     pd.testing.assert_frame_equal(app.session_state['current_scores'], scores)

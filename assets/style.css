@@ -91,3 +91,8 @@ input,textarea,[data-baseweb="input"]>div,[data-baseweb="select"]>div>div,[data-
 @media(max-width:1000px){.block-container{padding:20px 24px!important}[role="tablist"]{gap:22px!important}.stock-header h1{font-size:32px!important}.price{font-size:52px}.st-key-coach_panel{padding:16px!important}}
 @media(max-width:680px){.block-container{padding:18px 16px!important}.masthead{padding-bottom:16px}.stock-header{align-items:flex-start;gap:20px;flex-direction:column;padding-bottom:20px}.stock-header h1{font-size:32px!important}.price{font-size:50px;text-align:left}.data-status{text-align:left}[role="tablist"]{gap:18px!important;overflow:auto}[role="tab"]{min-width:max-content}.visual-header h1{font-size:34px!important}.section-title,.footer{flex-direction:column;gap:8px}.recipe-result{gap:24px}.recipe-result p{margin-left:0}.brand{font-size:23px}}
 [data-testid="stDialog"] button[aria-label="Close"]{color:#f3f2ed!important}
+/* Select menus mount in a portal; force their nested text to the light palette. */
+[role="listbox"],[role="option"],[data-baseweb="menu"]{color:var(--ink)!important;background-color:var(--panel)!important}
+[role="option"] *,[data-baseweb="menu"] li *,[role="listbox"] [data-testid="stMarkdownContainer"]{color:var(--ink)!important;-webkit-text-fill-color:var(--ink)!important;font-family:var(--sans)!important}
+[role="option"][aria-selected="true"],[role="option"]:hover,[data-baseweb="menu"] li:hover{background-color:var(--feature)!important}
+[data-testid="stSelectbox"] [role="combobox"],[data-testid="stSelectbox"] [role="combobox"] *,[data-testid="stMultiSelect"] [role="combobox"],[data-testid="stMultiSelect"] [role="combobox"] *{color:var(--ink)!important;-webkit-text-fill-color:var(--ink)!important}
