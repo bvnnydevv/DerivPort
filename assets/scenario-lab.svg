@@ -9,5 +9,5 @@
   <path d="m59 91 19-6 15 5 16-18 17 10 18-24 17 10 22-27 19 3 22-20" fill="none" stroke="#e7b66a" stroke-width="1" opacity=".5"/>
   <circle cx="59" cy="91" r="4.2" fill="#58d8b7" stroke="#102b31" stroke-width="2"/>
   <path d="M59 30v80" stroke="#58d8b7" stroke-width="1" stroke-dasharray="2 4" opacity=".65"/>
-  <g font-family="Trebuchet MS,Trebuchet,sans-serif" font-size="8" letter-spacing=".6" fill="#a9bdcf"><text x="40" y="124">ANCHOR</text><text x="179" y="124">SCENARIOS</text></g>
+  <g font-family="Helvetica Neue,Trebuchet,sans-serif" font-size="8" letter-spacing=".6" fill="#a9bdcf"><text x="40" y="124">ANCHOR</text><text x="179" y="124">SCENARIOS</text></g>
 </svg>

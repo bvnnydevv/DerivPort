@@ -54,7 +54,7 @@ def render_stock_chart(adjusted_prices, ticker, cutoff, metadata, coach_snapshot
             <div class="price">{value:,.2f}<small>{basis} · {last_date:%d %b %Y}<br>{move}</small></div></div>''')
         snapshot = coach_snapshot or {}
         guide_context = snapshot.get('context') or f'{ticker}|{cutoff}'
-        price_area, coach_area = st.columns([3.6, 1.35], gap='small')
+        price_area, coach_area = st.columns([3.2, 1.4], gap='medium')
         # The coach executes first so explicit actions can update chart options
         # before those widgets are instantiated on this rerun.
         with coach_area:
@@ -62,16 +62,14 @@ def render_stock_chart(adjusted_prices, ticker, cutoff, metadata, coach_snapshot
                 snapshot.get('note'), guide_context, inline=True, chart_context=guide_context)
         with price_area:
             with st.container(key='price_toolbar'):
-                range_col, interval_col, style_col, settings_col, expand_col = st.columns([1.05, 1.05, 1, 1, 1], vertical_alignment='bottom')
+                range_col, settings_col, expand_col = st.columns([1.4, 1, 1], vertical_alignment='bottom')
                 with range_col:
                     period = st.selectbox('Chart range', PERIODS, index=2, key='chart_period')
-                with interval_col:
-                    interval = st.selectbox('Candle interval', INTERVALS, key='chart_interval', disabled=candles is None)
-                with style_col:
-                    style = st.selectbox('Chart type', STYLES, key='chart_style', disabled=candles is None)
                 with settings_col:
                     with st.popover('Customize', width='stretch'):
                         st.markdown('**Chart appearance**')
+                        interval = st.selectbox('Candle interval', INTERVALS, key='chart_interval', disabled=candles is None)
+                        style = st.selectbox('Chart type', STYLES, key='chart_style', disabled=candles is None)
                         overlays = st.multiselect('Indicators', OVERLAYS, default=['SMA 20'], key='chart_overlays', disabled=candles is None)
                         show_volume = st.checkbox('Volume', value=True, key='chart_volume', disabled=candles is None)
                         show_grid = st.checkbox('Grid lines', value=True, key='chart_grid')

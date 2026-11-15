@@ -10,7 +10,7 @@ def test_custom_palette_contrasts_with_background_and_rejects_css_injection():
     light = theme_from_state({'theme_name':'Custom','theme_background':'#ffffff','theme_accent':'#234567'})
     assert dark['text'] != light['text']
     assert light['accent_text'] == '#ffffff'
-    assert 'Trebuchet MS' in theme_css(dark)
+    assert 'Helvetica Neue' in theme_css(dark)
     for value in ('red', '#fff', '#fff;}body{display:none}', None):
         with pytest.raises(ValueError):
             theme_from_state({'theme_accent':value})

@@ -77,12 +77,12 @@ def test_theme_font_and_fullscreen_leave_scores_and_cutoff_unchanged(offline_das
     app.color_picker(key='theme_accent').set_value('#d194ff').run()
     assert not app.exception
     rendered = '\n'.join(element.value for element in app.html)
-    assert 'Trebuchet MS' in rendered
+    assert 'Helvetica Neue' in rendered
     assert '--workspace:#121416' in rendered
     assert '--accent:#d194ff' in rendered
     current = offline_dashboard['known_price_hero']
     assert current.layout.paper_bgcolor != previous_background
-    assert 'Trebuchet MS' in current.layout.font.family
+    assert 'Helvetica Neue' in current.layout.font.family
     pd.testing.assert_frame_equal(app.session_state['current_scores'], scores)
     assert_unrevealed(app)
     app.button(key='open_fullscreen_chart').click().run()

@@ -1,12 +1,12 @@
 [theme]
 base = "dark"
-primaryColor = "#41d6b3"
-backgroundColor = "#090f19"
-secondaryBackgroundColor = "#132235"
-textColor = "#e7eef7"
-font = "Trebuchet MS, Trebuchet, sans-serif"
-headingFont = "Trebuchet MS, Trebuchet, sans-serif"
-codeFont = "Trebuchet MS, Trebuchet, sans-serif"
+primaryColor = "#d9e5d2"
+backgroundColor = "#050505"
+secondaryBackgroundColor = "#171717"
+textColor = "#f3f2ed"
+font = "Helvetica Neue, Helvetica, Arial, sans-serif"
+headingFont = "Helvetica Neue, Helvetica, Arial, sans-serif"
+codeFont = "Helvetica Neue, Helvetica, Arial, sans-serif"
 
 [browser]
 gatherUsageStats = false

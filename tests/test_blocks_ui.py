@@ -41,6 +41,7 @@ def test_native_block_changes_compile_preview_then_apply_and_export(monkeypatch)
     assert not app.exception
     initial = app.text_input(key='formula').value
     original = app.session_state['active_scores'].copy()
+    app.radio(key='builder_style').set_value('Advanced blocks').run()
     app.number_input(key='block_native_return_weight').set_value(.9).run()
     assert not app.exception
     assert app.text_input(key='formula').value == initial
@@ -74,6 +75,7 @@ def test_native_block_changes_compile_preview_then_apply_and_export(monkeypatch)
 def test_invalid_current_divisor_cannot_replace_active_algorithm():
     app = AppTest.from_string(SCRIPT, default_timeout=30).run()
     initial = app.text_input(key='formula').value
+    app.radio(key='builder_style').set_value('Advanced blocks').run()
     app.selectbox(key='block_native_error_operator').set_value('/').run()
     assert not app.exception
     assert app.error
@@ -101,3 +103,28 @@ def test_browser_board_packets_are_revision_checked_and_validated(monkeypatch, p
         assert state['block_items'] == initial
         assert state['block_revision'] == 7
         assert ('block_error' in state) == (packet_kind == 'invalid')
+
+
+def test_guided_defaults_and_changes_are_readable_drafts_until_apply():
+    app = AppTest.from_string(SCRIPT, default_timeout=30).run()
+    assert not app.exception
+    assert app.radio(key='builder_style').value == 'Guided'
+    assert not any(item.key == 'blocks_canvas' for item in app.get('component_instance'))
+    original = app.session_state['active_scores'].copy()
+    active_formula = app.text_input(key='formula').value
+    app.selectbox(key='guide_goal').set_value('Follow recent strength').run()
+    assert not app.exception
+    assert app.slider(key='guide_model_share').value == 20
+    app.slider(key='guide_model_share').set_value(80).run()
+    app.select_slider(key='guide_risk').set_value('Strong').run()
+    assert not app.exception
+    assert app.selectbox(key='guide_goal').value == 'Custom mix'
+    assert app.text_input(key='formula').value == active_formula
+    pd.testing.assert_frame_equal(app.session_state['active_scores'], original)
+    assert any('Start with 0.8 × model outlook' in item.value for item in app.markdown)
+    table = app.dataframe[0].value
+    assert table['Score contribution'].sum() == pytest.approx(table['Running score'].iloc[-1])
+    app.button(key='block_apply').click().run()
+    assert not app.exception
+    assert app.text_input(key='formula').value == compile_blocks(app.session_state['block_items'])
+    assert app.session_state['active_scores'].loc['AAPL', 'score'] == pytest.approx(1.8)

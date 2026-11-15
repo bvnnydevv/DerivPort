@@ -19,6 +19,7 @@ from derivport.market_data import (MarketDataError, get_search_status,
 from derivport.us_markets import (US_EXCHANGES, cached_us_listings,
     load_us_symbol_prices, search_us_symbols, us_catalog, directory_provenance, resolve_us_listing)
 from derivport.stock_chart_ui import render_stock_chart
+from derivport.company_news_ui import render_company_news
 from derivport.ohlc import load_candles
 from derivport.theme import render_theme_controls, theme_css, style_plot
 from derivport.blocks_ui import render_blocks
@@ -32,7 +33,7 @@ from algorithms.derivport_signal import NAME as SIGNAL_NAME, FORMULA as SIGNAL_F
 
 ROOT = Path(__file__).parent
 DEFAULT_STOCKS = ['AAPL', 'AMZN', 'GOOGL', 'MSFT', 'NVDA']
-COLORS = {'Momentum': '#66706f', 'AI model': '#2454ff', 'Your algorithm': '#101820'}
+COLORS = {'Momentum': '#c8b82e', 'AI model': '#b8a8d0', 'Your algorithm': '#d9e5d2'}
 st.set_page_config(page_title='DerivPort | Equity research', layout='wide', page_icon='D')
 
 
@@ -67,7 +68,7 @@ def chart(fig, height=230):
     legend = dict(orientation='h', y=1.03, x=0, yanchor='bottom') | fig.layout.legend.to_plotly_json()
     fig.update_layout(height=height, margin=margins,
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(family='Trebuchet MS, Trebuchet, sans-serif', size=12),
+        font=dict(family='Helvetica Neue, Helvetica, Arial, sans-serif', size=12),
         legend=legend)
     fig.update_xaxes(showgrid=False, zeroline=False, linecolor='#e6e4dd')
     fig.update_yaxes(gridcolor='#e6e4dd', zerolinecolor='#b9bdb5')
@@ -171,8 +172,10 @@ exchange_choices = ['All US exchanges'] + [venue for venue in US_EXCHANGES
     if any(row['exchange'] == venue for row in us_listings)]
 if st.session_state.get('exchange_filter') not in exchange_choices:
     st.session_state.exchange_filter = 'All US exchanges'
-exchange_col, stock_col, date_col, mode_col, status_col = st.columns(
-    [1, 1.6, 1.1, 1.3, 1.1], gap='medium', vertical_alignment='bottom')
+stock_col, date_col, status_col = st.columns([2.2, 1.1, 1], gap='medium', vertical_alignment='bottom')
+market_settings = st.expander('Market settings', expanded=False)
+with market_settings:
+    exchange_col, mode_col = st.columns(2)
 with exchange_col:
     exchange_filter = st.selectbox('Exchange', exchange_choices, key='exchange_filter')
 chart_listings = [row for row in us_listings if exchange_filter == 'All US exchanges' or row['exchange'] == exchange_filter]
@@ -216,7 +219,7 @@ with mode_col:
         key='history_mode', on_change=change_history_mode)
 extended = history_mode == 'Full cached history'
 
-with st.expander('Stocks & comparison group', expanded=False):
+with market_settings:
     st.caption(f"{len(us_listings):,} current US equity candidates from the NasdaqTrader directory. Choose any listing above; only the selected stock is downloaded. Cached histories work offline. Source snapshot: 2026-11-13; provider coverage varies.")
     directory_col, query_col, search_col = st.columns([1.4, 3, 1], vertical_alignment='bottom')
     with directory_col:
@@ -335,127 +338,130 @@ base, meta = analysis.stocks, metadata[ticker]
 notes = json.loads((ROOT / 'data/notes.json').read_text())
 available_notes = [n for n in notes if n['ticker'] == ticker and pd.Timestamp(n['published']) < pd.Timestamp(cutoff)]
 note = max(available_notes, key=lambda n: n['published']) if available_notes else None
-research, builder, future, benchmarking = st.tabs(['Research', 'Algorithm builder', 'Future scenarios', 'Research & Benchmarking'], key='workspace')
+research, builder, future, benchmarking = st.tabs(['Research', 'Algorithm builder', 'Future scenarios', 'Benchmarks'], key='workspace')
 with research:
     render_stock_chart(prices[ticker], ticker, cutoff, meta,
         coach_snapshot=dict(row=base.loc[ticker], note=note, context=context))
     if ticker == 'AAPL' and cutoff == '2024-05-03' and not extended:
         st.caption('Curated example: Apple after its May 2 earnings release. Choose any available date or change the stock group.')
-    panels = st.container()
-    ranks_area = st.container(border=True, key='rankings_panel')
-    replay_area = st.container(border=True, key='replay_panel')
-    extras_area = st.container()
+    render_company_news(meta.get('name', ticker), ticker, prices[ticker], cutoff, plotstyle=lambda figure: chart(figure, 280))
+    panels = st.expander('Company & model details', expanded=False)
+    ranks_area = st.expander('Compare stock rankings', expanded=False)
+    replay_area = st.expander('Historical replay', expanded=False)
+    extras_area = st.expander('More research tools', expanded=False)
 with builder:
-    visual_heading('Algorithm builder', 'Connect blocks, inspect the formula, and test your idea against observed history.', 'rule-lab.svg')
+    visual_heading('Build your own signal.', 'Choose what matters. See why stocks rank. Test your idea on the past.', 'rule-lab.svg')
     render_blocks(base, ticker)
-    with st.container(border=True, key='signal_card'):
-        st.html(f'<div class="summary-signal"><div><h2>{esc(SIGNAL_NAME)}</h2><p>A balanced model and momentum score with explicit error and volatility penalties.</p></div></div>')
-        signal_info, signal_actions = st.columns([2, 1], gap='large')
-        with signal_info:
-            st.latex(r'S = ' + formula_to_latex(SIGNAL_FORMULA))
-            st.caption('60% model estimate + 40% trailing momentum. k controls a penalty of 50% forecast error + 25% volatility. Fixed starting weights; no claim that they are optimal.')
-        with signal_actions:
-            def load_balanced_algorithm():
-                st.session_state.formula = SIGNAL_FORMULA
-                st.session_state.k = float(SIGNAL_K)
-            st.button('Use my balanced algorithm', key='load_balanced_algorithm',
-                on_click=load_balanced_algorithm, type='primary', width='stretch')
-            st.download_button('Download Python algorithm', (ROOT / 'algorithms/derivport_signal.py').read_bytes(),
-                file_name='derivport_signal.py', mime='text/x-python', key='download_algorithm', width='stretch')
-    editor, sensitivity = st.columns(2, gap='large')
-    with editor, st.container(border=True, key='algorithm_editor'):
-        formula = st.text_input('Ranking formula', value=st.session_state.valid_formula, key='formula', max_chars=400)
-        st.caption('Variables: predicted_return, uncertainty, momentum, volatility, k. Use numbers, + − * / and parentheses. Return inputs are percentage points.')
-        k = st.slider('Risk penalty weight · k', 0.0, 10.0, value=float(st.session_state.valid_k), step=.05, key='k')
-        old_formula, old_k = st.session_state.valid_formula, st.session_state.valid_k
-        try:
-            scores = apply_rule(base, formula, k)
-            if (formula, k) != (old_formula, old_k):
-                try:
-                    old_scores = apply_rule(base, old_formula, old_k)
-                    change = float(scores.loc[ticker, 'score'] - old_scores.loc[ticker, 'score'])
-                    cause = f'k ({old_k:g} → {k:g})' if formula == old_formula else 'the formula'
-                    st.session_state.rule_change = {'context': context, 'text': f"Changing {cause} changed {ticker}'s score by {change:+.2f}; stock inputs stayed fixed."}
-                except FormulaError:
-                    st.session_state.pop('rule_change', None)
-            st.session_state.valid_formula, st.session_state.valid_k = formula, k
-        except FormulaError as exc:
-            st.error(f'{exc} Showing the last valid formula and k.')
+    with st.expander('Example recipe & Python download'):
+        with st.container(border=True, key='signal_card'):
+            st.html(f'<div class="summary-signal"><div><h2>{esc(SIGNAL_NAME)}</h2><p>A balanced model and momentum score with explicit error and volatility penalties.</p></div></div>')
+            signal_info, signal_actions = st.columns([2, 1], gap='large')
+            with signal_info:
+                st.latex(r'S = ' + formula_to_latex(SIGNAL_FORMULA))
+                st.caption('60% model estimate + 40% trailing momentum. k controls a penalty of 50% forecast error + 25% volatility. Fixed starting weights; no claim that they are optimal.')
+            with signal_actions:
+                def load_balanced_algorithm():
+                    st.session_state.formula = SIGNAL_FORMULA
+                    st.session_state.k = float(SIGNAL_K)
+                st.button('Use my balanced algorithm', key='load_balanced_algorithm',
+                    on_click=load_balanced_algorithm, type='primary', width='stretch')
+                st.download_button('Download Python algorithm', (ROOT / 'algorithms/derivport_signal.py').read_bytes(),
+                    file_name='derivport_signal.py', mime='text/x-python', key='download_algorithm', width='stretch')
+    with st.expander('Explore the formula & Calculus Lab', expanded=False):
+        editor, sensitivity = st.columns(2, gap='large')
+        with editor, st.container(border=True, key='algorithm_editor'):
+            formula = st.text_input('Ranking formula', value=st.session_state.valid_formula, key='formula', max_chars=400)
+            st.caption('Variables: predicted_return, uncertainty, momentum, volatility, k. Use numbers, + − * / and parentheses. Return inputs are percentage points.')
+            k = st.slider('Risk penalty weight · k', 0.0, 10.0, value=float(st.session_state.valid_k), step=.05, key='k')
+            old_formula, old_k = st.session_state.valid_formula, st.session_state.valid_k
             try:
-                scores = apply_rule(base, old_formula, old_k)
+                scores = apply_rule(base, formula, k)
+                if (formula, k) != (old_formula, old_k):
+                    try:
+                        old_scores = apply_rule(base, old_formula, old_k)
+                        change = float(scores.loc[ticker, 'score'] - old_scores.loc[ticker, 'score'])
+                        cause = f'k ({old_k:g} → {k:g})' if formula == old_formula else 'the formula'
+                        st.session_state.rule_change = {'context': context, 'text': f"Changing {cause} changed {ticker}'s score by {change:+.2f}; stock inputs stayed fixed."}
+                    except FormulaError:
+                        st.session_state.pop('rule_change', None)
+                st.session_state.valid_formula, st.session_state.valid_k = formula, k
+            except FormulaError as exc:
+                st.error(f'{exc} Showing the last valid formula and k.')
+                try:
+                    scores = apply_rule(base, old_formula, old_k)
+                except FormulaError:
+                    st.warning('The previous rule is undefined for this new group or date. Using the default rule until you enter a valid expression.')
+                    scores = apply_rule(base, DEFAULT_FORMULA, old_k)
+                    st.session_state.valid_formula = DEFAULT_FORMULA
+            st.session_state.current_scores = scores.copy()
+            active_formula, active_k = st.session_state.valid_formula, st.session_state.valid_k
+            st.session_state.active_algorithm_name = SIGNAL_NAME if active_formula.strip() == SIGNAL_FORMULA else 'Custom expression'
+            st.caption(f'Active algorithm: {st.session_state.active_algorithm_name}')
+            row = scores.loc[ticker]
+            values = {name: float(row[name]) for name in ('predicted_return', 'uncertainty', 'momentum', 'volatility')}
+            values['k'] = active_k
+            st.latex(r'S = ' + formula_to_latex(active_formula))
+            st.latex(r'S \approx ' + formula_to_latex(active_formula, values) + rf' \approx {row.score:.3f}')
+            st.markdown(r'$\widehat r_{21}$ is the model estimate, $M_{21}$ momentum, $\varepsilon$ past forecast error, and $\sigma_{21}$ volatility. Return-like inputs are percentage points.')
+            st.caption('Substituted inputs are rounded; scores use full precision. A ranking score is not a return forecast.')
+            if active_formula.strip() == DEFAULT_FORMULA:
+                st.latex(rf'k\varepsilon \approx ({active_k:g})({row.uncertainty:.3f}) \approx {active_k * row.uncertainty:.3f}\;\mathrm{{pp}}')
+            elif active_formula.strip() == SIGNAL_FORMULA:
+                st.latex(rf'k(0.5\varepsilon+0.25\sigma_{{21}}) \approx {active_k * (.5 * row.uncertainty + .25 * row.volatility):.3f}\;\mathrm{{pp}}')
+            else:
+                st.caption('Custom arithmetic can change score units; return × return differs from a return. Normalize ratios when a dimensionless term is intended.')
+            change_note = st.session_state.get('rule_change')
+            if change_note and change_note['context'] == context:
+                st.caption(change_note['text'])
+            crossings = default_crossovers(base, max_k=10)
+            if len(crossings):
+                crossing = crossings.iloc[(crossings.k - active_k).abs().argsort()[:1]].iloc[0]
+                low = max(0.0, round(float(np.floor(crossing.k / .05) * .05), 2))
+                target = low if active_k > crossing.k else min(10.0, round(low + .05, 2))
+                st.caption(f"Default-rule crossover: {crossing['first']} / {crossing['second']} at k ≈ {crossing.k:.3f}. Scores change continuously; ranks change only when two scores cross.")
+                def try_crossover():
+                    st.session_state.formula = DEFAULT_FORMULA
+                    st.session_state.k = target
+                st.button(f'Try default rule at k = {target:.2f}', key='try_crossover', on_click=try_crossover)
+        with sensitivity, st.container(border=True, key='algorithm_sensitivity'):
+            st.html('<div class="small-title">Score sensitivity</div>')
+            curve = formula_curve(active_formula, values, active_k)
+            fig = go.Figure(go.Scatter(x=curve.uncertainty, y=curve.score, mode='lines', line=dict(color='#2454ff', width=2.5), showlegend=False))
+            fig.add_trace(go.Scatter(x=[row.uncertainty], y=[row.score], mode='markers', marker=dict(color='#101820', size=9), showlegend=False))
+            fig.add_vline(x=row.uncertainty, line_dash='dot', line_color='#bbc3ce')
+            fig.update_xaxes(title='Uncertainty (percentage points)')
+            fig.update_yaxes(title='Rule score')
+            try:
+                derivatives = differential(active_formula, values, active_k)
+                slope = derivatives.gradient['uncertainty']
+                curvature = derivatives.hessian['uncertainty']['uncertainty']
+                fig.add_trace(go.Scatter(x=curve.uncertainty,
+                    y=row.score + slope * (curve.uncertainty - row.uncertainty), name='Tangent',
+                    line=dict(color='#a1a7b0', width=1.5, dash='dot'), showlegend=False))
+                st.latex(rf'\left.\frac{{\partial S}}{{\partial\varepsilon}}\right|_{{\mathbf{{x}}_0}}={slope:.4g},\qquad \left.\frac{{\partial^2 S}}{{\partial\varepsilon^2}}\right|_{{\mathbf{{x}}_0}}={curvature:.4g}')
+                st.caption('Automatic differentiation of your rule gives the local slope and curvature. The dotted line is its tangent; all other inputs stay fixed.')
             except FormulaError:
-                st.warning('The previous rule is undefined for this new group or date. Using the default rule until you enter a valid expression.')
-                scores = apply_rule(base, DEFAULT_FORMULA, old_k)
-                st.session_state.valid_formula = DEFAULT_FORMULA
-        st.session_state.current_scores = scores.copy()
-        active_formula, active_k = st.session_state.valid_formula, st.session_state.valid_k
-        st.session_state.active_algorithm_name = SIGNAL_NAME if active_formula.strip() == SIGNAL_FORMULA else 'Custom expression'
-        st.caption(f'Active algorithm: {st.session_state.active_algorithm_name}')
-        row = scores.loc[ticker]
-        values = {name: float(row[name]) for name in ('predicted_return', 'uncertainty', 'momentum', 'volatility')}
-        values['k'] = active_k
-        st.latex(r'S = ' + formula_to_latex(active_formula))
-        st.latex(r'S \approx ' + formula_to_latex(active_formula, values) + rf' \approx {row.score:.3f}')
-        st.markdown(r'$\widehat r_{21}$ is the model estimate, $M_{21}$ momentum, $\varepsilon$ past forecast error, and $\sigma_{21}$ volatility. Return-like inputs are percentage points.')
-        st.caption('Substituted inputs are rounded; scores use full precision. A ranking score is not a return forecast.')
-        if active_formula.strip() == DEFAULT_FORMULA:
-            st.latex(rf'k\varepsilon \approx ({active_k:g})({row.uncertainty:.3f}) \approx {active_k * row.uncertainty:.3f}\;\mathrm{{pp}}')
-        elif active_formula.strip() == SIGNAL_FORMULA:
-            st.latex(rf'k(0.5\varepsilon+0.25\sigma_{{21}}) \approx {active_k * (.5 * row.uncertainty + .25 * row.volatility):.3f}\;\mathrm{{pp}}')
-        else:
-            st.caption('Custom arithmetic can change score units; return × return differs from a return. Normalize ratios when a dimensionless term is intended.')
-        change_note = st.session_state.get('rule_change')
-        if change_note and change_note['context'] == context:
-            st.caption(change_note['text'])
-        crossings = default_crossovers(base, max_k=10)
-        if len(crossings):
-            crossing = crossings.iloc[(crossings.k - active_k).abs().argsort()[:1]].iloc[0]
-            low = max(0.0, round(float(np.floor(crossing.k / .05) * .05), 2))
-            target = low if active_k > crossing.k else min(10.0, round(low + .05, 2))
-            st.caption(f"Default-rule crossover: {crossing['first']} / {crossing['second']} at k ≈ {crossing.k:.3f}. Scores change continuously; ranks change only when two scores cross.")
-            def try_crossover():
-                st.session_state.formula = DEFAULT_FORMULA
-                st.session_state.k = target
-            st.button(f'Try default rule at k = {target:.2f}', key='try_crossover', on_click=try_crossover)
-    with sensitivity, st.container(border=True, key='algorithm_sensitivity'):
-        st.html('<div class="small-title">Score sensitivity</div>')
-        curve = formula_curve(active_formula, values, active_k)
-        fig = go.Figure(go.Scatter(x=curve.uncertainty, y=curve.score, mode='lines', line=dict(color='#2454ff', width=2.5), showlegend=False))
-        fig.add_trace(go.Scatter(x=[row.uncertainty], y=[row.score], mode='markers', marker=dict(color='#101820', size=9), showlegend=False))
-        fig.add_vline(x=row.uncertainty, line_dash='dot', line_color='#bbc3ce')
-        fig.update_xaxes(title='Uncertainty (percentage points)')
-        fig.update_yaxes(title='Rule score')
-        try:
-            derivatives = differential(active_formula, values, active_k)
-            slope = derivatives.gradient['uncertainty']
-            curvature = derivatives.hessian['uncertainty']['uncertainty']
-            fig.add_trace(go.Scatter(x=curve.uncertainty,
-                y=row.score + slope * (curve.uncertainty - row.uncertainty), name='Tangent',
-                line=dict(color='#a1a7b0', width=1.5, dash='dot'), showlegend=False))
-            st.latex(rf'\left.\frac{{\partial S}}{{\partial\varepsilon}}\right|_{{\mathbf{{x}}_0}}={slope:.4g},\qquad \left.\frac{{\partial^2 S}}{{\partial\varepsilon^2}}\right|_{{\mathbf{{x}}_0}}={curvature:.4g}')
-            st.caption('Automatic differentiation of your rule gives the local slope and curvature. The dotted line is its tangent; all other inputs stay fixed.')
-        except FormulaError:
-            st.caption('Derivatives are undefined or outside numerical range here; the current score remains valid.')
-        try:
-            # A sampled curve must not draw a line across an unsampled pole.
-            for endpoint in (curve.uncertainty.iloc[0], curve.uncertainty.iloc[-1]):
-                calculus_experiment(active_formula, values, 'uncertainty',
-                    float(endpoint - row.uncertainty), active_k, points=3)
-            st.plotly_chart(chart(fig, 250), width='stretch', config={'displayModeBar': False}, key='calculus')
-        except FormulaError:
-            st.info('This preview range includes an undefined point. Choose a valid interval in Calculus lab; your current score is unchanged.')
-        if active_formula.strip() == DEFAULT_FORMULA and active_k == 2:
-            st.latex(r'\Delta S=-k\,\Delta\varepsilon=-2(1)=-2\;\mathrm{pp}')
-    render_calculus_lab(active_formula, values, active_k, plotstyle=chart)
-    st.caption('Calculus charts are deterministic experiments on your mathematical rule, not market-return forecasts or simulated future prices.')
-    feature_export = scores[['predicted_return', 'uncertainty', 'momentum', 'volatility']].rename_axis('ticker').reset_index()
-    feature_export.insert(1, 'cutoff', cutoff)
-    st.download_button('Download this cutoff’s algorithm inputs', feature_export.to_csv(index=False).encode(),
-        file_name=f'derivport_features_{cutoff}.csv', mime='text/csv', key='export_algorithm_inputs')
-    st.caption('The standalone file implements DerivPort Signal and matches that preset with the same k. Custom formula edits are not included in the download. It uses Python’s standard library and does not place trades.')
-    if active_formula.strip() == SIGNAL_FORMULA:
-        st.code(f'python3 derivport_signal.py --input derivport_features_{cutoff}.csv --output ranked.csv --k {active_k:g}', language='bash')
-    heading('Historical backtest', 'Same group and periods for every algorithm')
+                st.caption('Derivatives are undefined or outside numerical range here; the current score remains valid.')
+            try:
+                # A sampled curve must not draw a line across an unsampled pole.
+                for endpoint in (curve.uncertainty.iloc[0], curve.uncertainty.iloc[-1]):
+                    calculus_experiment(active_formula, values, 'uncertainty',
+                        float(endpoint - row.uncertainty), active_k, points=3)
+                st.plotly_chart(chart(fig, 250), width='stretch', config={'displayModeBar': False}, key='calculus')
+            except FormulaError:
+                st.info('This preview range includes an undefined point. Choose a valid interval in Calculus lab; your current score is unchanged.')
+            if active_formula.strip() == DEFAULT_FORMULA and active_k == 2:
+                st.latex(r'\Delta S=-k\,\Delta\varepsilon=-2(1)=-2\;\mathrm{pp}')
+        render_calculus_lab(active_formula, values, active_k, plotstyle=chart)
+        st.caption('Calculus charts are deterministic experiments on your mathematical rule, not market-return forecasts or simulated future prices.')
+        feature_export = scores[['predicted_return', 'uncertainty', 'momentum', 'volatility']].rename_axis('ticker').reset_index()
+        feature_export.insert(1, 'cutoff', cutoff)
+        st.download_button('Download this cutoff’s algorithm inputs', feature_export.to_csv(index=False).encode(),
+            file_name=f'derivport_features_{cutoff}.csv', mime='text/csv', key='export_algorithm_inputs')
+        st.caption('The standalone file implements DerivPort Signal and matches that preset with the same k. Custom formula edits are not included in the download. It uses Python’s standard library and does not place trades.')
+        if active_formula.strip() == SIGNAL_FORMULA:
+            st.code(f'python3 derivport_signal.py --input derivport_features_{cutoff}.csv --output ranked.csv --k {active_k:g}', language='bash')
+    heading('4. Test on past data', 'Compare your rule with the model and momentum on the same periods')
     for field in ('test_start', 'test_end'):
         if field in st.session_state:
             prior_date = pd.Timestamp(st.session_state[field])
@@ -579,7 +585,7 @@ edited = bool(snapshot and (formula != snapshot['formula'] or k != snapshot['k']
 with panels:
     left, right = st.columns(2, gap='large')
     with left, st.container(border=True, key='analyst_company'):
-        st.html('<h3>Stock analyst</h3>')
+        st.html('<h3>The business story</h3>')
         if note:
             st.caption('Date-only releases become eligible on a later observed date; same-day releases are embargoed because publication times are unavailable.')
             source_age = (pd.Timestamp(cutoff) - pd.Timestamp(note['published'])).days
@@ -592,7 +598,7 @@ with panels:
         else:
             st.info('No suitable dated company source is cached for this stock and cutoff. There is insufficient evidence for a company interpretation.')
     with right, st.container(border=True, key='analyst_quant'):
-        st.html('<h3>Quant analyst — model and ranking</h3>')
+        st.html('<h3>The model’s view</h3>')
         a, b, c = st.columns(3)
         a.metric('Estimated next 21 sessions', pct(row.predicted_return))
         b.metric('Typical forecast error', f'{row.uncertainty:.2f} pp')
@@ -705,4 +711,4 @@ with extras_area:
         st.download_button('Export prices known by cutoff', export.to_csv(index=False).encode(), file_name=f'derivport_prices_through_{cutoff}.csv', mime='text/csv')
 st.html('<div class="footer"><span>DerivPort</span><span>Historical research. Transparent assumptions. No investment recommendations.</span></div>')
 with st.expander('Image credits'):
-    st.markdown('NYSE photograph: [Ken Lund / Wikimedia Commons](https://commons.wikimedia.org/wiki/File:New_York_Stock_Exchange,_Manhattan,_New_York_(7236984682).jpg), [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/). Display crop only. Rule and scenario illustrations are original DerivPort artwork.')
+    st.markdown('Rule and scenario illustrations are original DerivPort artwork. Logo designed and exported in Figma; see docs/BRAND.md.')

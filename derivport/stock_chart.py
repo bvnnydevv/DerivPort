@@ -124,7 +124,7 @@ def _figure(ticker: str, cutoff, period: str, interval: str, style: str,
     fig.update_layout(
         height=height, margin=dict(l=12, r=72, t=22, b=12),
         paper_bgcolor=BACKGROUND, plot_bgcolor=BACKGROUND,
-        font=dict(family='Trebuchet MS, Trebuchet, sans-serif', size=11, color='#b9c7c4'),
+        font=dict(family='Helvetica Neue, Helvetica, Arial, sans-serif', size=11, color='#b9c7c4'),
         legend=dict(orientation='h', x=0, y=1.03, xanchor='left', yanchor='bottom',
                     bgcolor='rgba(0,0,0,0)', font_size=11, itemclick='toggle', itemdoubleclick='toggleothers'),
         hoverlabel=dict(bgcolor='#1d2b34', bordercolor='#47605e', font=dict(color='#edf4ee', size=12)),

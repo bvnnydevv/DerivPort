@@ -110,7 +110,7 @@ def _label(fig, x, y, text, name, color):
     fig.add_annotation(x=x, y=label_y, xref='x', yref='y', text=text,
         name=name, showarrow=False, xanchor='right', yanchor='bottom',
         bgcolor='#15242c', bordercolor=color, borderpad=3,
-        font=dict(family='Trebuchet MS, sans-serif', size=11, color=color))
+        font=dict(family='Helvetica Neue, Helvetica, Arial, sans-serif', size=11, color=color))
 
 
 def apply_chart_guide(fig, frame, guide, context, cutoff):

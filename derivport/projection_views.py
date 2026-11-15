@@ -63,7 +63,7 @@ def _scenario_data(projected, ticker):
 
 
 def _layout(fig, dates, ticker, kind):
-    fig.update_layout(font=dict(family='Trebuchet MS, sans-serif', size=12),
+    fig.update_layout(font=dict(family='Helvetica Neue, Helvetica, Arial, sans-serif', size=12),
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
         margin=dict(l=66, r=18, t=44, b=62, autoexpand=True),
         hovermode='x', legend=dict(orientation='h', x=0, y=1.03, yanchor='bottom', font_size=11),

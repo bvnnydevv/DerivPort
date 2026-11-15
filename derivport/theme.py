@@ -3,8 +3,8 @@ from __future__ import annotations
 
 import re
 
-FONT = 'Trebuchet MS, Trebuchet, sans-serif'
-THEMES = {'Midnight': '#090f19', 'Graphite': '#121416', 'Deep ocean': '#071b25', 'Custom': '#0c1425'}
+FONT = 'Helvetica Neue, Helvetica, Arial, sans-serif'
+THEMES = {'Midnight': '#050505', 'Graphite': '#121416', 'Deep ocean': '#071b25', 'Custom': '#0c1425'}
 
 
 def _hex(value):
@@ -27,9 +27,9 @@ def _light(value):
 def theme_from_state(state):
     name = state.get('theme_name', 'Midnight')
     bg = _hex(state.get('theme_background', THEMES['Custom'])) if name == 'Custom' else THEMES.get(name, THEMES['Midnight'])
-    accent = _hex(state.get('theme_accent', '#41d6b3'))
+    accent = _hex(state.get('theme_accent', '#d9e5d2'))
     light = _light(bg) > .35
-    text, muted = ('#102132', '#405366') if light else ('#e7eef7', '#a1b2c6')
+    text, muted = ('#102132', '#405366') if light else ('#f3f2ed', '#aaa9a1')
     panel = _mix(bg, '#000000' if light else '#ffffff', .045)
     return dict(name=name, background=bg, panel=panel, panel2=_mix(panel,text,.045),
         text=text, muted=muted, line=_mix(panel,text,.16), accent=accent,
@@ -47,19 +47,19 @@ def theme_css(palette):
         'muted':'muted','line':'line','accent':'accent','accent-text':'accent_text'}
     values = ';'.join(f'--{css}:{_hex(palette[key])}' for css,key in mapping.items())
     gap, pad = ('.55rem','14px') if palette['compact'] else ('.9rem','22px')
-    return f':root{{{values};--sans:"Trebuchet MS",Trebuchet,sans-serif;--mono:var(--sans);--gap:{gap};--pad:{pad}}}'
+    return f':root{{{values};--sans:"Helvetica Neue",Helvetica,Arial,sans-serif;--mono:var(--sans);--gap:{gap};--pad:{pad}}}'
 
 
 def render_theme_controls():
     import streamlit as st
     with st.popover('Theme', icon=':material/palette:', width='stretch'):
         st.selectbox('Website theme', list(THEMES), key='theme_name')
-        st.color_picker('Accent color', '#41d6b3', key='theme_accent')
+        st.color_picker('Accent color', '#d9e5d2', key='theme_accent')
         if st.session_state.theme_name == 'Custom':
             st.color_picker('Background color', '#0c1425', key='theme_background')
         st.radio('Layout density', ['Compact','Comfortable'], horizontal=True, key='theme_density')
         st.checkbox('Show illustrations', value=True, key='theme_images')
-        st.caption('Trebuchet MS throughout. Settings stay in this browser session.')
+        st.caption('Helvetica Neue throughout. Settings stay in this browser session.')
     return current_theme()
 
 

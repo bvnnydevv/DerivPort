@@ -18,6 +18,6 @@ The vector geometry was imported into the user's own Figma browser session as ed
 bc149f46a094363784fc577362f741def83718ff2e367cca25e210a7fe9f8902
 ```
 
-The SVG uses a transparent `64 × 64` viewBox and two paths in **mint `#41D6B3`**. Preserve the viewBox padding and scale proportionally; display at 24 px or larger. Pair it with the **Trebuchet MS** website wordmark, whose text color follows the active theme. The default background is **navy `#090F19`**. Keep the mark's geometry intact rather than stretching or cropping it.
+The SVG uses a transparent `64 × 64` viewBox and two paths in **mint `#41D6B3`**. Preserve the viewBox padding and scale proportionally; display at 24 px or larger. Pair it with the **Helvetica Neue** website wordmark, whose text color follows the active theme. The default background is **black `#050505`**. Keep the mark's geometry intact rather than stretching or cropping it.
 
 A screenshot showing the native component on the Brand page was saved locally at `artifacts/figma-logo-proof.png` for review; screenshots remain excluded from Git.

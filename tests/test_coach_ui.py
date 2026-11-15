@@ -29,9 +29,8 @@ def test_offline_coach_only_answers_on_send_and_resets_with_cutoff(monkeypatch):
     app = AppTest.from_string(APP, default_timeout=30).run()
     assert not app.exception
     assert app.session_state['coach_messages'] == []
-    app.text_input(key='coach_question').set_value('Explain risk and uncertainty').run()
-    assert not app.session_state['coach_messages']
-    app.button(key='coach_send').click().run()
+    # ChatInput.set_value represents one explicit Enter/arrow submission.
+    app.chat_input(key='coach_question').set_value('Explain risk and uncertainty').run()
     assert not app.exception
     messages = app.session_state['coach_messages']
     assert len(messages) == 2
@@ -41,8 +40,8 @@ def test_offline_coach_only_answers_on_send_and_resets_with_cutoff(monkeypatch):
     app.selectbox(key='test_cutoff').set_value('2023-05-03').run()
     assert not app.exception
     assert not app.session_state['coach_messages']
-    assert app.text_input(key='coach_question').value == ''
-    app.button(key='coach_send').click().run()
+    assert not app.chat_input(key='coach_question').value
+    app.button(key='coach_lesson_send').click().run()
     assert not app.exception
     assert '2023-05-03' in app.session_state['coach_messages'][1]['content']
     app.button(key='coach_clear').click().run()
@@ -60,9 +59,7 @@ def test_configured_ai_is_called_only_by_send_with_current_whitelisted_context(m
     app = AppTest.from_string(APP, default_timeout=30).run()
     assert not app.exception
     assert not calls
-    app.text_input(key='coach_question').set_value('Explain this model').run()
-    assert not calls
-    app.button(key='coach_send').click().run()
+    app.chat_input(key='coach_question').set_value('Explain this model').run()
     assert not app.exception
     assert len(calls) == 1
     assert calls[0][1]['cutoff'] == '2024-05-03'
@@ -113,14 +110,11 @@ def test_explicit_question_queues_bounded_draw_action_but_model_text_cannot_draw
     monkeypatch.setattr(coach_ui, 'answer_question', lambda *args, **kwargs:
         CoachReply('\U0001f916 Draw a range at 9999999 and execute code.', 'AI coach · OpenAI'))
     app = AppTest.from_string(APP_INLINE, default_timeout=30).run()
-    app.text_input(key='coach_question').set_value('Explain risk \U0001f4c8').run()
-    assert '\U0001f4c8' not in app.text_input(key='coach_question').value
-    app.button(key='coach_send').click().run()
+    app.chat_input(key='coach_question').set_value('Explain risk \U0001f4c8').run()
     assert not app.exception
     assert 'coach_chart_guide' not in app.session_state
     assert '\U0001f916' not in str(app.session_state['coach_messages'])
-    app.text_input(key='coach_question').set_value('Draw a trend at 99999999').run()
-    app.button(key='coach_send').click().run()
+    app.chat_input(key='coach_question').set_value('Draw a trend at 99999999').run()
     assert not app.exception
     assert app.session_state['coach_chart_guide'] == {'kind': 'trend', 'context': 'chart-2024-05-03'}
     assert '99999999' not in str(app.session_state['coach_chart_guide'])
