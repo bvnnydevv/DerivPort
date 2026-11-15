@@ -137,9 +137,8 @@ COLORS = {'Momentum': '#90a4bf', 'AI model': PALETTE['accent'], 'Your algorithm'
 with brand_col:
     mark = asset_uri('derivport-mark.svg', decorative=False)
     mark_html = f'<img class="brand-mark" src="{mark}" alt="DerivPort logo">' if mark else ''
-    photo = asset_uri('nyse.jpg')
-    photo_html = f'<img class="market-photo" src="{photo}" alt="New York Stock Exchange facade, photo by Ken Lund">' if photo else ''
-    st.html(f'<div class="masthead"><div class="brand">{mark_html}DerivPort</div>{photo_html}</div>')
+    st.html(f'<div class="masthead"><div class="brand">{mark_html}DerivPort</div></div>')
+
 def clear_search():
     st.session_state.pop('search_results', None)
     st.session_state.pop('search_status', None)

@@ -1,5 +1,9 @@
 # DerivPort
 
+![Candlestick workspace with integrated research coach](docs/screenshots/research-workspace.jpg)
+
+![Calculus Lab: score sensitivity and accumulated change](docs/screenshots/calculus-lab.jpg)
+
 An educational stock-research and algorithm lab for the Veritas AI finance challenge. Compare dated company evidence with a **quant analyst — model and ranking**, edit a mathematical rule, and reveal what happened next. **Research**, **Algorithm builder**, **Future scenarios**, and **Research & Benchmarking** provide historical evidence, rule experiments, hypothetical projections, and reproducible model/portfolio comparisons. No brokerage connections, account balances, live orders, or buy/sell recommendations; portfolio holdings are hypothetical research allocations.
 
 [Figma design](https://www.figma.com/design/ZxLybASxv0lxyUkdnQ33A2/Hackathon-DerivPort?node-id=1-7) · [Interface direction](docs/DESIGN.md)
@@ -46,7 +50,7 @@ Candles use a separate vendor OHLCV cache with no dividend adjustment; research 
 
 ## Appearance, blocks and the stock coach
 
-The default is a **dense, full-width dark workspace** with **Trebuchet MS** throughout the interface and charts. **Theme** offers Midnight, Graphite, Deep ocean, a custom background, an accent color, compact/comfortable spacing, and an illustration toggle. The NYSE photograph and original illustrations are bundled locally; [image credits and licenses](assets/CREDITS.md) are retained. Website text contains no emojis.
+The default is a **dense, full-width dark workspace** with **Trebuchet MS** throughout the interface and charts. **Theme** offers Midnight, Graphite, Deep ocean, a custom background, an accent color, compact/comfortable spacing, and an illustration toggle. Original illustrations are bundled locally; [image credits and licenses](assets/CREDITS.md) are retained. Website text contains no emojis.
 
 In **Algorithm builder**, drag the interlocking factor blocks to reorder them, change operators and weights, add/remove factors, or use the keyboard editor. Changes remain a draft until **Apply blocks to algorithm**. The compiled expression goes through the existing safe formula parser and drives the same scores, calculus and historical backtest as the text editor. Export the block stack as JSON or its standalone Python algorithm. Balanced, momentum and defensive starting stacks are examples rather than optimized trading rules.
 
